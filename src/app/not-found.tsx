@@ -33,7 +33,7 @@ export default function NotFound() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4">
                         <Button asChild>
-                            <Link href="/dashboard">Về trang chủ</Link>
+                            <Link href="/">Về trang chủ</Link>
                         </Button>
                         <Button variant="outline" asChild>
                             <Link href="/login">Đăng nhập</Link>

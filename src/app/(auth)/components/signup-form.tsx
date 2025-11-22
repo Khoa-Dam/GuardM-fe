@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import type React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,8 @@ import { signIn } from "next-auth/react"
 
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirectPath = searchParams.get('redirect')
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -88,9 +90,10 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                 router.push('/login')
                 router.refresh()
             } else if (loginResult?.ok) {
-                // Đăng nhập thành công, redirect đến trang chủ
+                // Đăng nhập thành công, redirect đến trang ban đầu hoặc trang chủ
                 toast.success('Đăng nhập thành công!')
-                router.push('/dashboard')
+                const redirectTo = redirectPath || '/'
+                router.push(redirectTo)
                 router.refresh()
             }
         } catch (err: any) {

@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sidebar"
 
 const items = [
-    { title: "Danh sách truy nã", icon: BookUser, url: "/dashboard" },
+    { title: "Danh sách truy nã", icon: BookUser, url: "/" },
     { title: "Báo cáo", icon: MessageSquareWarning, url: "/reports" },
     { title: "Bản đồ", icon: MapPinned, url: "/map" },
 ]

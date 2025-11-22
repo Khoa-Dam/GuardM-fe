@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import type React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
 import { email, password } from "@/utils/validation"
 import { z } from "zod"
+import { toast } from "sonner"
 
 const loginSchema = z.object({
     email,
@@ -19,11 +20,23 @@ const loginSchema = z.object({
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirectPath = searchParams.get('redirect')
     const [emailValue, setEmailValue] = useState("")
     const [passwordValue, setPasswordValue] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+    // Get route name for display
+    const getRouteName = (path: string) => {
+        const routeNames: Record<string, string> = {
+            '/reports': 'Báo cáo tội phạm',
+            '/map': 'Bản đồ cảnh báo',
+            '/dashboard': 'Trang chủ',
+        }
+        return routeNames[path] || path
+    }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -70,7 +83,9 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             if (result?.error) {
                 setError('Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.')
             } else if (result?.ok) {
-                router.push('/')
+                // Redirect to the original path if exists, otherwise go to home
+                const redirectTo = redirectPath || '/'
+                router.push(redirectTo)
                 router.refresh()
             }
         } catch (err: any) {
@@ -82,6 +97,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             setIsLoading(false)
         }
     }
+
+    useEffect(() => {
+        if (redirectPath) {
+            toast.warning(`Bạn cần đăng nhập để truy cập trang`)
+        }
+    }, [redirectPath])
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -108,11 +129,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                                 <span className="relative z-10 bg-background px-2 text-muted-foreground">Or continue with</span>
                             </div> */}
                             <div className="grid gap-6">
-                                {error && (
-                                    <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">
-                                        {error}
-                                    </div>
-                                )}
+
+
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input

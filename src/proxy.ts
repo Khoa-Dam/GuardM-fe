@@ -37,7 +37,10 @@ export default auth((req) => {
 
     // Protected routes - require authentication
     if (!isLoggedIn) {
-        return NextResponse.redirect(new URL(DEFAULT_LOGOUT_REDIRECT, nextUrl))
+        // Redirect to login with the original path as a query parameter
+        const loginUrl = new URL(DEFAULT_LOGOUT_REDIRECT, nextUrl)
+        loginUrl.searchParams.set('redirect', pathname)
+        return NextResponse.redirect(loginUrl)
     }
 
     // Admin routes - require admin role

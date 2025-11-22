@@ -4,7 +4,7 @@
  * Note: "/" redirects to /dashboard if user is logged in
  */
 export const publicRoutes = [
-    "/dashboard", // Danh sách truy nã - public, không cần auth
+    "/", // Trang chủ - public, không cần auth
     "/terms",
     "/privacy",
     "/about",
@@ -44,7 +44,7 @@ export const officerRoutes = [
 /**
  * The default redirect path after a user logs in
  */
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+export const DEFAULT_LOGIN_REDIRECT = "/";
 
 /**
  * The default redirect path after a user logs out
@@ -60,7 +60,17 @@ export const UNAUTHORIZED_REDIRECT = "/unauthorized";
  * Helper function to check if a path is a public route
  */
 export function isPublicRoute(pathname: string): boolean {
-    return publicRoutes.some(route => pathname.startsWith(route))
+    // Check exact match first
+    if (publicRoutes.includes(pathname as any)) {
+        return true
+    }
+    // Check if pathname starts with any public route (but not just "/")
+    return publicRoutes.some(route => {
+        if (route === "/") {
+            return false // "/" should only match exactly
+        }
+        return pathname.startsWith(route)
+    })
 }
 
 /**
