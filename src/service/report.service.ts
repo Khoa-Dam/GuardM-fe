@@ -18,9 +18,9 @@ export enum CrimeType {
 export interface CreateCrimeReportDto {
     title?: string;
     description?: string;
-    type: CrimeType;
-    lat: number;
-    lng: number;
+    type?: CrimeType;
+    lat?: number;
+    lng?: number;
     address?: string;
     areaCode?: string;
     province?: string;
@@ -44,19 +44,26 @@ export interface CrimeReportResponse {
     };
     title?: string;
     description?: string;
-    type: CrimeType;
-    lat: number;
-    lng: number;
+    type?: CrimeType;
+    lat?: number;
+    lng?: number;
     address?: string;
     areaCode?: string;
     province?: string;
     district?: string;
     ward?: string;
     street?: string;
-    source: string;
+    source?: string;
     attachments?: string[];
     status: number;
     severity: number;
+    severityLevel?: 'low' | 'medium' | 'high';
+    trustScore?: number;
+    verificationLevel?: string;
+    confirmationCount?: number;
+    disputeCount?: number;
+    verifiedBy?: string;
+    verifiedAt?: Date;
     reportedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -74,6 +81,8 @@ export interface CrimeHeatmapData {
 
 export interface CrimeStatistics {
     total: number;
+    activeAlerts: number;
+    highSeverity: number;
     byType: Array<{
         type: CrimeType;
         count: number;
@@ -126,13 +135,12 @@ class ReportService {
     }
 
     /**
-     * Get all crime reports
+     * Get all crime reports (optionally filter by type)
      */
-    async findAll(): Promise<CrimeReportResponse[]> {
+    async findAll(type?: CrimeType): Promise<CrimeReportResponse[]> {
         try {
-            const { data } = await apiClient.get<CrimeReportResponse[]>(
-                `${REPORT_BASE}`
-            );
+            const query = type ? `?type=${encodeURIComponent(type)}` : '';
+            const { data } = await apiClient.get<CrimeReportResponse[]>(`${REPORT_BASE}${query}`);
             return data;
         } catch (error: any) {
             const errorData = error?.response?.data;
@@ -141,6 +149,60 @@ class ReportService {
                 errorData?.error ||
                 error?.message ||
                 'Không thể tải danh sách báo cáo. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Confirm a report (community verification)
+     */
+    async confirmReport(id: string): Promise<CrimeReportResponse> {
+        try {
+            const { data } = await apiClient.post<CrimeReportResponse>(`${REPORT_BASE}/${id}/confirm`);
+            return data;
+        } catch (error: any) {
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể xác nhận báo cáo. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Dispute a report (community verification)
+     */
+    async disputeReport(id: string): Promise<CrimeReportResponse> {
+        try {
+            const { data } = await apiClient.post<CrimeReportResponse>(`${REPORT_BASE}/${id}/dispute`);
+            return data;
+        } catch (error: any) {
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể báo cáo sai lệch. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Verify a report (admin only)
+     */
+    async verifyReport(id: string): Promise<CrimeReportResponse> {
+        try {
+            const { data } = await apiClient.put<CrimeReportResponse>(`${REPORT_BASE}/${id}/verify`);
+            return data;
+        } catch (error: any) {
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể xác minh báo cáo. Vui lòng thử lại.';
             throw new Error(errorMessage);
         }
     }

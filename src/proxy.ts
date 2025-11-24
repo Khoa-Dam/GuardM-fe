@@ -12,6 +12,10 @@ import {
 } from "@/config/routes"
 
 export default auth((req) => {
+    // TEMPORARILY DISABLED AUTH - Allow all routes
+    return NextResponse.next()
+
+    /* AUTH ENABLED CODE - Commented out temporarily
     const { nextUrl } = req
     const pathname = nextUrl.pathname
     const isLoggedIn = !!req.auth
@@ -61,6 +65,7 @@ export default auth((req) => {
 
     // Other protected routes - just need to be logged in
     return NextResponse.next()
+    */
 })
 
 export const config = {

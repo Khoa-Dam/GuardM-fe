@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
-import { email, password } from "@/utils/validation"
+import { email, login, password } from "@/utils/validation"
 import { z } from "zod"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
@@ -50,7 +50,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         }
 
         // Validate using zod schema
-        const result = loginSchema.safeParse({
+        const result = login.safeParse({
             email: emailValue.trim(),
             password: passwordValue,
         })
@@ -75,55 +75,6 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         setIsLoading(true)
 
         try {
-            // Check server connection first
-            const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api'
-            const healthCheckUrl = apiUrl.endsWith('/api')
-                ? `${apiUrl.replace('/api', '')}/health`
-                : `${apiUrl}/health`
-
-            try {
-                const healthCheck = await fetch(healthCheckUrl, {
-                    method: 'GET',
-                    signal: AbortSignal.timeout(5000), // 5 second timeout
-                }).catch(() => null)
-
-                // If health check fails, try to connect to auth endpoint
-                if (!healthCheck || !healthCheck.ok) {
-                    const testUrl = apiUrl.endsWith('/api')
-                        ? `${apiUrl}/auth/login`
-                        : `${apiUrl}/api/auth/login`
-
-                    const testResponse = await fetch(testUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: 'test', password: 'test' }),
-                        signal: AbortSignal.timeout(5000),
-                    }).catch((err: any) => {
-                        // Network error detected
-                        if (err?.message?.includes('fetch failed') ||
-                            err?.cause?.code === 'ECONNREFUSED' ||
-                            err?.name === 'AbortError') {
-                            throw new Error('CONNECTION_ERROR')
-                        }
-                        return null
-                    })
-
-                    // If we can't even reach the server, it's a connection issue
-                    if (!testResponse) {
-                        throw new Error('CONNECTION_ERROR')
-                    }
-                }
-            } catch (connectionErr: any) {
-                if (connectionErr?.message === 'CONNECTION_ERROR') {
-                    const errorMsg = 'Không thể kết nối đến server. Vui lòng đảm bảo server backend đã được khởi động.'
-                    setError(errorMsg)
-                    toast.error(errorMsg)
-                    setIsLoading(false)
-                    return
-                }
-                // If it's a timeout or other error, continue with login attempt
-            }
-
             // Add timeout to detect connection issues
             const timeoutPromise = new Promise((_, reject) => {
                 setTimeout(() => reject(new Error('Timeout: Không thể kết nối đến server. Vui lòng kiểm tra lại kết nối.')), 10000)
