@@ -124,7 +124,7 @@ const CrimeMap = () => {
                 address: data?.display_name || 'Đang xác định...',
                 addressDetails: data?.address,
             });
-            marker.bindPopup(`<b>Vị trí đã chọn:</b><br/>${data?.display_name || 'Đang tải...'}`).openPopup();
+            marker.bindPopup(`<b>Vị trí đã chọn:</b><br/>${data?.display_name || 'Đang tải...'}`, { autoPan: false }).openPopup();
         };
 
         // Update marker position immediately on move

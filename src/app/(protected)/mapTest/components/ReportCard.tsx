@@ -55,7 +55,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
     const badge = badgeByLevel[report.verificationLevel ?? VerificationLevel.UNVERIFIED];
 
     return (
-        <div className="fixed md:absolute z-2000 md:z-1000 inset-0 md:inset-auto md:top-16 md:right-4 md:w-80 pointer-events-none md:pointer-events-auto flex items-center justify-center md:block p-4 md:p-0 bg-black/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+        <div className="fixed md:absolute z-49 md:z-45 inset-0 md:inset-auto md:top-16 md:right-4 md:w-80 pointer-events-none md:pointer-events-auto flex items-center justify-center md:block p-4 md:p-0 bg-black/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
             <Card className="w-full max-w-sm md:max-w-none shadow-2xl pointer-events-auto animate-in zoom-in-95 p-1 gap-1">
                 {report.attachments?.length ? (
                     <div className="w-full overflow-hidden rounded-t-lg bg-muted">
