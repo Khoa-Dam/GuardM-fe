@@ -1,6 +1,7 @@
 "use client"
 
-import { BookUser, MessageSquareWarning, MapPinned, Trophy } from "lucide-react"
+import { Logo } from "./icons";
+import { BookUser, MessageSquareWarning, MapPinned, Shield, Home, BarChart3, Search } from "lucide-react"
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -15,9 +16,12 @@ import {
 } from "@/components/ui/sidebar"
 
 const items = [
-    { title: "Danh sách truy nã", icon: BookUser, url: "/" },
+    { title: "Trang chủ", icon: Home, url: "/" },
+    { title: "Danh sách truy nã", icon: BookUser, url: "/crimeList" },
     { title: "Báo cáo", icon: MessageSquareWarning, url: "/reports" },
     { title: "Bản đồ", icon: MapPinned, url: "/map" },
+    { title: "Thống kê & Phân tích", icon: BarChart3, url: "/statistics" },
+    { title: "Tìm kiếm nâng cao", icon: Search, url: "/search" },
 ]
 
 export function AppSidebar() {
@@ -26,7 +30,15 @@ export function AppSidebar() {
         <Sidebar>
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Tra cứu tội phạm</SidebarGroupLabel>
+
+                    <SidebarGroupLabel>
+                        <div className="w-full flex justify-center">
+                            <Logo></Logo>
+                        </div>
+                        <div className="">
+                            CrimeLookup
+                        </div>
+                    </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => {

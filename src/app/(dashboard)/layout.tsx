@@ -20,7 +20,8 @@ export default async function PublicLayout({
     children: React.ReactNode
 }) {
     const session = await auth()
-    const isLoggedIn = !!session
+    // const isLoggedIn = !!session
+    const isLoggedIn = true
 
     // Nếu đã đăng nhập, hiển thị layout có Sidebar
     if (isLoggedIn) {

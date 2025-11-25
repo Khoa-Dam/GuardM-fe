@@ -55,6 +55,8 @@ export function SidebarMenu({ children }: { children: React.ReactNode }) {
     return <ul className="space-y-2">{children}</ul>
 }
 
+
+
 export function SidebarMenuItem({ children }: { children: React.ReactNode }) {
     return <li className="">{children}</li>
 }
@@ -69,4 +71,20 @@ export function SidebarMenuButton({ children, asChild }: { children: React.React
             {children}
         </button>
     )
+}
+
+export function SidebarTrigger() {
+    const { open, setOpen } = useSidebar()
+    return (
+        <button
+            onClick={() => setOpen(!open)}
+            className="p-2 bg-gray-200 hover:bg-gray-300 rounded-md"
+        >
+            Toggle
+        </button>
+    )
+}
+
+export function SidebarInset({ children }: { children: React.ReactNode }) {
+    return <div className="ml-4">{children}</div>
 }

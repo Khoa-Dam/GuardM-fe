@@ -5,6 +5,7 @@ import { Bell, Settings, LogOut, ChevronDown } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@/hooks/use-user"
+import { Logo } from "./icons"
 
 export function AppHeader() {
     const { userName, userRole } = useUser()
@@ -36,9 +37,12 @@ export function AppHeader() {
     return (
         <header className="flex items-center justify-between bg-white shadow px-6 py-3 border-b">
             {/* Bên trái: tiêu đề */}
-            <h1 className="text-lg font-semibold text-gray-700">
-                Hệ thống tra cứu tội phạm truy nã
-            </h1>
+            <div className="space-y-1">
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight">Chào mừng đến với <span className="text-red-600">CrimeLookup</span></h2>
+                <p className="text-sm md:text-base text-muted-foreground">
+                    Hệ thống tra cứu và quản lý thông tin tội phạm toàn quốc.
+                </p>
+            </div>
 
             {/* Bên phải: avatar + tên người dùng */}
             <div className="flex items-center gap-4">
