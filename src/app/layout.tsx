@@ -67,7 +67,9 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           )}
         >
           <SessionProvider>
-            {children}
+            <main className="container mx-auto">
+              {children}
+            </main>
             <Toaster />
           </SessionProvider>
 

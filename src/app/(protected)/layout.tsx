@@ -24,7 +24,7 @@ export default function ProtectedLayout({
                     <div>
                         <AppHeader />
                     </div>
-                    <main className="p-6 overflow-y-auto">{children}</main>
+                    <main className="container p-3 mx-auto">{children}</main>
                 </div>
             </div>
         </SidebarProvider>

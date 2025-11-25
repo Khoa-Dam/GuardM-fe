@@ -79,6 +79,10 @@ export function useCrimeReports(type?: CrimeType, options: UseCrimeReportsOption
     const disputeReport = useCallback((id: string) => runAction(id, 'dispute'), [runAction]);
     const verifyReport = useCallback((id: string) => runAction(id, 'verify'), [runAction]);
 
+    const addLocalReport = useCallback((report: VerificationCrimeReport) => {
+        setReports((prev) => [report, ...prev]);
+    }, []);
+
     return {
         reports,
         loading,
@@ -88,6 +92,7 @@ export function useCrimeReports(type?: CrimeType, options: UseCrimeReportsOption
         confirmReport,
         disputeReport,
         verifyReport,
+        addLocalReport,
     };
 }
 
