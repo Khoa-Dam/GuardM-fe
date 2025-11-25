@@ -1,7 +1,7 @@
 "use client"
 
 import { Logo } from "./icons";
-import { BookUser, MessageSquareWarning, MapPinned, Shield, Home, BarChart3, Search } from "lucide-react"
+import { BookUser, MessageSquareWarning, MapPinned, Shield, Home, BarChart3, Search, Settings } from "lucide-react"
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
@@ -22,6 +22,7 @@ const items = [
     { title: "Bản đồ", icon: MapPinned, url: "/map" },
     { title: "Thống kê & Phân tích", icon: BarChart3, url: "/statistics" },
     { title: "Tìm kiếm nâng cao", icon: Search, url: "/search" },
+    { title: "Hướng dẫn sử dụng", icon: Settings, url: "/userManual" },
 ]
 
 export function AppSidebar() {
