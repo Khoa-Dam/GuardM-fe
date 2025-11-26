@@ -1,8 +1,10 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
+import SidebarWrapper from "@/components/sidebar-wrapper"
 import { AppHeader } from "@/components/app-header"
 import { siteConfig } from "@/config/site.config"
 import { Metadata } from "next"
+import { SidebarStateProvider } from "@/components/sidebar-context"
+
 export const metadata: Metadata = {
     title: {
         default: siteConfig.name,
@@ -10,24 +12,25 @@ export const metadata: Metadata = {
     },
     description: siteConfig.description,
 }
+
 export default function ProtectedLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
     return (
-        <SidebarProvider>
-            <div className="flex h-screen">
-                <AppSidebar />
+        <SidebarStateProvider>
+            <SidebarProvider>
+                <div className="flex h-screen overflow-hidden">
+                    <SidebarWrapper />
 
-                <div className="flex flex-col grow flex-1 bg-gray-50">
-                    <div>
+                    <div className="flex flex-col flex-1 overflow-y-auto bg-gray-50">
                         <AppHeader />
+                        <main className="container flex-1 p-1.5 md:p-3.5">{children}</main>
                     </div>
-                    <main className="container p-3 mx-auto">{children}</main>
                 </div>
-            </div>
-        </SidebarProvider>
+            </SidebarProvider>
+        </SidebarStateProvider>
     )
 }
 
