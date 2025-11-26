@@ -64,10 +64,10 @@ export function AppHeader() {
                 {isAuthenticated ? (
                     <>
                         {/* Nút Thông báo */}
-                        <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-amber-600">
+                        {/* <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-amber-600">
                             <Bell className="h-5 w-5" />
                             <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
-                        </Button>
+                        </Button> */}
 
                         {/* User Dropdown */}
                         <DropdownMenu>
