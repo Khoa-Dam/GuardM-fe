@@ -34,9 +34,7 @@ export interface ResetPasswordPayload {
 class AuthService {
     async signup(payload: SignupPayload) {
         try {
-            console.log('[AuthService] Signup request:', payload)
             const { data } = await apiClient.post(`${AUTH_BASE}/signup`, payload);
-            console.log('[AuthService] Signup response:', data)
             return data;
         } catch (error: any) {
             console.error('[AuthService] Signup error:', error)

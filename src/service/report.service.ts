@@ -33,6 +33,24 @@ export interface CreateCrimeReportDto {
     reportedAt?: Date;
 }
 
+export interface UpdateCrimeReportDto {
+    title?: string;
+    description?: string;
+    type?: CrimeType;
+    lat?: number;
+    lng?: number;
+    address?: string;
+    areaCode?: string;
+    province?: string;
+    district?: string;
+    ward?: string;
+    street?: string;
+    source?: string;
+    attachments?: string[];
+    severity?: number;
+    reportedAt?: Date;
+}
+
 // Response DTOs
 export interface CrimeReportResponse {
     id: string;
@@ -108,6 +126,14 @@ export interface NearbyAlertResponse {
         address?: string;
         createdAt: Date;
     }>;
+}
+
+export interface VoteStatus {
+    hasConfirmed: boolean;
+    hasDisputed: boolean;
+    voteCount: number; // Tổng số vote (0, 1, hoặc 2)
+    canVote: boolean; // Có thể vote thêm không (voteCount < 2)
+    isOwner: boolean; // Có phải owner của report không
 }
 
 class ReportService {
@@ -343,6 +369,158 @@ class ReportService {
                 'Không thể tải cảnh báo gần đây. Vui lòng thử lại.';
             throw new Error(errorMessage);
         }
+    }
+
+    /**
+     * Get crime reports created by current user
+     * Requires authentication
+     */
+    async findMine(): Promise<CrimeReportResponse[]> {
+        try {
+            const { data } = await apiClient.get<CrimeReportResponse[]>(`${REPORT_BASE}/me`);
+            return data;
+        } catch (error: any) {
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể tải danh sách báo cáo của bạn. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Update an existing crime report (owner only)
+     * Supports both JSON payload and FormData (for file uploads)
+     * @param id - Report ID
+     * @param payload - Update data (UpdateCrimeReportDto or FormData)
+     */
+    async update(id: string, payload: UpdateCrimeReportDto | FormData): Promise<CrimeReportResponse> {
+        try {
+            const isFormData = payload instanceof FormData;
+            const { data } = await apiClient.put<CrimeReportResponse>(
+                `${REPORT_BASE}/${id}`,
+                payload,
+                isFormData ? {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                } : undefined
+            );
+            return data;
+        } catch (error: any) {
+            if (error?.response?.status === 400) {
+                throw new Error('Bạn không có quyền chỉnh sửa báo cáo này');
+            }
+            if (error?.response?.status === 404) {
+                throw new Error('Không tìm thấy báo cáo');
+            }
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể cập nhật báo cáo. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Delete a crime report (owner only)
+     * @param id - Report ID
+     */
+    async delete(id: string): Promise<{ message: string }> {
+        try {
+            const { data } = await apiClient.delete<{ message: string }>(`${REPORT_BASE}/${id}`);
+            return data;
+        } catch (error: any) {
+            if (error?.response?.status === 400) {
+                throw new Error('Bạn không có quyền xóa báo cáo này');
+            }
+            if (error?.response?.status === 404) {
+                throw new Error('Không tìm thấy báo cáo');
+            }
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể xóa báo cáo. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Get vote status for current user on a report
+     * @param id - Report ID
+     */
+    async getVoteStatus(id: string): Promise<VoteStatus> {
+        try {
+            const { data } = await apiClient.get<VoteStatus>(`${REPORT_BASE}/${id}/vote-status`);
+            return data;
+        } catch (error: any) {
+            // If endpoint doesn't exist, return default (can vote)
+            if (error?.response?.status === 404) {
+                return {
+                    hasConfirmed: false,
+                    hasDisputed: false,
+                    voteCount: 0,
+                    canVote: true,
+                    isOwner: false,
+                };
+            }
+            const errorData = error?.response?.data;
+            const errorMessage =
+                errorData?.message ||
+                errorData?.error ||
+                error?.message ||
+                'Không thể tải trạng thái vote. Vui lòng thử lại.';
+            throw new Error(errorMessage);
+        }
+    }
+
+    /**
+     * Create FormData from UpdateCrimeReportDto and files
+     * Utility method for multipart uploads
+     */
+    createUpdateFormData(
+        dto: UpdateCrimeReportDto,
+        files?: File[]
+    ): FormData {
+        const formData = new FormData();
+
+        // Add DTO fields
+        if (dto.title) formData.append('title', dto.title);
+        if (dto.description) formData.append('description', dto.description);
+        if (dto.type) formData.append('type', dto.type);
+        if (dto.lat !== undefined) formData.append('lat', dto.lat.toString());
+        if (dto.lng !== undefined) formData.append('lng', dto.lng.toString());
+        if (dto.address) formData.append('address', dto.address);
+        if (dto.areaCode) formData.append('areaCode', dto.areaCode);
+        if (dto.province) formData.append('province', dto.province);
+        if (dto.district) formData.append('district', dto.district);
+        if (dto.ward) formData.append('ward', dto.ward);
+        if (dto.street) formData.append('street', dto.street);
+        if (dto.source) formData.append('source', dto.source);
+        if (dto.severity !== undefined) formData.append('severity', dto.severity.toString());
+        if (dto.reportedAt) formData.append('reportedAt', dto.reportedAt.toISOString());
+
+        // Add existing attachment URLs (to keep)
+        if (dto.attachments) {
+            dto.attachments.forEach((attachment) => {
+                formData.append('attachments', attachment);
+            });
+        }
+
+        // Add new files
+        if (files) {
+            files.forEach((file) => {
+                formData.append('files', file);
+            });
+        }
+
+        return formData;
     }
 }
 
