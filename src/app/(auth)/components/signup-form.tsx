@@ -12,7 +12,8 @@ import authService from "@/service/auth.service"
 import { signUp } from "@/utils/validation"
 import { toast } from "sonner"
 import { signIn } from "next-auth/react"
-import { Loader2 } from "lucide-react"
+import { Loader2, ShieldAlert } from "lucide-react"
+import Link from "next/link"
 
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
     const router = useRouter()
@@ -64,8 +65,6 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
         setIsLoading(true)
 
         try {
-            console.log('[Signup] Submitting:', { name: name.trim(), email: email.trim().toLowerCase() })
-
             await authService.signup({
                 name: name.trim(),
                 email: email.trim().toLowerCase(),
@@ -118,6 +117,20 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
+            {/* Logo với link về trang chủ */}
+            <Link
+                href="/"
+                aria-label="Về trang chủ"
+                className="flex sm:hidden  gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+                <div className="bg-red-500 p-1.5 rounded-lg shadow-lg shadow-red-500/30">
+                    <ShieldAlert className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+                    <span className="text-red-600">GuardM</span>
+                </h2>
+            </Link>
+
             <Card className="border-dashed border-gray-300">
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Đăng ký</CardTitle>

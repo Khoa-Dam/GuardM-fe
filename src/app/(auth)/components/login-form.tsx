@@ -9,15 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
-import { email, login, password } from "@/utils/validation"
-import { z } from "zod"
+import { login } from "@/utils/validation"
 import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
+import { Loader2, ShieldAlert } from "lucide-react"
+import Link from "next/link"
 
-const loginSchema = z.object({
-    email,
-    password,
-})
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
     const router = useRouter()
@@ -51,9 +47,11 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
         // Validate using zod schema
         const result = login.safeParse({
+            type: 'email',
             email: emailValue.trim(),
             password: passwordValue,
         })
+
 
         if (!result.success) {
             const errors: Record<string, string> = {}
@@ -136,6 +134,20 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
+            {/* Logo với link về trang chủ */}
+            <Link
+                href="/"
+                aria-label="Về trang chủ"
+                className="flex sm:hidden  gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+                <div className="bg-red-500 p-1.5 rounded-lg shadow-lg shadow-red-500/30">
+                    <ShieldAlert className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight">
+                    <span className="text-red-600">Guard</span>M
+                </h2>
+            </Link>
+
             <Card className="border-dashed border-gray-300">
                 <CardHeader className="text-center">
                     <CardTitle className="text-xl">Welcome</CardTitle>
@@ -188,9 +200,9 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                                 <div className="grid gap-2">
                                     <div className="flex items-center">
                                         <Label htmlFor="password">Password</Label>
-                                        <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
+                                        {/* <a href="#" className="ml-auto text-sm underline-offset-4 hover:underline">
                                             Forgot your password?
-                                        </a>
+                                        </a> */}
                                     </div>
                                     <Input
                                         id="password"
