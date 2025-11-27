@@ -94,7 +94,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                 // Small delay to show success message before redirect
                 await new Promise(resolve => setTimeout(resolve, 800))
 
-                const redirectTo = redirectPath || '/'
+                const redirectTo = redirectPath || "/dashboard"
                 router.push(redirectTo)
                 router.refresh()
             }
