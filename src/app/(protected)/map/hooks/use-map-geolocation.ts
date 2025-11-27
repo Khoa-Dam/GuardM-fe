@@ -20,7 +20,6 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
     const [alertedReportIds, setAlertedReportIds] = useState<Set<string>>(new Set());
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
 
-    console.log('reports', alertedReportIds);
 
     const createUserMarker = (latitude: number, longitude: number, accuracy: number) => {
         const L = (window as any).L;

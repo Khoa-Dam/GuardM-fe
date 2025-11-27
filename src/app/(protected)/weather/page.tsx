@@ -9,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Spinner } from '@/components/ui/spinner';
-import { useWeatherNews, WeatherNewsResponse } from '@/hooks/use-weather-news';
-import { WeatherNewsType } from '@/service/weather-news.service';
+import { useWeatherNews } from '@/hooks/use-weather-news';
+import { WeatherNewsType, WeatherNewsResponse } from '@/service/weather-news.service';
 import { Calendar, MapPin, RefreshCw, Search, AlertTriangle, CloudDrizzle } from 'lucide-react';
 
 const typeMeta: Record<

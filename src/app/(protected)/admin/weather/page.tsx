@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Loader2, ArrowLeft, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { useWeatherNews } from '@/hooks/use-weather-news';
 import {
+    useWeatherNews,
     useCreateWeatherNews,
     useUpdateWeatherNews,
     useDeleteWeatherNews,
-} from '@/hooks/use-weather-news-admin';
+} from '@/hooks/use-weather-news';
 import {
     WeatherNewsResponse,
     CreateWeatherNewsDto,
