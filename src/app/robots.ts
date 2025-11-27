@@ -4,8 +4,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
-      disallow: ['/admin/', '/api/', '/unauthorized'],
+      disallow: ['/admin/', '/api/'],
     },
     sitemap: 'https://www.guardm.space/sitemap.xml',
   }
