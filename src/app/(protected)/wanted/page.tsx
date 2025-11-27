@@ -81,6 +81,7 @@ export default function WantedPage() {
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold tracking-tight">Danh sách truy nã</h1>
+                    <h2>Dữ liệu được lấy trực tiếp từ <a href='https://truyna.bocongan.gov.vn' target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Bộ Công An</a></h2>
                 </div>
                 <div className="flex gap-3">
                     <Button
