@@ -17,7 +17,7 @@ export const FilterBtn: React.FC<FilterBtnProps> = ({ children, active, onClick 
         onClick={onClick}
         className={cn(
             'rounded-full whitespace-nowrap snap-start shrink-0 pointer-events-auto shadow-sm',
-            active && 'bg-slate-900 hover:bg-slate-800'
+            active && 'text-white'
         )}
     >
         {children}

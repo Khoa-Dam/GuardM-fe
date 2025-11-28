@@ -202,6 +202,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
     const [voteStatus, setVoteStatus] = useState<VoteStatus | null>(null);
     const [loadingVoteStatus, setLoadingVoteStatus] = useState(true);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [isImageExpanded, setIsImageExpanded] = useState(false);
 
     const attachments = report.attachments || [];
     const hasMultipleMedia = attachments.length > 1;
@@ -318,8 +319,12 @@ const ReportCard: React.FC<ReportCardProps> = ({
                                 <img
                                     src={currentMedia}
                                     alt={`Bằng chứng ${currentMediaIndex + 1}`}
-                                    className="w-full h-auto max-h-72 object-cover rounded-md"
+                                    className="w-full h-auto max-h-72 object-cover rounded-md cursor-zoom-in"
                                     style={{ aspectRatio: '16 / 9' }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsImageExpanded(true);
+                                    }}
                                 />
                             )}
 
@@ -569,6 +574,36 @@ const ReportCard: React.FC<ReportCardProps> = ({
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Image Preview Overlay */}
+            <AnimatePresence>
+                {isImageExpanded && !isCurrentVideo && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-zoom-out"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsImageExpanded(false);
+                        }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.9 }}
+                            className="relative max-w-[95vw] max-h-[95vh] p-1 overflow-hidden"
+                        >
+                            <img
+                                src={currentMedia}
+                                alt="Zoomed preview"
+                                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+                            />
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

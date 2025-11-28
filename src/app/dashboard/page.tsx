@@ -45,42 +45,6 @@ const systemNotices = [
     },
 ];
 
-const fallbackWantedCriminals: HomeWantedCriminal[] = [
-    {
-        id: 'mock-1',
-        name: 'Nguyễn Văn A',
-        birthYear: 1990,
-        address: 'Hà Nội',
-        parents: 'Nguyễn Văn B',
-        crime: 'Cướp tài sản',
-        decisionNumber: '123/2025/QĐ-BCA',
-        issuingUnit: 'Bộ Công An',
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 'mock-2',
-        name: 'Trần Thị B',
-        birthYear: 1988,
-        address: 'TP. Hồ Chí Minh',
-        parents: 'Trần Văn C',
-        crime: 'Lừa đảo chiếm đoạt tài sản',
-        decisionNumber: '87/2025/QĐ-BCA',
-        issuingUnit: 'Cục CS Hình Sự',
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 'mock-3',
-        name: 'Lê Văn C',
-        birthYear: 1995,
-        address: 'Đà Nẵng',
-        parents: 'Lê Văn D',
-        crime: 'Buôn bán ma túy',
-        decisionNumber: '56/2025/QĐ-BCA',
-        issuingUnit: 'Bộ Công An',
-        createdAt: new Date().toISOString(),
-    },
-];
-
 const typeColors = ['#ef4444', '#f97316', '#facc15', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#14b8a6'];
 
 const crimeTypeLabels: Record<string, string> = {
@@ -172,10 +136,9 @@ export default function DashboardPage() {
 
     const heatmapHighlights = useMemo(() => heatmapData.slice(0, 6), [heatmapData]);
     const recentWanted = homeData?.recentWantedCriminals ?? [];
-    const displayedWanted = recentWanted.length ? recentWanted.slice(0, 6) : fallbackWantedCriminals;
+    const displayedWanted = recentWanted.slice(0, 6);
 
     return (
-
         <main className="flex-1 p-4 md:p-6">
             <div className="mx-auto max-w-7xl space-y-4 md:space-y-6">
                 {error && (
@@ -210,6 +173,7 @@ export default function DashboardPage() {
                                     <Eye className="h-4 w-4 md:h-5 md:w-5" />
                                     Đối tượng truy nã mới nhất
                                 </CardTitle>
+                                <CardDescription className="text-xs md:text-sm"></CardDescription>
 
                             </div>
                             <Link href="/wanted" className="text-sm text-primary hover:underline">
@@ -219,33 +183,39 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-3 md:gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-                            {displayedWanted.map((person) => (
-                                <div
-                                    key={person.id}
-                                    className="flex gap-3 rounded-lg border border-border p-3 md:p-4 transition-colors hover:bg-amber-50"
-                                >
-                                    <div className="h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-lg bg-muted flex items-center justify-center">
-                                        <Users className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
-                                    </div>
-                                    <div className="flex-1 min-w-0 space-y-1">
-                                        <div className="flex items-center justify-between gap-2">
-                                            <p className="font-semibold text-sm ">{person.name}</p>
-                                            <Badge variant="secondary" className="text-xs shrink-0">
-                                                Sinh {person.birthYear}
-                                            </Badge>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground ">Tội danh: {person.crime}</p>
-                                        <p className="text-xs text-muted-foreground ">
-                                            Đơn vị: {person.issuingUnit ?? 'Đang cập nhật'}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground ">
-                                            <MapPin className="inline h-3 w-3 mr-1" />
-                                            {person.address ?? 'Chưa rõ'}
-                                        </p>
-                                        <p className="text-[11px] text-muted-foreground">Cập nhật: {formatDate(person.createdAt)}</p>
-                                    </div>
+                            {loading ? (
+                                <div className="col-span-full flex justify-center py-8">
+                                    <Spinner className="h-8 w-8 text-muted-foreground" />
                                 </div>
-                            ))}
+                            ) : (
+                                displayedWanted.map((person) => (
+                                    <div
+                                        key={person.id}
+                                        className="flex gap-3 rounded-lg border border-border p-3 md:p-4 transition-colors hover:bg-amber-50"
+                                    >
+                                        <div className="h-14 w-14 md:h-16 md:w-16 shrink-0 rounded-lg bg-muted flex items-center justify-center">
+                                            <Users className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
+                                        </div>
+                                        <div className="flex-1 min-w-0 space-y-1">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <p className="font-semibold text-sm ">{person.name}</p>
+                                                <Badge variant="secondary" className="text-xs shrink-0">
+                                                    Sinh {person.birthYear}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground ">Tội danh: {person.crime}</p>
+                                            <p className="text-xs text-muted-foreground ">
+                                                Đơn vị: {person.issuingUnit ?? 'Đang cập nhật'}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground ">
+                                                <MapPin className="inline h-3 w-3 mr-1" />
+                                                {person.address ?? 'Chưa rõ'}
+                                            </p>
+                                            <p className="text-[11px] text-muted-foreground">Cập nhật: {formatDate(person.createdAt)}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     </CardContent>
                 </Card>

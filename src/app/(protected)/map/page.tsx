@@ -393,7 +393,7 @@ const CrimeMapContent = () => {
                 {!isReportingMode ? (
                     <>
                         {/* Mobile: Select (chỉ hiển thị 1 filter) */}
-                        <div className="md:hidden pointer-events-auto">
+                        <div className="md:hidden pointer-events-auto dark:text-black">
                             <Select
                                 value={filter}
                                 onValueChange={(value: FilterType) => setFilter(value)}
@@ -419,7 +419,7 @@ const CrimeMapContent = () => {
                         </div>
 
                         {/* Desktop: Filter buttons */}
-                        <div className="hidden md:flex gap-2 pointer-events-auto">
+                        <div className="hidden md:flex gap-2 pointer-events-auto dark:text-black">
                             <FilterBtn active={filter === 'all'} onClick={() => setFilter('all')}>
                                 Tất cả
                             </FilterBtn>
@@ -454,7 +454,7 @@ const CrimeMapContent = () => {
                         <Button
                             variant="outline"
                             onClick={handleCancelReporting}
-                            className="flex-1 shadow-lg"
+                            className="flex-1 shadow-lg dark:text-black dark:border-black"
                             size="lg"
                         >
                             Hủy

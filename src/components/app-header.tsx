@@ -36,7 +36,7 @@ export function AppHeader() {
     };
 
     return (
-        <header className="sticky top-0 z-40 flex items-center justify-between w-full border-b bg-background px-4 md:px-6 py-3 shadow-sm">
+        <header className="sticky top-0 z-40 flex items-center justify-between w-full border-b bg-background px-4 md:px-6 py-1 shadow-sm">
             {/* Left side: Hamburger + Branding */}
             <div className="flex items-center gap-2">
                 {/* Hamburger menu cho mobile */}
