@@ -139,7 +139,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             <Link
                 href="/dashboard"
                 aria-label="Về trang chủ"
-                className="flex sm:hidden  gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex lg:hidden  gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
                 <div className="bg-red-500 p-1.5 rounded-lg shadow-lg shadow-red-500/30">
                     <Logo className="w-6 h-6 text-white" />

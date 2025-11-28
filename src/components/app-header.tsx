@@ -45,6 +45,7 @@ export function AppHeader() {
                     size="icon"
                     className="md:hidden"
                     onClick={toggle}
+                    aria-label="Toggle menu"
                 >
                     <Menu className="h-5 w-5" />
                 </Button>
@@ -63,7 +64,7 @@ export function AppHeader() {
             {/* Actions bên phải */}
 
             <div className="flex items-center gap-3 md:gap-4">
-      <ThemeToggler className="border-dashed size-10 md:size-14" />
+                <ThemeToggler className="border-dashed size-10 md:size-14" />
 
                 {isAuthenticated ? (
                     <>
@@ -80,6 +81,7 @@ export function AppHeader() {
                                 <Button
                                     variant="ghost"
                                     className="relative h-10 w-10 rounded-full p-0 hover:bg-transparent focus-visible:ring-0"
+                                    aria-label="User menu"
                                 >
                                     <Avatar className="h-9 w-9 border border-gray-200 transition hover:ring-2 hover:ring-red-100">
                                         {/* Fallback luôn hiện vì không có AvatarImage */}
