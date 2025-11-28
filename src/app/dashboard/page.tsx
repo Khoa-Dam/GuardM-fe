@@ -357,7 +357,7 @@ export default function DashboardPage() {
                                         key={notice.id}
                                         className={`rounded-lg border p-3 md:p-4 ${notice.type === 'warning'
                                             ? 'border-amber-500/50 bg-amber-50'
-                                            : 'border-blue-500/50 bg-blue-50'
+                                            : 'border-blue-500/50 '
                                             }`}
                                     >
                                         <div className="flex items-start gap-2">

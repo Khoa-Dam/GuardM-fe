@@ -9,6 +9,7 @@ import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "@/providers/session-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { ThemeProvider } from "next-themes";
 
 export const viewport: Viewport = {
   viewportFit: "cover",
@@ -16,6 +17,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
 };
 
 export const metadata: Metadata = {
@@ -24,6 +29,7 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  keywords: siteConfig.keywords,
   authors: {
     name: siteConfig.author.name,
     url: siteConfig.author.url,
@@ -72,10 +78,17 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         >
           <QueryProvider>
             <SessionProvider>
+              <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
               <main className="container mx-auto">
                 {children}
               </main>
               <Toaster />
+            </ThemeProvider>
             </SessionProvider>
           </QueryProvider>
 

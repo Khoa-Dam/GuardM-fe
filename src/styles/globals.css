@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
 :root {
   --background: oklch(1.0000 0 0);
   --foreground: oklch(0 0 0);
@@ -169,5 +170,30 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* view transition */
+::view-transition-group(root) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--expo-in);
+}
+
+::view-transition-new(root) {
+  animation-name: reveal;
+}
+
+::view-transition-old(root),
+.dark::view-transition-old(root) {
+  animation: none;
+  z-index: -1;
+}
+
+@keyframes reveal {
+  from {
+    clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%);
+  }
+  to {
+    clip-path:  polygon(0 100%, 100% 100%, 100% 0, 0 0);
   }
 }

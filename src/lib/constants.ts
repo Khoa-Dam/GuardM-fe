@@ -2,7 +2,7 @@ import { siteConfig } from "@/config/site.config";
 
 export const LEGAL = {
     termsOfService: {
-        lastUpdated: "December 15, 2023",
+        lastUpdated: "November 25, 2025",
         sections: [
             {
                 title: "Acceptance of Terms",
@@ -44,39 +44,35 @@ export const LEGAL = {
     },
 
     privacyPolicy: {
-        lastUpdated: "December 15, 2023",
+        lastUpdated: "November 25, 2025",
         sections: [
             {
                 title: "Introduction",
-                description: `Thank you for choosing ${siteConfig.name}, an open-source web application developed under the MIT License. This Privacy Policy outlines how we collect, use, disclose, and protect your information when you use ${siteConfig.name}. By using ${siteConfig.name}, you consent to the practices described in this Privacy Policy.`,
+                description: `Thank you for choosing ${siteConfig.name}. This Privacy Policy outlines how we collect, use, disclose, and protect your information when you use ${siteConfig.name}. By using the application, you consent to the practices described in this Policy.`,
             },
             {
                 title: "Information We Collect",
-                description: `- **Personal Information:** We do not collect any personal information from ${siteConfig.name} users. ${siteConfig.name} is designed to respect your privacy, and any data you enter or generate while using the application remains on your local device.`,
+                description: `- **Personal Information:** When you register, we collect your Email and Name to authenticate and manage your session.\n- **Report Data:** When you create a crime report, we collect the information you provide, including title, description, images, and geographic location.\n- **Location:** We use your location data to display the map and nearby alerts, but we do not track your movement history.`,
             },
             {
                 title: "How We Use Your Information",
-                description: `- **Usage Data:** ${siteConfig.name} does not collect any usage data. All data generated or processed within the application stays locally on your device.`,
-            },
-            {
-                title: "Cookies and Tracking Technologies",
-                description: `- **Cookies:** ${siteConfig.name} does not use cookies or any tracking technologies.`,
+                description: `- **Service Provision:** To display crime alerts, manage reports, and verify reliability.\n- **Experience Improvement:** To analyze anonymous data for improving application performance.`,
             },
             {
                 title: "Data Security",
-                description: `- **Data Storage:** As an open-source project, ${siteConfig.name} does not store any user data on external servers. All data remains on the user's local device.`,
+                description: `- **Storage:** Your data is securely stored on our servers and protected by standard technical measures.\n- **No Sharing:** We do not sell or share your personal information with third parties for commercial purposes.`,
             },
             {
                 title: "Third-Party Links",
-                description: `- **External Links:** ${siteConfig.name} may contain links to external websites or resources. This Privacy Policy applies only to ${siteConfig.name} and does not cover the privacy practices of third-party websites.`,
+                description: `- **External Links:** ${siteConfig.name} may contain links to external websites or resources (e.g., news). This Privacy Policy applies only to ${siteConfig.name}.`,
             },
             {
                 title: "Changes to Privacy Policy",
-                description: `- **Updates:** This Privacy Policy may be updated from time to time. It is your responsibility to review this policy periodically. Your continued use of ${siteConfig.name} after changes to this policy signifies your acceptance of the updated terms.`,
+                description: `- **Updates:** This Privacy Policy may be updated. Your continued use of ${siteConfig.name} after changes signifies your acceptance of the new policies.`,
             },
             {
                 title: "Contact Information",
-                description: `If you have any questions or concerns about this Privacy Policy, please contact us at ${siteConfig.author.email}.`,
+                description: `If you have questions about this Privacy Policy, please contact us at: ${siteConfig.author.email}.`,
             },
         ],
     },

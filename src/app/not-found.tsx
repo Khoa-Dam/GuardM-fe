@@ -1,4 +1,3 @@
-import React from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -6,10 +5,10 @@ import { BlurFade } from "@/components/blur-fade"
 
 export default function NotFound() {
     return (
-        <div className="container flex min-h-screen flex-col items-center justify-center px-4 py-10">
+        <div className="container flex min-h-screen flex-col  items-center justify-center px-4 py-10">
             <div className="flex w-full max-w-4xl flex-col items-center gap-8 lg:flex-row lg:gap-12">
                 {/* Illustration */}
-                <BlurFade delay={0.25} inView>
+                <BlurFade delay={0.25} inView >
                     <div className="flex-1 flex items-center justify-center">
                         <Image
                             priority
@@ -17,7 +16,7 @@ export default function NotFound() {
                             alt="404 Not Found"
                             width={400}
                             height={400}
-                            className="drop-shadow-xl"
+                            className="drop-shadow-xl dark:bg-white"
                         />
                     </div>
                 </BlurFade>
@@ -33,7 +32,7 @@ export default function NotFound() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4">
                         <Button asChild>
-                            <Link href="/">Về trang chủ</Link>
+                            <Link href="/dashboard">Về trang chủ</Link>
                         </Button>
                         <Button variant="outline" asChild>
                             <Link href="/login">Đăng nhập</Link>

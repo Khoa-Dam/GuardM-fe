@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
     <div className="container h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
 
-      <div className="relative hidden h-full flex-col justify-between border-r p-10 lg:flex">
+      <div className="relative hidden bg-white h-full flex-col justify-between border-r p-10 lg:flex">
         <div className="absolute inset-0 " />
 
         <div className="z-10 w-fit font-handwriting text-2xl font-medium lowercase text-background dark:text-foreground">

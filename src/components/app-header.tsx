@@ -19,6 +19,7 @@ import {
 import Link from 'next/link';
 import { useSidebarState } from './sidebar-context';
 import { Logo } from './icons';
+import ThemeToggler from './theme/toggler';
 
 export function AppHeader() {
     const { userName, userRole, isAuthenticated, isLoading } = useUser();
@@ -60,7 +61,10 @@ export function AppHeader() {
             </div>
 
             {/* Actions bên phải */}
+
             <div className="flex items-center gap-3 md:gap-4">
+      <ThemeToggler className="border-dashed size-10 md:size-14" />
+
                 {isAuthenticated ? (
                     <>
                         {/* Nút Thông báo */}
@@ -70,6 +74,7 @@ export function AppHeader() {
                         </Button> */}
 
                         {/* User Dropdown */}
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
@@ -125,6 +130,7 @@ export function AppHeader() {
                     </>
                 )}
             </div>
+
         </header>
     );
 }

@@ -5,6 +5,8 @@ import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { Logo } from '@/components/icons';
 
+import { siteConfig } from '@/config/site.config';
+
 export const LandingFooter: React.FC = () => {
     return (
         <footer className="px-6 pb-12">
@@ -15,10 +17,15 @@ export const LandingFooter: React.FC = () => {
                     GuardM
                 </div>
                 <div className="flex gap-8">
-                    <a href="#" className="hover:text-slate-900 transition-colors">
+                    <a 
+                        href={siteConfig.links.github} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="hover:text-slate-900 transition-colors"
+                    >
                         Về chúng tôi
                     </a>
-                    <a href="#" className="hover:text-slate-900 transition-colors">
+                    <a href={`mailto:${siteConfig.author.email}`} className="hover:text-slate-900 transition-colors">
                         Liên hệ
                     </a>
                 </div>
