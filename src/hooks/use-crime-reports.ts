@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import reportService, { CrimeReportResponse, CrimeType, CreateCrimeReportDto, UpdateCrimeReportDto } from '@/service/report.service';
 import { VerificationCrimeReport, VerificationLevel } from '@/types/map';
+import { statisticsKeys } from './use-statistics';
 
 // Query keys for cache management
 export const reportsKeys = {
@@ -65,6 +66,8 @@ export function useCreateReport() {
             queryClient.invalidateQueries({ queryKey: reportsKeys.lists() });
             // Update my reports
             queryClient.invalidateQueries({ queryKey: reportsKeys.mine() });
+            // Invalidate statistics to update total count
+            queryClient.invalidateQueries({ queryKey: statisticsKeys.statistics() });
         },
     });
 }
@@ -127,6 +130,8 @@ export function useUpdateReport() {
                 reportsKeys.mine(),
                 (old) => old?.map((r) => (r.id === normalized.id ? normalized : r))
             );
+            // Invalidate statistics (in case severity changed)
+            queryClient.invalidateQueries({ queryKey: statisticsKeys.statistics() });
         },
     });
 }
@@ -150,6 +155,8 @@ export function useDeleteReport() {
                 reportsKeys.mine(),
                 (old) => old?.filter((r) => r.id !== id)
             );
+            // Invalidate statistics to update total count
+            queryClient.invalidateQueries({ queryKey: statisticsKeys.statistics() });
         },
     });
 }

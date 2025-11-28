@@ -26,15 +26,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     const [error, setError] = useState<string | null>(null)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-    // Get route name for display
-    const getRouteName = (path: string) => {
-        const routeNames: Record<string, string> = {
-            '/reports': 'Báo cáo tội phạm',
-            '/map': 'Bản đồ cảnh báo',
-            '/dashboard': 'Trang chủ',
-        }
-        return routeNames[path] || path
-    }
+  
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()

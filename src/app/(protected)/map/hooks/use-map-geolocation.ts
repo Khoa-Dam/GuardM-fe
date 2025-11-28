@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { getDistanceFromLatLonInMeters } from '@/utils/geolocation';
 import { VerificationCrimeReport } from '@/types/map';
@@ -21,7 +21,7 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
 
 
-    const createUserMarker = (latitude: number, longitude: number, accuracy: number) => {
+    const createUserMarker = useCallback((latitude: number, longitude: number, accuracy: number) => {
         const L = (window as any).L;
         const map = mapInstanceRef.current;
         if (!L || !map) return null;
@@ -41,9 +41,9 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
         const marker = L.marker([latitude, longitude], { icon }).addTo(map);
         marker.bindPopup(`<b>Vị trí hiện tại của bạn</b>${accuracyText}`);
         return marker;
-    };
+    }, [mapInstanceRef]);
 
-    const updateUserMarker = (latitude: number, longitude: number, accuracy: number) => {
+    const updateUserMarker = useCallback((latitude: number, longitude: number, accuracy: number) => {
         if (userMarkerRef.current) {
             userMarkerRef.current.setLatLng([latitude, longitude]);
             const accuracyText =
@@ -54,9 +54,9 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
         } else {
             userMarkerRef.current = createUserMarker(latitude, longitude, accuracy);
         }
-    };
+    }, [createUserMarker]);
 
-    const handleGetLocation = () => {
+    const handleGetLocation = useCallback(() => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
             toast.warning('Trình duyệt không hỗ trợ định vị');
             return;
@@ -104,14 +104,14 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
                 toast.error('Không thể xác định vị trí của bạn, hãy cho phép ở trình duyệt');
             }
         );
-    };
+    }, [mapInstanceRef, createUserMarker, updateUserMarker]);
 
     // Lấy vị trí lần đầu
     useEffect(() => {
         if (isLeafletLoaded && mapInstanceRef.current && !hasLocated) {
             handleGetLocation();
         }
-    }, [isLeafletLoaded, hasLocated]);
+    }, [isLeafletLoaded, hasLocated, handleGetLocation, mapInstanceRef]);
 
     // Theo dõi vị trí liên tục và kiểm tra cảnh báo nguy hiểm
     useEffect(() => {
@@ -178,7 +178,7 @@ export const useMapGeolocation = ({ isLeafletLoaded, mapInstanceRef, reports }: 
                 navigator.geolocation.clearWatch(watchIdRef.current);
             }
         };
-    }, [isLeafletLoaded, reports, hasLocated]);
+    }, [isLeafletLoaded, reports, hasLocated, updateUserMarker, mapInstanceRef]);
 
     return {
         handleGetLocation,

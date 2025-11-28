@@ -3,19 +3,13 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Loader2, Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import wantedCriminalService, {
-    WantedCriminalResponse,
-    CreateWantedCriminalDto,
-    UpdateWantedCriminalDto,
-} from '@/service/wanted-criminal.service';
 import {
     useCreateWantedCriminal,
     useUpdateWantedCriminal,
     useDeleteWantedCriminal,
-    wantedCriminalsKeys,
 } from '@/hooks/use-wanted-criminals-admin';
 import { useWantedCriminals } from '@/hooks/use-wanted-criminals';
+import type { WantedCriminalResponse, CreateWantedCriminalDto, UpdateWantedCriminalDto } from '@/service/wanted-criminal.service';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import {

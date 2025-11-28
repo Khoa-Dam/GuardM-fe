@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { CrimeType } from '@/service/report.service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -420,7 +421,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                                 {isVideo ? (
                                                     <video src={url} className="w-full h-full object-cover" muted />
                                                 ) : (
-                                                    <img src={url} alt="attachment" className="w-full h-full object-cover" />
+                                                    <Image src={url} alt="attachment" fill className="object-cover" sizes="80px" />
                                                 )}
                                                 <Badge
                                                     variant="secondary"
@@ -457,7 +458,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                             className="relative w-20 h-20 rounded-lg overflow-hidden border"
                                         >
                                             {file.startsWith('data:image') ? (
-                                                <img src={file} alt="preview" className="w-full h-full object-cover" />
+                                                <Image src={file} alt="preview" fill className="object-cover" sizes="80px" />
                                             ) : (
                                                 <video src={file} className="w-full h-full object-cover" muted />
                                             )}

@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userService, User, CreateUserDto, UpdateUserDto } from '@/service/user.service';
+import { userService, CreateUserDto, UpdateUserDto } from '@/service/user.service';
 
 // Query keys for cache management
 export const usersKeys = {

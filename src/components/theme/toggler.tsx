@@ -13,11 +13,17 @@ type ThemeTogglerProps = {
 
 export default function ThemeToggler({ className, size }: ThemeTogglerProps) {
   const { theme, setTheme } = useTheme();
-  const [systemTheme, setSystemTheme] = useState<"light" | "dark">("light");
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(() => {
+    // Lazy initialization - only runs once on mount
+    if (typeof window !== 'undefined') {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      return mediaQuery.matches ? "dark" : "light";
+    }
+    return "light";
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemTheme(mediaQuery.matches ? "dark" : "light");
 
     const handleChange = (e: MediaQueryListEvent) => {
       setSystemTheme(e.matches ? "dark" : "light");
