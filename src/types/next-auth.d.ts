@@ -30,6 +30,8 @@ declare module "next-auth/jwt" {
         refreshToken?: string
         userId?: string
         role?: string | null
+        accessTokenExpires?: number  // Timestamp when access token expires
+        error?: string  // Error flag for failed refresh attempts
     }
 }
 

@@ -2,6 +2,53 @@ import type { NextAuthConfig } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { env } from "../lib/env"
 import { isPublicRoute, isAuthRoute, DEFAULT_LOGIN_REDIRECT } from "./routes"
+import type { JWT } from "next-auth/jwt"
+
+/**
+ * Takes a token, and returns a new token with updated
+ * `accessToken` and `accessTokenExpires`. If an error occurs,
+ * returns the old token and an error property is added
+ */
+async function refreshAccessToken(token: JWT) {
+    try {
+        const apiUrl = env.NEXT_PUBLIC_API_BASE_URL.endsWith('/api')
+            ? `${env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`
+            : `${env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                refreshToken: token.refreshToken,
+            }),
+        })
+
+        const refreshedTokens = await response.json()
+
+        if (!response.ok) {
+            throw refreshedTokens
+        }
+
+        console.log('[JWT Callback] Token refresh successful')
+
+        return {
+            ...token,
+            accessToken: refreshedTokens.accessToken,
+            refreshToken: refreshedTokens.refreshToken ?? token.refreshToken, // Fall back to old refresh token
+            accessTokenExpires: Date.now() + (3600 - 300) * 1000, // 55 minutes
+        }
+    } catch (error) {
+        console.error('[JWT Callback] Token refresh failed:', error)
+
+        return {
+            ...token,
+            error: "RefreshAccessTokenError",
+        }
+    }
+}
+
 
 export const authConfig = {
     pages: {
@@ -35,14 +82,34 @@ export const authConfig = {
         async jwt({ token, user, account }) {
             // Initial sign in
             if (account && user) {
-                token.accessToken = user.accessToken
-                token.refreshToken = user.refreshToken
-                token.userId = user.userId
-                token.role = user.role
+                return {
+                    accessToken: user.accessToken,
+                    refreshToken: user.refreshToken,
+                    userId: user.userId,
+                    role: user.role,
+                    // Set token expiry time (JWT_EXPIRES_IN=1h = 3600 seconds)
+                    // Subtract 5 minutes buffer to refresh before actual expiry
+                    accessTokenExpires: Date.now() + (3600 - 300) * 1000, // 55 minutes
+                }
             }
-            return token
+
+            // Return previous token if the access token has not expired yet
+            const tokenExpires = token.accessTokenExpires as number || 0;
+            if (Date.now() < tokenExpires) {
+                return token
+            }
+
+            // Access token has expired, try to refresh it
+            console.log('[JWT Callback] Access token expired, refreshing...')
+            return refreshAccessToken(token)
         },
         async session({ session, token }) {
+            // Force sign out if token refresh failed
+            if (token.error) {
+                console.error('[Session Callback] Token refresh error detected, invalidating session')
+                return null as any  // This will force logout
+            }
+
             if (token) {
                 session.user = {
                     ...session.user,
