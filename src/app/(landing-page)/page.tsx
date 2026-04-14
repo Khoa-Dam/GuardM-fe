@@ -11,38 +11,38 @@ const IMAGE_SCALE = 0.86;
 const SCROLL_HEIGHT = '900vh';
 
 export default function LandingPage() {
-  const canvasRef          = useRef<HTMLCanvasElement>(null);
-  const canvasWrapRef      = useRef<HTMLDivElement>(null);
-  const heroRef            = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasWrapRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const overlayRef         = useRef<HTMLDivElement>(null);
-  const marqueeRef         = useRef<HTMLDivElement>(null);
-  const loaderRef          = useRef<HTMLDivElement>(null);
-  const loaderBarRef       = useRef<HTMLDivElement>(null);
-  const loaderPctRef       = useRef<HTMLSpanElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const marqueeRef = useRef<HTMLDivElement>(null);
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const loaderBarRef = useRef<HTMLDivElement>(null);
+  const loaderPctRef = useRef<HTMLSpanElement>(null);
 
   const APP_URL = env.NEXT_PUBLIC_APP_URL ?? '';
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const canvas    = canvasRef.current!;
-    const ctx       = canvas.getContext('2d')!;
-    const wrap      = canvasWrapRef.current!;
-    const hero      = heroRef.current!;
-    const sc        = scrollContainerRef.current!;
-    const overlay   = overlayRef.current!;
+    const canvas = canvasRef.current!;
+    const ctx = canvas.getContext('2d')!;
+    const wrap = canvasWrapRef.current!;
+    const hero = heroRef.current!;
+    const sc = scrollContainerRef.current!;
+    const overlay = overlayRef.current!;
     const marqueeEl = marqueeRef.current!;
-    const loader    = loaderRef.current!;
+    const loader = loaderRef.current!;
     const loaderBar = loaderBarRef.current!;
     const loaderPct = loaderPctRef.current!;
 
     // ── Canvas sizing ──────────────────────────────────────────────────────
     const dpr = window.devicePixelRatio || 1;
     function resizeCanvas() {
-      canvas.width  = window.innerWidth  * dpr;
+      canvas.width = window.innerWidth * dpr;
       canvas.height = window.innerHeight * dpr;
-      canvas.style.width  = window.innerWidth  + 'px';
+      canvas.style.width = window.innerWidth + 'px';
       canvas.style.height = window.innerHeight + 'px';
       ctx.scale(dpr, dpr);
     }
@@ -61,7 +61,7 @@ export default function LandingPage() {
       const img = frames[index];
       if (!img?.complete) return;
       const cw = window.innerWidth, ch = window.innerHeight;
-      const iw = img.naturalWidth,  ih = img.naturalHeight;
+      const iw = img.naturalWidth, ih = img.naturalHeight;
       const scale = Math.max(cw / iw, ch / ih) * IMAGE_SCALE;
       const dw = iw * scale, dh = ih * scale;
       const dx = (cw - dw) / 2, dy = (ch - dh) / 2;
@@ -130,9 +130,9 @@ export default function LandingPage() {
 
     // ── GSAP + Lenis ───────────────────────────────────────────────────────
     async function initGSAP() {
-      const { gsap }          = await import('gsap');
+      const { gsap } = await import('gsap');
       const { ScrollTrigger } = await import('gsap/ScrollTrigger');
-      const Lenis             = (await import('lenis')).default;
+      const Lenis = (await import('lenis')).default;
 
       gsap.registerPlugin(ScrollTrigger);
 
@@ -181,9 +181,9 @@ export default function LandingPage() {
         onUpdate: (self) => {
           const p = self.progress;
           let op = 0;
-          if (p >= OV_ENTER - FADE && p <= OV_ENTER)         op = (p - (OV_ENTER - FADE)) / FADE;
-          else if (p > OV_ENTER && p < OV_LEAVE)             op = 0.92;
-          else if (p >= OV_LEAVE && p <= OV_LEAVE + FADE)    op = 0.92 * (1 - (p - OV_LEAVE) / FADE);
+          if (p >= OV_ENTER - FADE && p <= OV_ENTER) op = (p - (OV_ENTER - FADE)) / FADE;
+          else if (p > OV_ENTER && p < OV_LEAVE) op = 0.92;
+          else if (p >= OV_LEAVE && p <= OV_LEAVE + FADE) op = 0.92 * (1 - (p - OV_LEAVE) / FADE);
           overlay.style.opacity = String(op);
         },
       });
@@ -200,8 +200,8 @@ export default function LandingPage() {
           const p = self.progress;
           const edge = 0.02;
           let op = 0;
-          if (p >= 0.46 && p <= 0.48)      op = (p - 0.46) / edge;
-          else if (p > 0.48 && p < 0.64)   op = 1;
+          if (p >= 0.46 && p <= 0.48) op = (p - 0.46) / edge;
+          else if (p > 0.48 && p < 0.64) op = 1;
           else if (p >= 0.64 && p <= 0.66) op = 1 - (p - 0.64) / edge;
           marqueeEl.style.opacity = String(op);
         },
@@ -211,11 +211,11 @@ export default function LandingPage() {
       // Each .scroll-section is position:absolute inside the fixed overlay.
       // We only animate opacity via GSAP — no top/transform calculations needed.
       document.querySelectorAll('.scroll-section').forEach((section) => {
-        const el      = section as HTMLElement;
-        const type    = el.dataset.animation ?? 'fade-up';
+        const el = section as HTMLElement;
+        const type = el.dataset.animation ?? 'fade-up';
         const persist = el.dataset.persist === 'true';
-        const enter   = parseFloat(el.dataset.enter ?? '0') / 100;
-        const leave   = parseFloat(el.dataset.leave ?? '100') / 100;
+        const enter = parseFloat(el.dataset.enter ?? '0') / 100;
+        const leave = parseFloat(el.dataset.leave ?? '100') / 100;
 
         const children = Array.from(el.querySelectorAll(
           '.section-label, .section-heading, .section-body, .section-note, .cta-heading, .cta-body, .cta-button, .stat'
@@ -269,11 +269,11 @@ export default function LandingPage() {
 
       // ── Counter animations ────────────────────────────────────────────────
       document.querySelectorAll('.stat-number').forEach((el) => {
-        const num      = el as HTMLElement;
-        const target   = parseFloat(num.dataset.value ?? '0');
+        const num = el as HTMLElement;
+        const target = parseFloat(num.dataset.value ?? '0');
         const decimals = parseInt(num.dataset.decimals ?? '0');
-        const section  = num.closest('.scroll-section') as HTMLElement;
-        const enter    = parseFloat(section?.dataset.enter ?? '0') / 100;
+        const section = num.closest('.scroll-section') as HTMLElement;
+        const enter = parseFloat(section?.dataset.enter ?? '0') / 100;
 
         ScrollTrigger.create({
           trigger: sc, start: 'top top', end: 'bottom bottom',
@@ -322,7 +322,7 @@ export default function LandingPage() {
             <Logo className="w-4 h-4 text-[#ff3b3b]" />
           </div>
           <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '15px', letterSpacing: '0.15em' }}>
-            GRD<span style={{ color: '#ff3b3b' }}>[M]</span>
+            GUARD<span style={{ color: '#ff3b3b' }}>[M]</span>
           </span>
         </div>
         <nav style={{ display: 'flex', gap: '32px', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
@@ -353,7 +353,7 @@ export default function LandingPage() {
         <div className="hero-scroll-hint" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', letterSpacing: '0.3em', color: 'rgba(107,122,141,0.6)', textTransform: 'uppercase' }}>
           <span>SCROLL TO ENGAGE</span>
           <svg width="10" height="16" viewBox="0 0 10 16" fill="none">
-            <path d="M5 0v12M1 8l4 5 4-5" stroke="currentColor" strokeWidth="1.2"/>
+            <path d="M5 0v12M1 8l4 5 4-5" stroke="currentColor" strokeWidth="1.2" />
           </svg>
         </div>
       </section>
@@ -392,7 +392,7 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: '55vw', paddingRight: '8vw' }}>
           <div style={{ width: '100%' }}>
             <div className="section-label" style={labelStyle}>002 / THREAT SCORING</div>
-            <h2 className="section-heading" style={headingStyle}>Trust Score —<br/>not rumor</h2>
+            <h2 className="section-heading" style={headingStyle}>Trust Score —<br />not rumor</h2>
             <p className="section-body" style={bodyStyle}>Every report is confirmed or disputed by the community. The trust score self-adjusts over time based on evidence.</p>
           </div>
         </section>
@@ -402,7 +402,7 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', paddingLeft: '8vw', paddingRight: '55vw' }}>
           <div>
             <div className="section-label" style={labelStyle}>003 / AI ANALYSIS</div>
-            <h2 className="section-heading" style={headingStyle}>AI reads the map,<br/>people act</h2>
+            <h2 className="section-heading" style={headingStyle}>AI reads the map,<br />people act</h2>
             <p className="section-body" style={bodyStyle}>Claude AI analyzes report density, generates a Safety Score, and delivers specific recommendations per area — updated by the hour.</p>
           </div>
         </section>
@@ -442,7 +442,7 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', paddingLeft: '8vw', paddingRight: '55vw' }}>
           <div>
             <div className="section-label" style={labelStyle}>005 / OPEN SOURCE</div>
-            <h2 className="section-heading" style={headingStyle}>Transparent by Design,<br/>End to End</h2>
+            <h2 className="section-heading" style={headingStyle}>Transparent by Design,<br />End to End</h2>
             <p className="section-body" style={bodyStyle}>Trust Score, heatmap, AI analysis — all open source and independently verifiable.</p>
           </div>
         </section>
@@ -453,7 +453,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', maxWidth: '600px', padding: '0 24px' }}>
             <div className="section-label" style={{ ...labelStyle, textAlign: 'center', marginBottom: '24px' }}>GUARDM / JOIN</div>
             <h2 className="cta-heading" style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 'clamp(2rem, 5vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: '20px' }}>
-              Join the network.<br/>Protect your community.
+              Join the network.<br />Protect your community.
             </h2>
             <p className="cta-body" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#6b7a8d', marginBottom: '40px', lineHeight: 1.6 }}>
               Free to use. No account required to view the threat map.
