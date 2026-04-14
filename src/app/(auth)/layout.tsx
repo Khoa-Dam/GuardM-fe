@@ -4,10 +4,10 @@ import { Logo } from "@/components/icons";
 
 export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
-    <div className="min-h-screen flex bg-[#060a14] font-mono">
+    <div style={{ height: '100dvh', display: 'flex' }} className="bg-[#060a14] font-mono">
 
       {/* ── Left — tactical brand panel ── */}
-      <div className="hidden lg:flex lg:w-[52%] flex-col items-center justify-center relative overflow-hidden border-r border-white/[0.04]">
+      <div style={{ height: '100%' }} className="hidden lg:flex lg:w-[52%] flex-col items-center justify-center relative overflow-hidden border-r border-white/[0.04]">
 
         {/* Deep background atmosphere */}
         <div className="absolute inset-0"
@@ -120,7 +120,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
       </div>
 
       {/* ── Right — form slot ── */}
-      <div className="flex w-full lg:w-[48%] items-center justify-center p-8">
+      <div style={{ height: '100%' }} className="flex w-full lg:w-[48%] items-center justify-center p-8 overflow-y-auto">
         <div className="w-full max-w-[380px]">
           {children}
         </div>
