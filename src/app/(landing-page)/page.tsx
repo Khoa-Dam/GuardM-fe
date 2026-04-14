@@ -326,12 +326,12 @@ export default function LandingPage() {
           </span>
         </div>
         <nav style={{ display: 'flex', gap: '32px', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase' }}>
-          <Link href="/map" style={{ color: '#6b7a8d', textDecoration: 'none' }}>Bản đồ</Link>
-          <Link href="/map" style={{ color: '#6b7a8d', textDecoration: 'none' }}>Báo cáo</Link>
+          <Link href="/map" style={{ color: '#6b7a8d', textDecoration: 'none' }}>Map</Link>
+          <Link href="/map" style={{ color: '#6b7a8d', textDecoration: 'none' }}>Reports</Link>
           <a href="https://github.com/Khoa-Dam/GuardM-api" target="_blank" rel="noreferrer" style={{ color: '#6b7a8d', textDecoration: 'none' }}>API</a>
         </nav>
         <Link href={APP_URL + '/dashboard'} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '8px 16px', border: '1px solid rgba(255,59,59,0.4)', borderRadius: '4px', background: 'rgba(255,59,59,0.1)', color: '#ff3b3b', textDecoration: 'none' }}>
-          Mở App →
+          Open App →
         </Link>
       </header>
 
@@ -342,12 +342,12 @@ export default function LandingPage() {
             THREAT MONITOR / ACTIVE
           </div>
           <h1 style={{ fontSize: 'clamp(3rem, 8vw, 8rem)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.02em', marginBottom: '32px' }}>
-            {['Mọi', 'mối', 'nguy', 'đều', 'để', 'lại', 'dấu', 'vết'].map((w, i) => (
+            {['Every', 'threat', 'leaves', 'a', 'trace'].map((w, i) => (
               <span key={i} className="hero-word" style={{ display: 'inline-block', marginRight: '0.25em' }}>{w}</span>
             ))}
           </h1>
           <p className="hero-tagline" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#6b7a8d', letterSpacing: '0.05em', lineHeight: 1.6 }}>
-            Báo cáo tội phạm. Xác minh cộng đồng. Cảnh báo tức thì.
+            Report incidents. Verify together. Alert in real time.
           </p>
         </div>
         <div className="hero-scroll-hint" style={{ position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', fontFamily: "'JetBrains Mono', monospace", fontSize: '9px', letterSpacing: '0.3em', color: 'rgba(107,122,141,0.6)', textTransform: 'uppercase' }}>
@@ -369,7 +369,7 @@ export default function LandingPage() {
       {/* ── Marquee ── */}
       <div ref={marqueeRef} style={{ position: 'fixed', top: '50%', left: 0, right: 0, zIndex: 3, transform: 'translateY(-50%)', opacity: 0, pointerEvents: 'none', overflow: 'hidden', whiteSpace: 'nowrap' }}>
         <div className="marquee-text" style={{ display: 'inline-block', fontSize: '11vw', fontWeight: 800, letterSpacing: '-0.02em', color: '#ff3b3b', opacity: 0.07, textTransform: 'uppercase' }}>
-          LIVE THREAT DETECTION &nbsp;—&nbsp; COMMUNITY VERIFIED &nbsp;—&nbsp; GUARDM ACTIVE &nbsp;—&nbsp; KHU VỰC AN TOÀN &nbsp;—&nbsp; CẢNH BÁO PHÁT HIỆN &nbsp;—&nbsp; LIVE THREAT DETECTION &nbsp;—&nbsp; COMMUNITY VERIFIED &nbsp;—&nbsp;
+          LIVE THREAT DETECTION &nbsp;—&nbsp; COMMUNITY VERIFIED &nbsp;—&nbsp; GUARDM ACTIVE &nbsp;—&nbsp; SAFE ZONE NETWORK &nbsp;—&nbsp; ALERT DETECTED &nbsp;—&nbsp; LIVE THREAT DETECTION &nbsp;—&nbsp; COMMUNITY VERIFIED &nbsp;—&nbsp;
         </div>
       </div>
 
@@ -381,8 +381,8 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', paddingLeft: '8vw', paddingRight: '55vw' }}>
           <div>
             <div className="section-label" style={labelStyle}>001 / LIVE TRACKING</div>
-            <h2 className="section-heading" style={headingStyle}>Theo dõi theo thời gian thực</h2>
-            <p className="section-body" style={bodyStyle}>WebSocket liên tục cập nhật vị trí các báo cáo mới. Bản đồ phản ánh thực tế trong vòng dưới 200ms.</p>
+            <h2 className="section-heading" style={headingStyle}>Live Real-Time Tracking</h2>
+            <p className="section-body" style={bodyStyle}>WebSocket streams continuously push new report positions. The map reflects ground truth in under 200ms.</p>
             <div className="section-note" style={noteStyle}>LATENCY &lt; 200MS</div>
           </div>
         </section>
@@ -392,8 +392,8 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: '55vw', paddingRight: '8vw' }}>
           <div style={{ width: '100%' }}>
             <div className="section-label" style={labelStyle}>002 / THREAT SCORING</div>
-            <h2 className="section-heading" style={headingStyle}>Trust Score —<br/>không phải tin đồn</h2>
-            <p className="section-body" style={bodyStyle}>Mỗi báo cáo được cộng đồng confirm hoặc dispute. Điểm tin cậy tự điều chỉnh theo thời gian và bằng chứng.</p>
+            <h2 className="section-heading" style={headingStyle}>Trust Score —<br/>not rumor</h2>
+            <p className="section-body" style={bodyStyle}>Every report is confirmed or disputed by the community. The trust score self-adjusts over time based on evidence.</p>
           </div>
         </section>
 
@@ -402,8 +402,8 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', paddingLeft: '8vw', paddingRight: '55vw' }}>
           <div>
             <div className="section-label" style={labelStyle}>003 / AI ANALYSIS</div>
-            <h2 className="section-heading" style={headingStyle}>AI đọc bản đồ, con người hành động</h2>
-            <p className="section-body" style={bodyStyle}>Claude AI phân tích mật độ báo cáo, đưa Safety Score và khuyến nghị cụ thể cho từng khu vực theo giờ.</p>
+            <h2 className="section-heading" style={headingStyle}>AI reads the map,<br/>people act</h2>
+            <p className="section-body" style={bodyStyle}>Claude AI analyzes report density, generates a Safety Score, and delivers specific recommendations per area — updated by the hour.</p>
           </div>
         </section>
 
@@ -412,10 +412,10 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '48px', padding: '0 8vw', width: '100%' }}>
             {[
-              { value: '1247', suffix: '',   label: 'Báo cáo đã xử lý' },
-              { value: '5',    suffix: 'km', label: 'Bán kính cảnh báo' },
-              { value: '98',   suffix: '%',  label: 'Tỉ lệ xác minh đúng' },
-              { value: '200',  suffix: 'ms', label: 'Phản hồi WebSocket' },
+              { value: '1247', suffix: '',   label: 'Reports Processed' },
+              { value: '5',    suffix: 'km', label: 'Alert Radius' },
+              { value: '98',   suffix: '%',  label: 'Verification Accuracy' },
+              { value: '200',  suffix: 'ms', label: 'WebSocket Latency' },
             ].map((s, i) => (
               <div key={i} className="stat" style={{ textAlign: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
@@ -434,8 +434,8 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: '55vw', paddingRight: '8vw' }}>
           <div style={{ width: '100%' }}>
             <div className="section-label" style={labelStyle}>004 / COVERAGE</div>
-            <h2 className="section-heading" style={headingStyle}>Mạng lưới cảnh báo toàn thành phố</h2>
-            <p className="section-body" style={bodyStyle}>Từ quận 1 đến ngoại ô — bất kỳ ai cũng có thể báo cáo và nhận cảnh báo trong vòng bán kính 5km.</p>
+            <h2 className="section-heading" style={headingStyle}>City-Wide Alert Network</h2>
+            <p className="section-body" style={bodyStyle}>From the city center to the suburbs — anyone can report and receive alerts within a 5km radius.</p>
           </div>
         </section>
 
@@ -444,8 +444,8 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', paddingLeft: '8vw', paddingRight: '55vw' }}>
           <div>
             <div className="section-label" style={labelStyle}>005 / OPEN SOURCE</div>
-            <h2 className="section-heading" style={headingStyle}>Minh bạch từ thuật toán đến dữ liệu</h2>
-            <p className="section-body" style={bodyStyle}>Trust Score, heatmap, AI analysis — tất cả đều open source và có thể kiểm chứng độc lập.</p>
+            <h2 className="section-heading" style={headingStyle}>Transparent by Design,<br/>End to End</h2>
+            <p className="section-body" style={bodyStyle}>Trust Score, heatmap, AI analysis — all open source and independently verifiable.</p>
           </div>
         </section>
 
@@ -455,15 +455,15 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center', maxWidth: '600px', padding: '0 24px' }}>
             <div className="section-label" style={{ ...labelStyle, textAlign: 'center', marginBottom: '24px' }}>GUARDM / JOIN</div>
             <h2 className="cta-heading" style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '20px' }}>
-              Tham gia mạng lưới<br/>bảo vệ cộng đồng
+              Join the network.<br/>Protect your community.
             </h2>
             <p className="cta-body" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#6b7a8d', marginBottom: '40px', lineHeight: 1.6 }}>
-              Miễn phí. Không cần tài khoản để xem bản đồ nguy hiểm.
+              Free to use. No account required to view the threat map.
             </p>
             <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', pointerEvents: 'all' }}>
               <Link href="/map" className="cta-button"
                 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '14px 28px', border: '1px solid rgba(255,59,59,0.5)', borderRadius: '4px', background: 'rgba(255,59,59,0.12)', color: '#ff3b3b', textDecoration: 'none', display: 'inline-block' }}>
-                MỞ BẢN ĐỒ →
+                OPEN MAP →
               </Link>
               <a href="https://github.com/Khoa-Dam/GuardM-api" target="_blank" rel="noreferrer" className="cta-button"
                 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '14px 28px', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '4px', background: 'transparent', color: '#6b7a8d', textDecoration: 'none', display: 'inline-block' }}>

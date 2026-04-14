@@ -83,11 +83,11 @@ export default function AdminUsersPage() {
     const handleCreate = async () => {
         try {
             await createUserMutation.mutateAsync(formData);
-            toast.success('Tạo người dùng thành công');
+            toast.success('User created successfully');
             setCreateDialogOpen(false);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể tạo người dùng');
+            toast.error((err as Error)?.message || 'Unable to create user');
         }
     };
 
@@ -102,12 +102,12 @@ export default function AdminUsersPage() {
 
         try {
             await updateUserMutation.mutateAsync({ id: selectedUser.id, payload: updateData });
-            toast.success('Cập nhật người dùng thành công');
+            toast.success('User updated successfully');
             setEditDialogOpen(false);
             setSelectedUser(null);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể cập nhật người dùng');
+            toast.error((err as Error)?.message || 'Unable to update user');
         }
     };
 
@@ -116,11 +116,11 @@ export default function AdminUsersPage() {
 
         try {
             await deleteUserMutation.mutateAsync(selectedUser.id);
-            toast.success('Xóa người dùng thành công');
+            toast.success('User deleted successfully');
             setDeleteDialogOpen(false);
             setSelectedUser(null);
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể xóa người dùng');
+            toast.error((err as Error)?.message || 'Unable to delete user');
         }
     };
 
@@ -145,7 +145,7 @@ export default function AdminUsersPage() {
             <div className="p-6">
                 <Card>
                     <CardContent className="pt-6">
-                        <p className="text-destructive">Có lỗi xảy ra: {error.message}</p>
+                        <p className="text-destructive">An error occurred: {error.message}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -160,20 +160,20 @@ export default function AdminUsersPage() {
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold">Quản lý người dùng</h1>
-                        <p className="text-muted-foreground">Quản lý tài khoản người dùng trong hệ thống</p>
+                        <h1 className="text-3xl font-bold">User Management</h1>
+                        <p className="text-muted-foreground">Manage user accounts in the system</p>
                     </div>
                 </div>
                 <Button onClick={() => setCreateDialogOpen(true)}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Thêm người dùng
+                    Add User
                 </Button>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Danh sách người dùng</CardTitle>
-                    <CardDescription>Tổng số: {users.length} người dùng</CardDescription>
+                    <CardTitle>User List</CardTitle>
+                    <CardDescription>Total: {users.length} users</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -184,10 +184,10 @@ export default function AdminUsersPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Tên</TableHead>
+                                    <TableHead>Name</TableHead>
                                     <TableHead>Email</TableHead>
-                                    <TableHead>Vai trò</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -230,19 +230,19 @@ export default function AdminUsersPage() {
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Thêm người dùng mới</DialogTitle>
+                        <DialogTitle>Add New User</DialogTitle>
                         <DialogDescription>
-                            Tạo tài khoản người dùng mới trong hệ thống
+                            Create a new user account in the system
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="create-name">Tên</Label>
+                            <Label htmlFor="create-name">Name</Label>
                             <Input
                                 id="create-name"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                placeholder="Nhập tên người dùng"
+                                placeholder="Enter user name"
                             />
                         </div>
                         <div className="space-y-2">
@@ -256,17 +256,17 @@ export default function AdminUsersPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="create-password">Mật khẩu</Label>
+                            <Label htmlFor="create-password">Password</Label>
                             <Input
                                 id="create-password"
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                placeholder="Tối thiểu 6 ký tự, có ít nhất 1 số"
+                                placeholder="Minimum 6 characters, at least 1 number"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="create-role">Vai trò</Label>
+                            <Label htmlFor="create-role">Role</Label>
                             <Select
                                 value={formData.role}
                                 onValueChange={(value) => setFormData({ ...formData, role: value as Role })}
@@ -284,13 +284,13 @@ export default function AdminUsersPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleCreate} disabled={createUserMutation.isPending}>
                             {createUserMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Tạo
+                            Create
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -300,14 +300,14 @@ export default function AdminUsersPage() {
             <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Chỉnh sửa người dùng</DialogTitle>
+                        <DialogTitle>Edit User</DialogTitle>
                         <DialogDescription>
-                            Cập nhật thông tin người dùng
+                            Update user information
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="edit-name">Tên</Label>
+                            <Label htmlFor="edit-name">Name</Label>
                             <Input
                                 id="edit-name"
                                 value={formData.name}
@@ -324,7 +324,7 @@ export default function AdminUsersPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="edit-role">Vai trò</Label>
+                            <Label htmlFor="edit-role">Role</Label>
                             <Select
                                 value={formData.role}
                                 onValueChange={(value) => setFormData({ ...formData, role: value as Role })}
@@ -342,13 +342,13 @@ export default function AdminUsersPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleEdit} disabled={updateUserMutation.isPending}>
                             {updateUserMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Cập nhật
+                            Update
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -358,14 +358,14 @@ export default function AdminUsersPage() {
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                        <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa người dùng <strong>{selectedUser?.name}</strong>?
-                            Hành động này không thể hoàn tác.
+                            Are you sure you want to delete user <strong>{selectedUser?.name}</strong>?
+                            This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             className="bg-destructive hover:bg-destructive/90"
@@ -374,7 +374,7 @@ export default function AdminUsersPage() {
                             {deleteUserMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Xóa
+                            Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

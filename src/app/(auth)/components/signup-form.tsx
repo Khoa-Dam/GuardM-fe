@@ -72,7 +72,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                 password,
             })
 
-            // Tự động đăng nhập sau khi đăng ký thành công
+            // Automatically sign in after successful registration
             const loginResult = await signIn("credentials", {
                 email: email.trim().toLowerCase(),
                 password: password,
@@ -80,14 +80,14 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
             })
 
             if (loginResult?.error) {
-                // Nếu đăng nhập thất bại, redirect đến login page
-                toast.error('Đăng ký thành công nhưng đăng nhập thất bại. Vui lòng đăng nhập thủ công.')
+                // If sign in fails, redirect to login page
+                toast.error('Registration successful but sign in failed. Please sign in manually.')
                 router.push('/login')
                 router.refresh()
             } else if (loginResult?.ok) {
-                // Đăng nhập thành công, redirect đến trang ban đầu hoặc trang chủ
-                toast.success('Đăng ký thành công!', {
-                    description: 'Đang chuyển hướng...',
+                // Sign in successful, redirect to original page or home
+                toast.success('Registration successful!', {
+                    description: 'Redirecting...',
                     duration: 2000,
                 })
 
@@ -100,15 +100,15 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
             }
         } catch (err: unknown) {
             console.error('Signup error:', err);
-            setError((err as Error)?.message || 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+            setError((err as Error)?.message || 'An error occurred during registration. Please try again later.');
             // The original line `console.error('[Signup] Error response:', err?.response?.data)` was removed by the instruction.
             // The original line `console.error('[Signup] Error message:', err?.message)` was replaced by the instruction.
             console.error('[Signup] Error message:', (err as Error)?.message)
 
-            // Error đã được format trong authService
+            // Error has already been formatted in authService
             const errorMessage = (err as Error)?.message ||
                 (err as { response?: { data?: string } })?.response?.data ||
-                'Đăng ký thất bại. Vui lòng thử lại.'
+                'Registration failed. Please try again.'
 
             setError(typeof errorMessage === 'string' ? errorMessage : JSON.stringify(errorMessage))
         } finally {
@@ -118,10 +118,10 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
-            {/* Logo với link về trang chủ */}
+            {/* Logo with link to home */}
             <Link
                 href="/dashboard"
-                aria-label="Về trang chủ"
+                aria-label="Back to home"
                 className="flex sm:hidden  gap-2 rounded-md hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
                 <div className="bg-red-500 p-1.5 rounded-lg shadow-lg shadow-red-500/30">
@@ -134,8 +134,8 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
             <Card className="border-dashed border-gray-300">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-xl">Đăng ký</CardTitle>
-                    <CardDescription>Tạo tài khoản mới để sử dụng hệ thống</CardDescription>
+                    <CardTitle className="text-xl">Sign Up</CardTitle>
+                    <CardDescription>Create a new account to use the system</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit}>
@@ -147,11 +147,11 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                                     </div>
                                 )}
                                 <div className="grid gap-2">
-                                    <Label htmlFor="name">Họ và tên</Label>
+                                    <Label htmlFor="name">Full Name</Label>
                                     <Input
                                         id="name"
                                         type="text"
-                                        placeholder="Nguyễn Văn A"
+                                        placeholder="John Doe"
                                         required
                                         value={name}
                                         onChange={(e) => {
@@ -189,11 +189,11 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                                     )}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">Mật khẩu</Label>
+                                    <Label htmlFor="password">Password</Label>
                                     <Input
                                         id="password"
                                         type="password"
-                                        placeholder="mật khẩu"
+                                        placeholder="password"
                                         required
                                         value={password}
                                         onChange={(e) => {
@@ -210,11 +210,11 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                                     )}
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
+                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
                                     <Input
                                         id="confirmPassword"
                                         type="password"
-                                        placeholder="Nhập lại mật khẩu"
+                                        placeholder="Re-enter password"
                                         required
                                         value={confirmPassword}
                                         onChange={(e) => {
@@ -234,17 +234,17 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Đang đăng ký...
+                                            Signing up...
                                         </>
                                     ) : (
-                                        "Đăng ký"
+                                        "Sign Up"
                                     )}
                                 </Button>
                             </div>
                             <div className="text-center text-sm">
-                                Đã có tài khoản?{" "}
+                                Already have an account?{" "}
                                 <a href="/login" className="underline underline-offset-4">
-                                    Đăng nhập
+                                    Sign In
                                 </a>
                             </div>
                         </div>

@@ -32,11 +32,11 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="text-base md:text-lg">Thống kê báo cáo</CardTitle>
+                <CardTitle className="text-base md:text-lg">Report Statistics</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-6 lg:grid-cols-2">
                 <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Theo loại tội phạm</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">By crime type</p>
                     <div className="h-64">
                         {statsLoading ? (
                             <div className="flex h-full items-center justify-center">
@@ -61,14 +61,14 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
                                         ))}
                                     </Pie>
                                     <Tooltip
-                                        formatter={(value) => `${Number(value).toLocaleString('vi-VN')} báo cáo`}
+                                        formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
                                         wrapperClassName="text-sm"
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
                         ) : (
                             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                                Chưa có dữ liệu
+                                No data available
                             </div>
                         )}
                     </div>
@@ -87,7 +87,7 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
                     ) : null}
                 </div>
                 <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">Top quận/huyện</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Top districts</p>
                     <div className="h-64">
                         {statsLoading ? (
                             <div className="flex h-full items-center justify-center">
@@ -100,7 +100,7 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
                                     <XAxis dataKey="district" tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
                                     <YAxis tickLine={false} axisLine={false} />
                                     <Tooltip
-                                        formatter={(value) => `${Number(value).toLocaleString('vi-VN')} báo cáo`}
+                                        formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
                                         wrapperClassName="text-sm"
                                     />
                                     <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
@@ -108,7 +108,7 @@ export const StatisticsSection: React.FC<StatisticsSectionProps> = ({
                             </ResponsiveContainer>
                         ) : (
                             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                                Chưa có dữ liệu
+                                No data available
                             </div>
                         )}
                     </div>

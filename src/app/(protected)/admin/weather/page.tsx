@@ -59,8 +59,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 const weatherTypeLabels: Record<WeatherNewsType, string> = {
-    [WeatherNewsType.DISASTER_WARNING]: 'Cảnh báo thiên tai',
-    [WeatherNewsType.WEATHER_FORECAST]: 'Dự báo thời tiết',
+    [WeatherNewsType.DISASTER_WARNING]: 'Disaster Warning',
+    [WeatherNewsType.WEATHER_FORECAST]: 'Weather Forecast',
 };
 
 const weatherTypeColors: Record<WeatherNewsType, string> = {
@@ -108,11 +108,11 @@ export default function AdminWeatherPage() {
     const handleCreate = async () => {
         try {
             await createMutation.mutateAsync(formData);
-            toast.success('Tạo tin tức thời tiết thành công');
+            toast.success('Weather news created successfully');
             setCreateDialogOpen(false);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể tạo tin tức');
+            toast.error((err as Error)?.message || 'Unable to create news');
         }
     };
 
@@ -132,12 +132,12 @@ export default function AdminWeatherPage() {
 
         try {
             await updateMutation.mutateAsync({ id: selectedNews.id, payload: updateData });
-            toast.success('Cập nhật tin tức thành công');
+            toast.success('News updated successfully');
             setEditDialogOpen(false);
             setSelectedNews(null);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể cập nhật tin tức');
+            toast.error((err as Error)?.message || 'Unable to update news');
         }
     };
 
@@ -146,11 +146,11 @@ export default function AdminWeatherPage() {
 
         try {
             await deleteMutation.mutateAsync(selectedNews.id);
-            toast.success('Xóa tin tức thành công');
+            toast.success('News deleted successfully');
             setDeleteDialogOpen(false);
             setSelectedNews(null);
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể xóa tin tức');
+            toast.error((err as Error)?.message || 'Unable to delete news');
         }
     };
 
@@ -179,7 +179,7 @@ export default function AdminWeatherPage() {
             <div className="p-6">
                 <Card>
                     <CardContent className="pt-6">
-                        <p className="text-destructive">Có lỗi xảy ra: {error.message}</p>
+                        <p className="text-destructive">An error occurred: {error.message}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -194,9 +194,9 @@ export default function AdminWeatherPage() {
                         <ArrowLeft className="w-4 h-4" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold">Quản lý tin thời tiết</h1>
+                        <h1 className="text-3xl font-bold">Weather News Management</h1>
                         <p className="text-muted-foreground">
-                            Quản lý tin tức thời tiết và cảnh báo thiên tai
+                            Manage weather news and disaster warnings
                         </p>
                     </div>
                 </div>
@@ -205,14 +205,14 @@ export default function AdminWeatherPage() {
                     setCreateDialogOpen(true);
                 }}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Thêm tin mới
+                    Add New Article
                 </Button>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Danh sách tin tức</CardTitle>
-                    <CardDescription>Tổng số: {newsList.length} tin</CardDescription>
+                    <CardTitle>News List</CardTitle>
+                    <CardDescription>Total: {newsList.length} articles</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {isLoading ? (
@@ -223,11 +223,11 @@ export default function AdminWeatherPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Tiêu đề</TableHead>
-                                    <TableHead>Loại tin</TableHead>
-                                    <TableHead>Địa điểm</TableHead>
-                                    <TableHead>Ngày đăng</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Location</TableHead>
+                                    <TableHead>Published Date</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -257,7 +257,7 @@ export default function AdminWeatherPage() {
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() => window.open(news.sourceUrl, '_blank')}
-                                                            title="Xem nguồn"
+                                                            title="View Source"
                                                         >
                                                             <ExternalLink className="w-4 h-4" />
                                                         </Button>
@@ -283,7 +283,7 @@ export default function AdminWeatherPage() {
                                 ) : (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                            Không tìm thấy dữ liệu
+                                            No data found
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -297,25 +297,25 @@ export default function AdminWeatherPage() {
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Thêm tin thời tiết mới</DialogTitle>
+                        <DialogTitle>Add New Weather Article</DialogTitle>
                         <DialogDescription>
-                            Nhập thông tin tin tức thời tiết hoặc cảnh báo thiên tai
+                            Enter weather news or disaster warning information
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="create-title">Tiêu đề <span className="text-destructive">*</span></Label>
+                            <Label htmlFor="create-title">Title <span className="text-destructive">*</span></Label>
                             <Input
                                 id="create-title"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                placeholder="Nhập tiêu đề tin tức"
+                                placeholder="Enter news title"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="create-type">Loại tin</Label>
+                                <Label htmlFor="create-type">Type</Label>
                                 <Select
                                     value={formData.type}
                                     onValueChange={(value) => setFormData({ ...formData, type: value as WeatherNewsType })}
@@ -324,46 +324,46 @@ export default function AdminWeatherPage() {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Dự báo thời tiết</SelectItem>
-                                        <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Cảnh báo thiên tai</SelectItem>
+                                        <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Weather Forecast</SelectItem>
+                                        <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Disaster Warning</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="create-location">Địa điểm</Label>
+                                <Label htmlFor="create-location">Location</Label>
                                 <Input
                                     id="create-location"
                                     value={formData.location}
                                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                    placeholder="Khu vực ảnh hưởng"
+                                    placeholder="Affected area"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-summary">Tóm tắt</Label>
+                            <Label htmlFor="create-summary">Summary</Label>
                             <Textarea
                                 id="create-summary"
                                 value={formData.summary}
                                 onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
-                                placeholder="Tóm tắt nội dung tin tức"
+                                placeholder="Summarize the news content"
                                 rows={2}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-content">Nội dung chi tiết</Label>
+                            <Label htmlFor="create-content">Detailed Content</Label>
                             <Textarea
                                 id="create-content"
                                 value={formData.content}
                                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                placeholder="Nội dung chi tiết..."
+                                placeholder="Detailed content..."
                                 rows={5}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-imageUrl">URL Hình ảnh</Label>
+                            <Label htmlFor="create-imageUrl">Image URL</Label>
                             <Input
                                 id="create-imageUrl"
                                 value={formData.imageUrl}
@@ -373,7 +373,7 @@ export default function AdminWeatherPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-sourceUrl">URL Nguồn</Label>
+                            <Label htmlFor="create-sourceUrl">Source URL</Label>
                             <Input
                                 id="create-sourceUrl"
                                 value={formData.sourceUrl}
@@ -384,13 +384,13 @@ export default function AdminWeatherPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleCreate} disabled={createMutation.isPending}>
                             {createMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Tạo
+                            Create
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -400,12 +400,12 @@ export default function AdminWeatherPage() {
             <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Chỉnh sửa tin tức</DialogTitle>
-                        <DialogDescription>Cập nhật thông tin tin tức</DialogDescription>
+                        <DialogTitle>Edit News</DialogTitle>
+                        <DialogDescription>Update news information</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="edit-title">Tiêu đề <span className="text-destructive">*</span></Label>
+                            <Label htmlFor="edit-title">Title <span className="text-destructive">*</span></Label>
                             <Input
                                 id="edit-title"
                                 value={formData.title}
@@ -415,7 +415,7 @@ export default function AdminWeatherPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="edit-type">Loại tin</Label>
+                                <Label htmlFor="edit-type">Type</Label>
                                 <Select
                                     value={formData.type}
                                     onValueChange={(value) => setFormData({ ...formData, type: value as WeatherNewsType })}
@@ -424,13 +424,13 @@ export default function AdminWeatherPage() {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Dự báo thời tiết</SelectItem>
-                                        <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Cảnh báo thiên tai</SelectItem>
+                                        <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Weather Forecast</SelectItem>
+                                        <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Disaster Warning</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-location">Địa điểm</Label>
+                                <Label htmlFor="edit-location">Location</Label>
                                 <Input
                                     id="edit-location"
                                     value={formData.location}
@@ -440,7 +440,7 @@ export default function AdminWeatherPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-summary">Tóm tắt</Label>
+                            <Label htmlFor="edit-summary">Summary</Label>
                             <Textarea
                                 id="edit-summary"
                                 value={formData.summary}
@@ -450,7 +450,7 @@ export default function AdminWeatherPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-content">Nội dung chi tiết</Label>
+                            <Label htmlFor="edit-content">Detailed Content</Label>
                             <Textarea
                                 id="edit-content"
                                 value={formData.content}
@@ -460,7 +460,7 @@ export default function AdminWeatherPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-imageUrl">URL Hình ảnh</Label>
+                            <Label htmlFor="edit-imageUrl">Image URL</Label>
                             <Input
                                 id="edit-imageUrl"
                                 value={formData.imageUrl}
@@ -469,7 +469,7 @@ export default function AdminWeatherPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-sourceUrl">URL Nguồn</Label>
+                            <Label htmlFor="edit-sourceUrl">Source URL</Label>
                             <Input
                                 id="edit-sourceUrl"
                                 value={formData.sourceUrl}
@@ -479,13 +479,13 @@ export default function AdminWeatherPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleEdit} disabled={updateMutation.isPending}>
                             {updateMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Cập nhật
+                            Update
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -495,14 +495,14 @@ export default function AdminWeatherPage() {
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                        <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa tin tức <strong>{selectedNews?.title}</strong>?
-                            Hành động này không thể hoàn tác.
+                            Are you sure you want to delete news article <strong>{selectedNews?.title}</strong>?
+                            This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             className="bg-destructive hover:bg-destructive/90"
@@ -511,7 +511,7 @@ export default function AdminWeatherPage() {
                             {deleteMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Xóa
+                            Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

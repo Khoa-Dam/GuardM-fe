@@ -11,11 +11,11 @@ export const ReportStatusBadge: React.FC<ReportStatusBadgeProps> = ({ report }) 
     const level = verificationLevel ?? VerificationLevel.UNVERIFIED;
 
     if (status === 2) {
-        return <Badge className="bg-emerald-100 text-emerald-700">Đã đóng</Badge>;
+        return <Badge className="bg-emerald-100 text-emerald-700">Closed</Badge>;
     }
 
     if (level === VerificationLevel.CONFIRMED) {
-        return <Badge className="bg-blue-100 text-blue-700">Đã xác minh</Badge>;
+        return <Badge className="bg-blue-100 text-blue-700">Verified</Badge>;
     }
 
     if (level === VerificationLevel.VERIFIED) {

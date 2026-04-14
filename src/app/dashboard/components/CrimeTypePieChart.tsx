@@ -17,7 +17,7 @@ const CrimeTypePieChart = ({ data, colors }: CrimeTypePieChartProps) => {
     if (!data.length) {
         return (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Chưa có dữ liệu
+                No data available
             </div>
         );
     }
@@ -38,7 +38,7 @@ const CrimeTypePieChart = ({ data, colors }: CrimeTypePieChartProps) => {
                     ))}
                 </Pie>
                 <Tooltip
-                    formatter={(value) => `${Number(value).toLocaleString('vi-VN')} báo cáo`}
+                    formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
                     wrapperClassName="text-sm"
                 />
             </PieChart>

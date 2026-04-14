@@ -1,12 +1,12 @@
 export const CRIME_TYPE_LABEL: Record<string, string> = {
-    giet_nguoi: 'Giết người',
-    bat_coc:    'Bắt cóc',
-    truy_na:    'Truy nã',
-    cuop_giat:  'Cướp giật',
-    de_doa:     'Đe dọa',
-    nghi_pham:  'Nghi phạm',
-    dang_ngo:   'Đáng ngờ',
-    trom_cap:   'Trộm cắp',
+    giet_nguoi: 'Homicide',
+    bat_coc:    'Kidnapping',
+    truy_na:    'Wanted',
+    cuop_giat:  'Robbery',
+    de_doa:     'Threat',
+    nghi_pham:  'Suspect',
+    dang_ngo:   'Suspicious',
+    trom_cap:   'Theft',
 };
 
 /** Token color for filter chips and map markers */

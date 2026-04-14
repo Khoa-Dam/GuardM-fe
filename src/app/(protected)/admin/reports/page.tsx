@@ -28,10 +28,10 @@ import {
 import { VerificationCrimeReport, VerificationLevel } from '@/types/map';
 
 const verificationLevelLabels: Record<VerificationLevel, string> = {
-    [VerificationLevel.UNVERIFIED]: 'Chưa xác minh',
-    [VerificationLevel.PENDING]: 'Đang chờ',
-    [VerificationLevel.CONFIRMED]: 'Đã xác minh',
-    [VerificationLevel.VERIFIED]: 'Đã xác thực',
+    [VerificationLevel.UNVERIFIED]: 'Unverified',
+    [VerificationLevel.PENDING]: 'Pending',
+    [VerificationLevel.CONFIRMED]: 'Confirmed',
+    [VerificationLevel.VERIFIED]: 'Verified',
 };
 
 const verificationLevelColors: Record<VerificationLevel, string> = {
@@ -58,11 +58,11 @@ export default function AdminReportsPage() {
 
         try {
             await verifyReportMutation.mutateAsync(selectedReport.id);
-            toast.success('Đã xác minh báo cáo thành công');
+            toast.success('Report verified successfully');
             setVerifyDialogOpen(false);
             setSelectedReport(null);
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể xác minh báo cáo');
+            toast.error((err as Error)?.message || 'Unable to verify report');
         }
     };
 
@@ -78,7 +78,7 @@ export default function AdminReportsPage() {
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-2 text-destructive">
                             <AlertCircle className="w-5 h-5" />
-                            <p>Có lỗi xảy ra: {error.message}</p>
+                            <p>An error occurred: {error.message}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -89,16 +89,16 @@ export default function AdminReportsPage() {
     return (
         <div className="p-6 space-y-6">
             <div>
-                <h1 className="text-3xl font-bold">Xác minh báo cáo</h1>
+                <h1 className="text-3xl font-bold">Verify Reports</h1>
                 <p className="text-muted-foreground">
-                    Xác minh các báo cáo tội phạm từ người dùng
+                    Verify crime reports submitted by users
                 </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Tổng báo cáo</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total Reports</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{reports.length}</div>
@@ -106,7 +106,7 @@ export default function AdminReportsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Chờ xác minh</CardTitle>
+                        <CardTitle className="text-sm font-medium">Pending Verification</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-yellow-600">
@@ -116,7 +116,7 @@ export default function AdminReportsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">Đã xác minh</CardTitle>
+                        <CardTitle className="text-sm font-medium">Verified</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-green-600">
@@ -128,9 +128,9 @@ export default function AdminReportsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Báo cáo chờ xác minh</CardTitle>
+                    <CardTitle>Reports Pending Verification</CardTitle>
                     <CardDescription>
-                        {unverifiedReports.length} báo cáo cần xác minh
+                        {unverifiedReports.length} reports need verification
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -140,29 +140,29 @@ export default function AdminReportsPage() {
                         </div>
                     ) : unverifiedReports.length === 0 ? (
                         <div className="text-center py-8 text-muted-foreground">
-                            Không có báo cáo nào cần xác minh
+                            No reports need verification
                         </div>
                     ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Tiêu đề</TableHead>
-                                    <TableHead>Loại</TableHead>
-                                    <TableHead>Địa chỉ</TableHead>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Address</TableHead>
                                     <TableHead>Trust Score</TableHead>
-                                    <TableHead>Trạng thái</TableHead>
-                                    <TableHead className="text-right">Hành động</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {unverifiedReports.map((report) => (
                                     <TableRow key={report.id}>
                                         <TableCell className="font-medium">
-                                            {report.title || 'Không có tiêu đề'}
+                                            {report.title || 'No title'}
                                         </TableCell>
                                         <TableCell>{report.type}</TableCell>
                                         <TableCell className="max-w-xs truncate">
-                                            {report.address || 'Không có địa chỉ'}
+                                            {report.address || 'No address'}
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant={report.trustScore >= 50 ? 'default' : 'secondary'}>
@@ -186,7 +186,7 @@ export default function AdminReportsPage() {
                                                 onClick={() => openVerifyDialog(report)}
                                             >
                                                 <CheckCircle2 className="w-4 h-4 mr-1" />
-                                                Xác minh
+                                                Verify
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -201,17 +201,17 @@ export default function AdminReportsPage() {
             <AlertDialog open={verifyDialogOpen} onOpenChange={setVerifyDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận xác minh</AlertDialogTitle>
+                        <AlertDialogTitle>Confirm Verification</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xác minh báo cáo{' '}
+                            Are you sure you want to verify report{' '}
                             <strong>{selectedReport?.title}</strong>?
                             <br />
                             <br />
-                            Báo cáo sẽ được đánh dấu là <strong>Đã xác thực</strong> với Trust Score = 100.
+                            The report will be marked as <strong>Verified</strong> with Trust Score = 100.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleVerify}
                             disabled={verifyReportMutation.isPending}
@@ -219,7 +219,7 @@ export default function AdminReportsPage() {
                             {verifyReportMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Xác minh
+                            Verify
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

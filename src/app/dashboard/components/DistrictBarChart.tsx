@@ -15,7 +15,7 @@ const DistrictBarChart = ({ data }: DistrictBarChartProps) => {
     if (!data.length) {
         return (
             <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Chưa có dữ liệu
+                No data available
             </div>
         );
     }
@@ -31,7 +31,7 @@ const DistrictBarChart = ({ data }: DistrictBarChartProps) => {
                 />
                 <YAxis tickLine={false} axisLine={false} />
                 <Tooltip
-                    formatter={(value) => `${Number(value).toLocaleString('vi-VN')} báo cáo`}
+                    formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
                     wrapperClassName="text-sm"
                 />
                 <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />

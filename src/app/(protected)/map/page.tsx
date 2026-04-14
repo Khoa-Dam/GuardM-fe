@@ -56,7 +56,7 @@ const HudOverlay = ({ lat, lng, address, isLoading }: { lat: number | null; lng:
             style={{ background: 'rgba(6,10,20,0.92)', backdropFilter: 'blur(16px)', boxShadow: '0 0 24px rgba(0,212,255,0.15)' }}>
             <div className="flex items-center gap-2 mb-1.5">
                 <Crosshair className="h-3 w-3 text-[#00d4ff] shrink-0" />
-                <span className="font-mono text-[9px] tracking-[0.25em] text-[#00d4ff]/60 uppercase">Chọn Vị Trí Báo Cáo</span>
+                <span className="font-mono text-[9px] tracking-[0.25em] text-[#00d4ff]/60 uppercase">Select Report Location</span>
                 {isLoading && <Loader2 className="h-3 w-3 text-[#00d4ff] animate-spin ml-auto" />}
             </div>
             <div className="flex gap-4 mb-1.5">
@@ -68,7 +68,7 @@ const HudOverlay = ({ lat, lng, address, isLoading }: { lat: number | null; lng:
                 </span>
             </div>
             <p className="font-mono text-[10px] text-white/70 truncate leading-relaxed">
-                {isLoading ? 'Đang xác định địa chỉ...' : address || 'Kéo bản đồ để chọn vị trí'}
+                {isLoading ? 'Resolving address...' : address || 'Drag the map to select a location'}
             </p>
         </div>
     </div>
@@ -158,7 +158,7 @@ const CrimeMapContent = () => {
     }, [mapInstanceRef, actions]);
 
     useEffect(() => {
-        if (error) toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu');
+        if (error) toast.error(error instanceof Error ? error.message : 'An error occurred while loading data');
     }, [error]);
 
     const handleLocationButtonClick = () => {
@@ -169,7 +169,7 @@ const CrimeMapContent = () => {
             } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     ({ coords }) => mapInstanceRef.current?.flyTo([coords.latitude, coords.longitude], 16, { duration: 1.5 }),
-                    () => toast.error('Không thể xác định vị trí'),
+                    () => toast.error('Unable to determine location'),
                 );
             }
         }
@@ -185,7 +185,7 @@ const CrimeMapContent = () => {
             {(!isLeafletLoaded || loading) && (
                 <div className="absolute inset-0 bg-[rgba(6,10,20,0.92)] backdrop-blur-sm z-[2000] flex flex-col items-center justify-center">
                     <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
-                    <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Đang tải bản đồ...</span>
+                    <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Loading map...</span>
                 </div>
             )}
 
@@ -204,10 +204,10 @@ const CrimeMapContent = () => {
                     <div className="flex items-center gap-1.5 flex-wrap">
                         <div className="flex gap-1.5 pointer-events-auto flex-wrap">
                             {([
-                                { value: 'all' as FilterType,    label: 'Tất cả',     color: '#00d4ff' },
-                                { value: 'high' as FilterType,   label: 'Nguy hiểm',  color: '#ff3b3b' },
-                                { value: 'medium' as FilterType, label: 'Trung bình', color: '#ffd700' },
-                                { value: 'low' as FilterType,    label: 'Thấp',       color: '#00ff88' },
+                                { value: 'all' as FilterType,    label: 'All',       color: '#00d4ff' },
+                                { value: 'high' as FilterType,   label: 'Dangerous', color: '#ff3b3b' },
+                                { value: 'medium' as FilterType, label: 'Medium',    color: '#ffd700' },
+                                { value: 'low' as FilterType,    label: 'Low',       color: '#00ff88' },
                             ] as const).map(opt => (
                                 <FilterBtn key={opt.value} active={filters.severityFilter === opt.value}
                                     onClick={() => filters.setSeverityFilter(opt.value)} color={opt.color}>
@@ -217,7 +217,7 @@ const CrimeMapContent = () => {
                         </div>
                         <div className="ml-auto flex gap-1.5 pointer-events-auto">
                             <button onClick={() => filters.setShowGlobalAlerts(v => !v)}
-                                title={`${filters.showGlobalAlerts ? 'Ẩn' : 'Hiện'} tin tức (${globalAlerts.length})`}
+                                title={`${filters.showGlobalAlerts ? 'Hide' : 'Show'} news (${globalAlerts.length})`}
                                 className={cn(
                                     'relative flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
                                     filters.showGlobalAlerts
@@ -225,7 +225,7 @@ const CrimeMapContent = () => {
                                         : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
                                 )}>
                                 <Globe className="h-3 w-3" />
-                                <span className="hidden sm:inline">Tin tức</span>
+                                <span className="hidden sm:inline">News</span>
                                 {globalAlerts.length > 0 && (
                                     <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff9a3c] font-mono text-[7px] flex items-center justify-center text-white font-bold">
                                         {globalAlerts.length > 99 ? '99' : globalAlerts.length}
@@ -240,7 +240,7 @@ const CrimeMapContent = () => {
                                         : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
                                 )}>
                                 <Thermometer className="h-3 w-3" />
-                                <span className="hidden sm:inline">Nhiệt</span>
+                                <span className="hidden sm:inline">Heat</span>
                             </button>
                             <button onClick={() => filters.setShowExtraFilters(v => !v)}
                                 className={cn(
@@ -264,7 +264,7 @@ const CrimeMapContent = () => {
                         <div className="space-y-1.5 pointer-events-auto">
                             <div className="flex items-center gap-1.5 flex-wrap rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
                                 style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
-                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">LOẠI TỘI</span>
+                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">CRIME TYPE</span>
                                 <div className="flex gap-1 flex-wrap">
                                     {CRIME_TYPE_OPTIONS.map(opt => (
                                         <button key={opt.value}
@@ -288,7 +288,7 @@ const CrimeMapContent = () => {
                             <div className="flex items-center gap-1.5 rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
                                 style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
                                 <Clock className="h-3 w-3 text-[#00d4ff]/40 shrink-0" />
-                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">THỜI GIAN</span>
+                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">TIME RANGE</span>
                                 <div className="flex gap-1">
                                     {TIME_OPTIONS.map(opt => (
                                         <button key={opt.value}
@@ -304,7 +304,7 @@ const CrimeMapContent = () => {
                                     ))}
                                 </div>
                                 <span className="ml-auto font-mono text-[9px] text-[#8899aa]">
-                                    {filters.filteredReports.length} <span className="text-[#00d4ff]/50">kết quả</span>
+                                    {filters.filteredReports.length} <span className="text-[#00d4ff]/50">result(s)</span>
                                 </span>
                             </div>
                         </div>
@@ -338,15 +338,15 @@ const CrimeMapContent = () => {
                     <button onClick={reporting.handleCancelReporting}
                         className="flex-1 font-mono text-xs border border-[rgba(255,255,255,0.15)] rounded bg-[rgba(6,10,20,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.3)] py-2.5 transition-all"
                         style={{ backdropFilter: 'blur(12px)' }}>
-                        Hủy
+                        Cancel
                     </button>
                     <button onClick={reporting.handleConfirmLocation}
                         disabled={!reporting.reportLocation || reporting.isLoadingAddress}
                         className="flex-1 font-mono text-xs rounded border border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.12)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.2)] hover:text-white py-2.5 transition-all disabled:opacity-40"
                         style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}>
                         {reporting.isLoadingAddress
-                            ? <><Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1" />Đang tải...</>
-                            : <><Crosshair className="h-3.5 w-3.5 inline mr-1" />Xác nhận vị trí</>}
+                            ? <><Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1" />Loading...</>
+                            : <><Crosshair className="h-3.5 w-3.5 inline mr-1" />Confirm location</>}
                     </button>
                 </div>
             )}
@@ -379,13 +379,13 @@ const CrimeMapContent = () => {
                 className="absolute bottom-6 left-6 z-[44] pointer-events-auto flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest rounded border border-[rgba(255,59,59,0.6)] bg-[rgba(255,59,59,0.15)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white px-4 py-2.5 transition-all disabled:opacity-40"
                 style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 20px rgba(255,59,59,0.2)' }}>
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">Báo cáo ngay</span>
-                <span className="sm:hidden">Báo cáo</span>
+                <span className="hidden sm:inline">Report now</span>
+                <span className="sm:hidden">Report</span>
             </button>
 
             <button onClick={handleLocationButtonClick}
                 className="absolute bottom-6 right-12 z-[44] pointer-events-auto w-11 h-11 rounded-full border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.1)] hover:bg-[rgba(0,212,255,0.2)] transition-all flex items-center justify-center"
-                title="Vị trí của tôi" style={{ backdropFilter: 'blur(12px)' }}>
+                title="My location" style={{ backdropFilter: 'blur(12px)' }}>
                 <MapPin className="h-4 w-4 text-[#00d4ff]" />
             </button>
 
@@ -420,7 +420,7 @@ const CrimeMap = () => (
     <Suspense fallback={
         <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14] flex flex-col items-center justify-center">
             <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
-            <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Đang khởi tạo bản đồ...</span>
+            <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Initializing map...</span>
         </div>
     }>
         <CrimeMapContent />

@@ -56,7 +56,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
         try {
             const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout: Không thể kết nối đến server.')), 10000)
+                setTimeout(() => reject(new Error('Timeout: Unable to connect to the server.')), 10000)
             })
 
             const signInPromise = signIn("credentials", {
@@ -68,19 +68,19 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             const res = await Promise.race([signInPromise, timeoutPromise]) as { error?: string; ok?: boolean }
 
             if (res?.error) {
-                setError('Đăng nhập thất bại. Vui lòng kiểm tra lại email và mật khẩu.')
-                toast.error('Đăng nhập thất bại.')
+                setError('Sign in failed. Please check your email and password.')
+                toast.error('Sign in failed.')
             } else if (res?.ok) {
-                toast.success('Đăng nhập thành công!', { description: 'Đang chuyển hướng...', duration: 2000 })
+                toast.success('Signed in successfully!', { description: 'Redirecting...', duration: 2000 })
                 await new Promise(resolve => setTimeout(resolve, 800))
                 router.push(redirectPath || '/dashboard')
                 router.refresh()
             } else {
-                setError('Không thể kết nối đến server. Vui lòng thử lại.')
-                toast.error('Không thể kết nối đến server.')
+                setError('Unable to connect to the server. Please try again.')
+                toast.error('Unable to connect to the server.')
             }
         } catch (err: unknown) {
-            const msg = (err as Error)?.message || 'Có lỗi xảy ra. Vui lòng thử lại.'
+            const msg = (err as Error)?.message || 'An error occurred. Please try again.'
             setError(msg)
             toast.error(msg)
         } finally {
@@ -89,7 +89,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     }
 
     useEffect(() => {
-        if (redirectPath) toast.warning('Bạn cần đăng nhập để truy cập trang')
+        if (redirectPath) toast.warning('You need to sign in to access this page')
     }, [redirectPath])
 
     return (
@@ -111,10 +111,10 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                     IDENTITY VERIFICATION
                 </p>
                 <h1 className="font-mono text-xl font-bold text-[#e8edf2] tracking-tight">
-                    Đăng nhập
+                    Sign In
                 </h1>
                 <p className="text-xs text-[#6b7a8d] tracking-wide">
-                    Xem thông tin tội phạm và nhận cảnh báo gần bạn
+                    View crime information and receive nearby alerts
                 </p>
             </div>
 
@@ -139,7 +139,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                     <svg viewBox="0 0 24 24" className="mr-2 h-3.5 w-3.5 shrink-0">
                         <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor" />
                     </svg>
-                    Đăng nhập với Google
+                    Continue with Google
                 </Button>
 
                 {/* Divider */}
@@ -226,15 +226,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
             {/* Footer */}
             <div className="space-y-3">
                 <p className="text-center font-mono text-[11px] text-[#6b7a8d]">
-                    Chưa có tài khoản?{" "}
+                    Don&apos;t have an account?{" "}
                     <Link href="/signup" className="text-[#e8edf2] hover:text-[#ff3b3b] transition-colors underline underline-offset-4">
-                        Đăng ký
+                        Sign Up
                     </Link>
                 </p>
                 <p className="text-center font-mono text-[9px] text-[#6b7a8d]/50 tracking-wide">
-                    Tiếp tục đồng nghĩa với việc bạn chấp nhận{" "}
+                    By continuing you agree to our{" "}
                     <Link href="/terms" className="underline underline-offset-2 hover:text-[#6b7a8d] transition-colors">Terms</Link>
-                    {" "}và{" "}
+                    {" "}and{" "}
                     <Link href="/privacy" className="underline underline-offset-2 hover:text-[#6b7a8d] transition-colors">Privacy</Link>
                 </p>
             </div>

@@ -61,14 +61,14 @@ export default function WantedPage() {
                     {criminal.crime}
                 </p>
                 <p className="font-mono text-[10px] text-[#8899aa] truncate">
-                    {criminal.issuingUnit ?? 'Đang cập nhật'}
+                    {criminal.issuingUnit ?? 'Updating'}
                 </p>
                 <p className="flex items-center gap-1 font-mono text-[10px] text-[#8899aa] truncate">
                     <MapPin className="h-2.5 w-2.5 shrink-0 text-[#00d4ff]/50" />
-                    {criminal.address ?? 'Chưa rõ'}
+                    {criminal.address ?? 'Unknown'}
                 </p>
                 <p className="font-mono text-[9px] text-[#8899aa]/40">
-                    Cập nhật: {formatDate(criminal.createdAt)}
+                    Updated: {formatDate(criminal.createdAt)}
                 </p>
             </div>
         </div>
@@ -82,21 +82,21 @@ export default function WantedPage() {
                     <div className="flex items-center gap-2">
                         <div className="w-1 h-5 rounded-full bg-[#ff3b3b]" />
                         <h1 className="font-mono text-xl font-bold text-white tracking-wide uppercase">
-                            Danh Sách Truy Nã
+                            Wanted Criminals List
                         </h1>
                     </div>
                     <p className="font-mono text-[10px] text-[#8899aa] pl-3">
-                        Dữ liệu từ{' '}
+                        Data from{' '}
                         <a href="https://truyna.bocongan.gov.vn" target="_blank" rel="noopener noreferrer"
                             className="text-[#00d4ff] hover:text-white transition-colors">
-                            Bộ Công An
+                            Ministry of Public Security
                         </a>
                     </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}
                     className="flex items-center gap-2 font-mono text-xs border-[rgba(0,212,255,0.2)] text-[#8899aa] hover:text-white hover:border-[rgba(0,212,255,0.4)] bg-transparent">
                     <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? 'animate-spin' : ''}`} />
-                    Làm mới
+                    Refresh
                 </Button>
             </div>
 
@@ -104,15 +104,15 @@ export default function WantedPage() {
             <div className="rounded border border-[rgba(0,212,255,0.12)] bg-[rgba(12,17,32,0.6)] p-4 space-y-3">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8899aa]" />
-                    <Input placeholder="Tìm kiếm tên, tội danh, địa chỉ..."
+                    <Input placeholder="Search name, crime, address..."
                         className="pl-9 font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.15)] focus-visible:border-[#00d4ff] focus-visible:ring-0 text-white placeholder:text-[#8899aa]/50"
                         value={search}
                         onChange={(e) => handleSearchChange(e.target.value)} />
                 </div>
                 <p className="font-mono text-[10px] text-[#8899aa]">
-                    Tổng cộng:{' '}
+                    Total:{' '}
                     <span className="text-[#00d4ff] font-bold">
-                        {totalItems.toLocaleString('vi-VN')} đối tượng
+                        {totalItems.toLocaleString('vi-VN')} subjects
                     </span>
                 </p>
             </div>
@@ -148,7 +148,7 @@ export default function WantedPage() {
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <span className="font-mono text-xs text-[#8899aa]">
-                                Trang <span className="text-white font-bold">{page}</span> / {totalPages}
+                                Page <span className="text-white font-bold">{page}</span> / {totalPages}
                             </span>
                             <Button variant="outline" size="sm"
                                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
@@ -162,7 +162,7 @@ export default function WantedPage() {
             ) : (
                 <div className="rounded border border-[rgba(255,255,255,0.06)] bg-[rgba(12,17,32,0.6)] py-16 text-center">
                     <Users className="h-8 w-8 mx-auto text-[#8899aa]/30 mb-3" />
-                    <p className="font-mono text-xs text-[#8899aa]">Không tìm thấy đối tượng phù hợp.</p>
+                    <p className="font-mono text-xs text-[#8899aa]">No matching subjects found.</p>
                 </div>
             )}
         </div>

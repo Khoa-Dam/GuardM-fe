@@ -14,21 +14,21 @@ export const typeColors = [
 ];
 
 export const severityLabels: Record<string, string> = {
-    low: 'Thấp',
-    medium: 'Trung bình',
-    high: 'Cao',
+    low: 'Low',
+    medium: 'Moderate',
+    high: 'High',
 };
 
 export const statusLabels: Record<number, string> = {
-    0: 'Đang hoạt động',
-    1: 'Đang điều tra',
-    2: 'Đã đóng',
+    0: 'Active',
+    1: 'Under investigation',
+    2: 'Closed',
 };
 
 export const verificationText: Record<VerificationLevel, string> = {
-    [VerificationLevel.UNVERIFIED]: 'Chưa xác minh',
-    [VerificationLevel.PENDING]: 'Đang chờ duyệt',
-    [VerificationLevel.VERIFIED]: 'Đã xác minh sơ bộ',
-    [VerificationLevel.CONFIRMED]: 'Đã xác nhận',
+    [VerificationLevel.UNVERIFIED]: 'Unverified',
+    [VerificationLevel.PENDING]: 'Pending review',
+    [VerificationLevel.VERIFIED]: 'Preliminarily verified',
+    [VerificationLevel.CONFIRMED]: 'Confirmed',
 };
 

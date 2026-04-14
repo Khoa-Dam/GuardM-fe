@@ -101,11 +101,11 @@ export default function AdminWantedPage() {
     const handleCreate = async () => {
         try {
             await createMutation.mutateAsync(formData);
-            toast.success('Tạo đối tượng truy nã thành công');
+            toast.success('Wanted criminal created successfully');
             setCreateDialogOpen(false);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể tạo đối tượng truy nã');
+            toast.error((err as Error)?.message || 'Unable to create wanted criminal');
         }
     };
 
@@ -124,12 +124,12 @@ export default function AdminWantedPage() {
 
         try {
             await updateMutation.mutateAsync({ id: selectedCriminal.id, payload: updateData });
-            toast.success('Cập nhật đối tượng truy nã thành công');
+            toast.success('Wanted criminal updated successfully');
             setEditDialogOpen(false);
             setSelectedCriminal(null);
             resetForm();
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể cập nhật đối tượng truy nã');
+            toast.error((err as Error)?.message || 'Unable to update wanted criminal');
         }
     };
 
@@ -138,11 +138,11 @@ export default function AdminWantedPage() {
 
         try {
             await deleteMutation.mutateAsync(selectedCriminal.id);
-            toast.success('Xóa đối tượng truy nã thành công');
+            toast.success('Wanted criminal deleted successfully');
             setDeleteDialogOpen(false);
             setSelectedCriminal(null);
         } catch (err: unknown) {
-            toast.error((err as Error)?.message || 'Không thể xóa đối tượng truy nã');
+            toast.error((err as Error)?.message || 'Unable to delete wanted criminal');
         }
     };
 
@@ -170,7 +170,7 @@ export default function AdminWantedPage() {
             <div className="p-6">
                 <Card>
                     <CardContent className="pt-6">
-                        <p className="text-destructive">Có lỗi xảy ra: {error.message}</p>
+                        <p className="text-destructive">An error occurred: {error.message}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -181,9 +181,9 @@ export default function AdminWantedPage() {
         <div className="p-6 space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Quản lý đối tượng truy nã</h1>
+                    <h1 className="text-3xl font-bold">Wanted Criminals Management</h1>
                     <p className="text-muted-foreground">
-                        Thêm, sửa, xóa thông tin đối tượng truy nã
+                        Add, edit, delete wanted criminal information
                     </p>
                 </div>
                 <Button onClick={() => {
@@ -191,7 +191,7 @@ export default function AdminWantedPage() {
                     setCreateDialogOpen(true);
                 }}>
                     <Plus className="w-4 h-4 mr-2" />
-                    Thêm đối tượng
+                    Add Subject
                 </Button>
             </div>
 
@@ -199,13 +199,13 @@ export default function AdminWantedPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                            <CardTitle>Danh sách đối tượng truy nã</CardTitle>
-                            <CardDescription>Tổng số: {paginatedData?.total || 0} đối tượng</CardDescription>
+                            <CardTitle>Wanted Criminals List</CardTitle>
+                            <CardDescription>Total: {paginatedData?.total || 0} subjects</CardDescription>
                         </div>
                         <div className="relative w-full sm:w-64">
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Tìm kiếm theo tên, tội danh..."
+                                placeholder="Search by name, crime..."
                                 className="pl-8"
                                 value={search}
                                 onChange={handleSearchChange}
@@ -223,12 +223,12 @@ export default function AdminWantedPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Họ tên</TableHead>
-                                        <TableHead>Năm sinh</TableHead>
-                                        <TableHead>Tội danh</TableHead>
-                                        <TableHead>Nơi ĐKTT</TableHead>
-                                        <TableHead>Số QĐ</TableHead>
-                                        <TableHead className="text-right">Hành động</TableHead>
+                                        <TableHead>Full Name</TableHead>
+                                        <TableHead>Birth Year</TableHead>
+                                        <TableHead>Crime</TableHead>
+                                        <TableHead>Registered Address</TableHead>
+                                        <TableHead>Decision No.</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -269,7 +269,7 @@ export default function AdminWantedPage() {
                                     ) : (
                                         <TableRow>
                                             <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                                Không tìm thấy dữ liệu
+                                                No data found
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -289,7 +289,7 @@ export default function AdminWantedPage() {
                             <ChevronLeft className="h-4 w-4" />
                         </Button>
                         <span className="text-sm font-medium">
-                            Trang {page} / {totalPages}
+                            Page {page} / {totalPages}
                         </span>
                         <Button
                             variant="outline"
@@ -307,16 +307,16 @@ export default function AdminWantedPage() {
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Thêm đối tượng truy nã</DialogTitle>
+                        <DialogTitle>Add Wanted Criminal</DialogTitle>
                         <DialogDescription>
-                            Nhập thông tin đối tượng truy nã mới
+                            Enter new wanted criminal information
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="create-name">
-                                    Họ tên <span className="text-destructive">*</span>
+                                    Full Name <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="create-name"
@@ -324,12 +324,12 @@ export default function AdminWantedPage() {
                                     onChange={(e) =>
                                         setFormData({ ...formData, name: e.target.value })
                                     }
-                                    placeholder="Nguyễn Văn A"
+                                    placeholder="John Doe"
                                 />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="create-birthYear">
-                                    Năm sinh <span className="text-destructive">*</span>
+                                    Birth Year <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="create-birthYear"
@@ -344,7 +344,7 @@ export default function AdminWantedPage() {
 
                         <div className="space-y-2">
                             <Label htmlFor="create-crime">
-                                Tội danh <span className="text-destructive">*</span>
+                                Crime <span className="text-destructive">*</span>
                             </Label>
                             <Textarea
                                 id="create-crime"
@@ -352,38 +352,38 @@ export default function AdminWantedPage() {
                                 onChange={(e) =>
                                     setFormData({ ...formData, crime: e.target.value })
                                 }
-                                placeholder="Trộm cắp tài sản"
+                                placeholder="Property theft"
                                 rows={2}
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-address">Nơi ĐKTT</Label>
+                            <Label htmlFor="create-address">Registered Address</Label>
                             <Input
                                 id="create-address"
                                 value={formData.address}
                                 onChange={(e) =>
                                     setFormData({ ...formData, address: e.target.value })
                                 }
-                                placeholder="Hà Nội"
+                                placeholder="Hanoi"
                             />
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="create-parents">Họ tên bố/mẹ</Label>
+                            <Label htmlFor="create-parents">Parent Names</Label>
                             <Input
                                 id="create-parents"
                                 value={formData.parents}
                                 onChange={(e) =>
                                     setFormData({ ...formData, parents: e.target.value })
                                 }
-                                placeholder="Nguyễn Văn B"
+                                placeholder="Jane Doe"
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="create-decisionNumber">Số ngày QĐ</Label>
+                                <Label htmlFor="create-decisionNumber">Decision Number</Label>
                                 <Input
                                     id="create-decisionNumber"
                                     value={formData.decisionNumber}
@@ -394,27 +394,27 @@ export default function AdminWantedPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="create-issuingUnit">Đơn vị ra QĐTN</Label>
+                                <Label htmlFor="create-issuingUnit">Issuing Unit</Label>
                                 <Input
                                     id="create-issuingUnit"
                                     value={formData.issuingUnit}
                                     onChange={(e) =>
                                         setFormData({ ...formData, issuingUnit: e.target.value })
                                     }
-                                    placeholder="Bộ Công An"
+                                    placeholder="Ministry of Public Security"
                                 />
                             </div>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleCreate} disabled={createMutation.isPending}>
                             {createMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Tạo
+                            Create
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -424,13 +424,13 @@ export default function AdminWantedPage() {
             <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>Chỉnh sửa đối tượng truy nã</DialogTitle>
-                        <DialogDescription>Cập nhật thông tin đối tượng truy nã</DialogDescription>
+                        <DialogTitle>Edit Wanted Criminal</DialogTitle>
+                        <DialogDescription>Update wanted criminal information</DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="edit-name">Họ tên</Label>
+                                <Label htmlFor="edit-name">Full Name</Label>
                                 <Input
                                     id="edit-name"
                                     value={formData.name}
@@ -440,7 +440,7 @@ export default function AdminWantedPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-birthYear">Năm sinh</Label>
+                                <Label htmlFor="edit-birthYear">Birth Year</Label>
                                 <Input
                                     id="edit-birthYear"
                                     type="number"
@@ -453,7 +453,7 @@ export default function AdminWantedPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-crime">Tội danh</Label>
+                            <Label htmlFor="edit-crime">Crime</Label>
                             <Textarea
                                 id="edit-crime"
                                 value={formData.crime}
@@ -465,7 +465,7 @@ export default function AdminWantedPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-address">Nơi ĐKTT</Label>
+                            <Label htmlFor="edit-address">Registered Address</Label>
                             <Input
                                 id="edit-address"
                                 value={formData.address}
@@ -476,7 +476,7 @@ export default function AdminWantedPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor="edit-parents">Họ tên bố/mẹ</Label>
+                            <Label htmlFor="edit-parents">Parent Names</Label>
                             <Input
                                 id="edit-parents"
                                 value={formData.parents}
@@ -488,7 +488,7 @@ export default function AdminWantedPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="edit-decisionNumber">Số ngày QĐ</Label>
+                                <Label htmlFor="edit-decisionNumber">Decision Number</Label>
                                 <Input
                                     id="edit-decisionNumber"
                                     value={formData.decisionNumber}
@@ -498,7 +498,7 @@ export default function AdminWantedPage() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-issuingUnit">Đơn vị ra QĐTN</Label>
+                                <Label htmlFor="edit-issuingUnit">Issuing Unit</Label>
                                 <Input
                                     id="edit-issuingUnit"
                                     value={formData.issuingUnit}
@@ -511,13 +511,13 @@ export default function AdminWantedPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={handleEdit} disabled={updateMutation.isPending}>
                             {updateMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Cập nhật
+                            Update
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -527,15 +527,14 @@ export default function AdminWantedPage() {
             <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Xác nhận xóa</AlertDialogTitle>
+                        <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Bạn có chắc chắn muốn xóa đối tượng truy nã{' '}
-                            <strong>{selectedCriminal?.name}</strong>? Hành động này không thể hoàn
-                            tác.
+                            Are you sure you want to delete wanted criminal{' '}
+                            <strong>{selectedCriminal?.name}</strong>? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             className="bg-destructive hover:bg-destructive/90"
@@ -544,7 +543,7 @@ export default function AdminWantedPage() {
                             {deleteMutation.isPending && (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             )}
-                            Xóa
+                            Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

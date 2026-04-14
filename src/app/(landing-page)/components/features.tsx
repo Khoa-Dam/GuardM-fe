@@ -6,23 +6,23 @@ import { MapPin, FilePlus, BarChart3, ShieldCheck } from 'lucide-react';
 const features = [
   {
     icon: MapPin, color: '#00d4ff', label: 'LIVE',
-    title: 'Bản đồ sự cố thời gian thực',
-    desc: 'Marker tội phạm theo mức độ nguy hiểm, lọc theo severity, focus trực tiếp từ trang báo cáo. Dark tile + heatmap trực quan.',
+    title: 'Real-Time Incident Map',
+    desc: 'Crime markers color-coded by threat level, filterable by severity, with direct focus from the report page. Dark tile layer and visual heatmap.',
   },
   {
     icon: FilePlus, color: '#ffd700', label: 'REPORT',
-    title: 'Báo cáo & quản lý vụ việc',
-    desc: 'Multi-step wizard gửi/chỉnh sửa báo cáo, ghim vị trí, reverse geocoding, xem chi tiết trong ReportCard.',
+    title: 'Incident Reporting & Case Management',
+    desc: 'Multi-step wizard to submit and edit reports, pin location on map, reverse geocoding, and detailed view in ReportCard.',
   },
   {
     icon: BarChart3, color: '#ff3b3b', label: 'STATS',
-    title: 'Thống kê & phân tích',
-    desc: 'Dashboard thống kê theo loại tội phạm, quận/huyện, mức độ cảnh báo. Charts PieChart + BarChart real-time.',
+    title: 'Statistics & Analysis',
+    desc: 'Analytics dashboard by crime type, district, and alert level. Real-time PieChart and BarChart visualizations.',
   },
   {
     icon: ShieldCheck, color: '#00ff88', label: 'DATA',
-    title: 'Truy nã & cảnh báo thời tiết',
-    desc: 'API truy nã từ Bộ Công An, tin thiên tai/khí tượng kèm ảnh, thời gian cập nhật và nguồn chính thống.',
+    title: 'Wanted Alerts & Weather Warnings',
+    desc: 'Wanted persons data from the Ministry of Public Security, natural disaster and weather alerts with images, timestamps, and verified sources.',
   },
 ];
 
@@ -35,14 +35,14 @@ export const FeaturesSection: React.FC = () => (
       <div className="text-center mb-16 space-y-4">
         <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase px-3 py-1.5 rounded border border-[rgba(255,59,59,0.25)] bg-[rgba(255,59,59,0.06)] text-[#ff3b3b]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3b] animate-pulse" />
-          Hệ sinh thái bảo mật
+          Safety Ecosystem
         </div>
         <h2 className="font-mono text-3xl md:text-4xl font-bold text-white leading-tight">
-          CÔNG NGHỆ BẢO VỆ<br />
-          <span style={{ color: '#00d4ff' }}>TIÊN TIẾN NHẤT</span>
+          PROTECTION BUILT ON<br />
+          <span style={{ color: '#00d4ff' }}>ADVANCED TECHNOLOGY</span>
         </h2>
         <p className="font-mono text-sm text-[#8899aa] max-w-xl mx-auto leading-relaxed">
-          Kết hợp dữ liệu cộng đồng và hạ tầng thời gian thực để cảnh báo chính xác mọi lúc mọi nơi.
+          Combining community-sourced data with real-time infrastructure to deliver accurate alerts — anywhere, anytime.
         </p>
       </div>
 

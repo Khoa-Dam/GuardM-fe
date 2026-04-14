@@ -6,36 +6,36 @@ import Link from 'next/link';
 
 const adminSections = [
     {
-        title: 'Quản lý người dùng',
-        description: 'Tạo, sửa, xóa tài khoản người dùng',
+        title: 'User Management',
+        description: 'Create, edit, delete user accounts',
         href: '/admin/users',
         icon: Users,
         color: 'text-blue-500',
     },
     {
-        title: 'Đối tượng truy nã',
-        description: 'Quản lý danh sách truy nã',
+        title: 'Wanted Criminals',
+        description: 'Manage the wanted criminals list',
         href: '/admin/wanted',
         icon: ShieldX,
         color: 'text-red-500',
     },
     {
-        title: 'Xác minh báo cáo',
-        description: 'Xác minh báo cáo tội phạm',
+        title: 'Verify Reports',
+        description: 'Verify crime reports',
         href: '/admin/reports',
         icon: FileText,
         color: 'text-green-500',
     },
     {
-        title: 'Quản lý Scraper',
-        description: 'Kích hoạt và theo dõi scrapers',
+        title: 'Scraper Management',
+        description: 'Trigger and monitor scrapers',
         href: '/admin/scraper',
         icon: Database,
         color: 'text-purple-500',
     },
     {
-        title: 'Tin tức thời tiết',
-        description: 'Quản lý tin tức và cảnh báo',
+        title: 'Weather News',
+        description: 'Manage news and alerts',
         href: '/admin/weather',
         icon: CloudSun,
         color: 'text-orange-500',
@@ -47,7 +47,7 @@ export default function AdminDashboardPage() {
         <div className="p-6 space-y-6">
             <div>
                 <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                <p className="text-muted-foreground">Quản lý hệ thống GuardM</p>
+                <p className="text-muted-foreground">Manage the GuardM system</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -77,13 +77,13 @@ export default function AdminDashboardPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Hướng dẫn sử dụng</CardTitle>
+                    <CardTitle>Usage Guide</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <p>• <strong>Quản lý người dùng:</strong> Tạo, chỉnh sửa, xóa tài khoản và phân quyền</p>
-                    <p>• <strong>Đối tượng truy nã:</strong> Thêm, cập nhật thông tin đối tượng truy nã</p>
-                    <p>• <strong>Xác minh báo cáo:</strong> Xác minh các báo cáo tội phạm từ người dùng</p>
-                    <p>• <strong>Quản lý Scraper:</strong> Kích hoạt scraper để cập nhật dữ liệu tự động</p>
+                    <p>• <strong>User Management:</strong> Create, edit, delete accounts and assign roles</p>
+                    <p>• <strong>Wanted Criminals:</strong> Add, update wanted criminal information</p>
+                    <p>• <strong>Verify Reports:</strong> Verify crime reports submitted by users</p>
+                    <p>• <strong>Scraper Management:</strong> Trigger scrapers to automatically update data</p>
                 </CardContent>
             </Card>
         </div>

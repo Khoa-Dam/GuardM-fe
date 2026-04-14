@@ -27,23 +27,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const { data: homeData, isLoading: homeLoading } = useHomeData()
 
     const navItems = [
-        { label: "Luồng Tin Trực Tiếp", href: "/dashboard", icon: Home, color: "#00d4ff" },
-        { label: "Danh Sách Truy Nã", href: "/wanted", icon: ShieldX, color: "#ff3b3b" },
-        { label: "Thời Tiết & Thiên Tai", href: "/weather", icon: CloudRain, color: "#00d4ff" },
-        { label: "Bản Đồ Tội Phạm", href: "/map", icon: MapPin, color: "#ffd700" },
-        { label: "Báo Cáo Sự Cố", href: "/reports", icon: MessageSquareWarning, color: "#ff3b3b" },
-        { label: "Trang Chủ", href: "/", icon: Globe, color: "#00ff88" },
+        { label: "Live Feed", href: "/dashboard", icon: Home, color: "#00d4ff" },
+        { label: "Wanted List", href: "/wanted", icon: ShieldX, color: "#ff3b3b" },
+        { label: "Weather & Disasters", href: "/weather", icon: CloudRain, color: "#00d4ff" },
+        { label: "Crime Map", href: "/map", icon: MapPin, color: "#ffd700" },
+        { label: "Incident Reports", href: "/reports", icon: MessageSquareWarning, color: "#ff3b3b" },
+        { label: "Home", href: "/", icon: Globe, color: "#00ff88" },
     ]
 
     if (userRole === 'admin' || userRole === 'Admin') {
-        navItems.push({ label: "Quản Trị Hệ Thống", href: "/admin", icon: Settings, color: "#a855f7" })
+        navItems.push({ label: "System Admin", href: "/admin", icon: Settings, color: "#a855f7" })
     }
 
     const miniStats = [
-        { label: "Tổng BC", value: stats?.total, icon: FileText, color: "#00d4ff" },
-        { label: "Hoạt động", value: stats?.activeAlerts, icon: AlertTriangle, color: "#ffd700" },
-        { label: "Nguy hiểm", value: stats?.highSeverity, icon: ShieldCheck, color: "#ff3b3b" },
-        { label: "Truy nã", value: homeData?.statistics?.totalWanted, icon: Users, color: "#00ff88" },
+        { label: "Total Reports", value: stats?.total, icon: FileText, color: "#00d4ff" },
+        { label: "Active", value: stats?.activeAlerts, icon: AlertTriangle, color: "#ffd700" },
+        { label: "High Risk", value: stats?.highSeverity, icon: ShieldCheck, color: "#ff3b3b" },
+        { label: "Wanted", value: homeData?.statistics?.totalWanted, icon: Users, color: "#00ff88" },
     ]
 
     const isLoading = statsLoading || homeLoading
@@ -168,9 +168,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                     {/* Emergency hotlines */}
                     <div className="space-y-2">
-                        <p className="font-mono text-[9px] tracking-[0.25em] text-[#00d4ff]/30 uppercase px-2">HOTLINE KHẨN CẤP</p>
+                        <p className="font-mono text-[9px] tracking-[0.25em] text-[#00d4ff]/30 uppercase px-2">EMERGENCY HOTLINES</p>
                         <div className="grid grid-cols-3 gap-2">
-                            {[{ label: "Công an", number: "113" }, { label: "Cứu hỏa", number: "114" }, { label: "Cấp cứu", number: "115" }].map((c) => (
+                            {[{ label: "Police", number: "113" }, { label: "Fire", number: "114" }, { label: "Ambulance", number: "115" }].map((c) => (
                                 <a key={c.number} href={`tel:${c.number}`}
                                     className="group flex flex-col items-center gap-1 rounded border border-[rgba(255,59,59,0.2)] bg-[rgba(255,59,59,0.04)] p-2 text-center hover:border-[rgba(255,59,59,0.5)] hover:bg-[rgba(255,59,59,0.08)] transition-all duration-200">
                                     <Phone className="h-3.5 w-3.5 text-[#ff3b3b]" />
@@ -186,7 +186,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <Link href="/map" onClick={() => onClose?.()}
                             className="group relative flex items-center justify-between rounded border border-[rgba(255,59,59,0.4)] bg-[rgba(255,59,59,0.08)] hover:bg-[rgba(255,59,59,0.15)] px-4 py-3 transition-all duration-200 overflow-hidden">
                             <div className="absolute inset-0 bg-gradient-to-r from-[rgba(255,59,59,0.1)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <span className="font-mono text-xs font-bold text-[#ff3b3b] uppercase tracking-widest relative z-10">GỬI BÁO CÁO</span>
+                            <span className="font-mono text-xs font-bold text-[#ff3b3b] uppercase tracking-widest relative z-10">SUBMIT REPORT</span>
                             <ChevronRight className="h-4 w-4 text-[#ff3b3b] group-hover:translate-x-1 transition-transform relative z-10" />
                         </Link>
                     </div>

@@ -132,7 +132,7 @@ export function AppHeader() {
                                     className="cursor-pointer"
                                 >
                                     <Settings className="mr-2 h-4 w-4" />
-                                    <span>Chỉnh sửa hồ sơ</span>
+                                    <span>Edit Profile</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -140,7 +140,7 @@ export function AppHeader() {
                                     className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    <span>Đăng xuất</span>
+                                    <span>Sign Out</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -161,7 +161,7 @@ export function AppHeader() {
                             onClick={() => router.push('/login')}
                             disabled={isLoading}
                         >
-                            Đăng nhập
+                            Sign In
                         </Button>
                         <Button
                             size="sm"
@@ -169,7 +169,7 @@ export function AppHeader() {
                             onClick={() => router.push('/signup')}
                             disabled={isLoading}
                         >
-                            Đăng ký
+                            Sign Up
                         </Button>
                     </>
                 )}

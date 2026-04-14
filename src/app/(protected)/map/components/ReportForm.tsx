@@ -54,22 +54,22 @@ interface ReportFormProps {
 }
 
 const crimeTypes: { type: CrimeType; label: string; icon: React.ElementType; color: string; desc: string }[] = [
-    { type: CrimeType.GIET_NGUOI, label: 'Giết người', icon: Skull, color: '#ff3b3b', desc: 'Tội phạm giết người' },
-    { type: CrimeType.BAT_COC, label: 'Bắt cóc', icon: Target, color: '#ff6b35', desc: 'Bắt cóc, tống tiền' },
-    { type: CrimeType.TRUY_NA, label: 'Truy nã', icon: Siren, color: '#ff3b3b', desc: 'Đối tượng đang bị truy nã' },
-    { type: CrimeType.CUOP_GIAT, label: 'Cướp giật', icon: Flame, color: '#ffd700', desc: 'Cướp giật tài sản' },
-    { type: CrimeType.DE_DOA, label: 'Đe dọa', icon: AlertTriangle, color: '#ffd700', desc: 'Đe dọa, uy hiếp' },
-    { type: CrimeType.NGHI_PHAM, label: 'Nghi phạm', icon: Eye, color: '#00d4ff', desc: 'Đối tượng nghi phạm' },
-    { type: CrimeType.DANG_NGO, label: 'Đáng ngờ', icon: Shield, color: '#00d4ff', desc: 'Hành vi đáng ngờ' },
-    { type: CrimeType.TROM_CAP, label: 'Trộm cắp', icon: Package, color: '#00ff88', desc: 'Trộm cắp tài sản' },
+    { type: CrimeType.GIET_NGUOI, label: 'Homicide', icon: Skull, color: '#ff3b3b', desc: 'Homicide crime' },
+    { type: CrimeType.BAT_COC, label: 'Kidnapping', icon: Target, color: '#ff6b35', desc: 'Kidnapping, ransom' },
+    { type: CrimeType.TRUY_NA, label: 'Wanted', icon: Siren, color: '#ff3b3b', desc: 'Wanted suspect' },
+    { type: CrimeType.CUOP_GIAT, label: 'Robbery', icon: Flame, color: '#ffd700', desc: 'Property robbery' },
+    { type: CrimeType.DE_DOA, label: 'Threat', icon: AlertTriangle, color: '#ffd700', desc: 'Threat, intimidation' },
+    { type: CrimeType.NGHI_PHAM, label: 'Suspect', icon: Eye, color: '#00d4ff', desc: 'Suspect individual' },
+    { type: CrimeType.DANG_NGO, label: 'Suspicious', icon: Shield, color: '#00d4ff', desc: 'Suspicious behavior' },
+    { type: CrimeType.TROM_CAP, label: 'Theft', icon: Package, color: '#00ff88', desc: 'Property theft' },
 ];
 
 const severityConfig = [
-    { level: 1, label: 'Rất thấp', color: '#00ff88', desc: 'Hành vi nhẹ, không nguy hiểm' },
-    { level: 2, label: 'Thấp', color: '#66ff66', desc: 'Có thể theo dõi thêm' },
-    { level: 3, label: 'Trung bình', color: '#ffd700', desc: 'Cần chú ý, báo cáo ngay' },
-    { level: 4, label: 'Cao', color: '#ff6b35', desc: 'Nguy hiểm, cần can thiệp' },
-    { level: 5, label: 'Rất cao', color: '#ff3b3b', desc: 'Cực kỳ nguy hiểm — GỌI 113' },
+    { level: 1, label: 'Very Low', color: '#00ff88', desc: 'Minor behavior, not dangerous' },
+    { level: 2, label: 'Low', color: '#66ff66', desc: 'Worth monitoring further' },
+    { level: 3, label: 'Medium', color: '#ffd700', desc: 'Attention needed, report now' },
+    { level: 4, label: 'High', color: '#ff6b35', desc: 'Dangerous, intervention required' },
+    { level: 5, label: 'Very High', color: '#ff3b3b', desc: 'Extremely dangerous — CALL 911' },
 ];
 
 const formatDateTimeLocal = (date?: string | Date): string => {
@@ -78,7 +78,7 @@ const formatDateTimeLocal = (date?: string | Date): string => {
     return d.toISOString().slice(0, 16);
 };
 
-const STEPS = ['VỊ TRÍ', 'LOẠI TỘI', 'CHI TIẾT', 'XÁC NHẬN'];
+const STEPS = ['LOCATION', 'CRIME TYPE', 'DETAILS', 'CONFIRM'];
 
 const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit, isSubmitting = false, report }) => {
     const isEditMode = !!report;
@@ -114,7 +114,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
         const oversized: string[] = [];
         const valid: File[] = [];
         Array.from(files).forEach(f => f.size > MAX_FILE_SIZE_BYTES ? oversized.push(f.name) : valid.push(f));
-        if (oversized.length) setUploadError(`File vượt quá ${MAX_FILE_SIZE_MB}MB: ${oversized.join(', ')}`);
+        if (oversized.length) setUploadError(`File exceeds ${MAX_FILE_SIZE_MB}MB: ${oversized.join(', ')}`);
         if (!valid.length) return;
         setIsUploading(true);
         try {
@@ -125,7 +125,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                 r.readAsDataURL(f);
             })));
             setUploadedFiles(prev => [...prev, ...base64s].slice(0, 5));
-        } catch { setUploadError('Lỗi đọc file. Vui lòng thử lại.'); }
+        } catch { setUploadError('Error reading file. Please try again.'); }
         finally { setIsUploading(false); }
     };
 
@@ -146,7 +146,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
             address: String(locationData.address),
             province, district, ward, street,
             areaCode: report?.areaCode || '',
-            source: report?.source || 'Người dùng báo cáo',
+            source: report?.source || 'User report',
             severity,
             reportedAt: reportedAt ? new Date(reportedAt).toISOString() : undefined,
         };
@@ -170,7 +170,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
             }
             if (result.description) setDescription(result.description);
         } catch {
-            setAiError('AI không thể phân tích. Vui lòng thử lại.');
+            setAiError('AI could not analyze. Please try again.');
         } finally {
             setIsAiLoading(false);
         }
@@ -186,8 +186,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
         <Dialog open onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="p-0 gap-0 w-full max-w-lg overflow-hidden border border-[rgba(0,212,255,0.2)] bg-[rgba(8,12,24,0.98)]"
                 style={{ backdropFilter: 'blur(20px)' }}>
-                <DialogTitle className="sr-only">Báo cáo sự cố</DialogTitle>
-                <DialogDescription className="sr-only">Form báo cáo sự cố tội phạm trên bản đồ</DialogDescription>
+                <DialogTitle className="sr-only">Report Incident</DialogTitle>
+                <DialogDescription className="sr-only">Crime incident report form on the map</DialogDescription>
 
                 {/* Scan-line overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
@@ -249,7 +249,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                         <MapPin className="h-4 w-4 text-[#00d4ff]" />
                                     </div>
                                     <div className="space-y-1 min-w-0">
-                                        <p className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">VỊ TRÍ ĐÃ XÁC NHẬN</p>
+                                        <p className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">CONFIRMED LOCATION</p>
                                         <p className="font-mono text-sm text-white leading-relaxed">{locationData.address}</p>
                                         <div className="flex gap-4 mt-2">
                                             <span className="font-mono text-[10px] text-[#00d4ff]/50">LAT: <span className="text-[#00d4ff]">{locationData.lat.toFixed(6)}</span></span>
@@ -258,7 +258,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                     </div>
                                 </div>
                             </div>
-                            {[{ label: 'TỈNH/THÀNH', val: province }, { label: 'QUẬN/HUYỆN', val: district }, { label: 'PHƯỜNG/XÃ', val: ward }, { label: 'ĐƯỜNG', val: street }]
+                            {[{ label: 'PROVINCE/CITY', val: province }, { label: 'DISTRICT', val: district }, { label: 'WARD/COMMUNE', val: ward }, { label: 'STREET', val: street }]
                                 .filter(r => r.val).map(row => (
                                     <div key={row.label} className="flex items-center gap-3 px-3 py-2 rounded border border-[rgba(255,255,255,0.05)]">
                                         <span className="font-mono text-[9px] text-[#00d4ff]/40 uppercase tracking-widest w-24 shrink-0">{row.label}</span>
@@ -295,7 +295,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
 
                             <div className="space-y-3 pt-2">
                                 <div className="flex items-center justify-between">
-                                    <span className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">MỨC ĐỘ NGUY HIỂM</span>
+                                    <span className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">DANGER LEVEL</span>
                                     <span className="font-mono text-xs font-bold" style={{ color: selectedSeverityConfig.color }}>{selectedSeverityConfig.label}</span>
                                 </div>
                                 <div className="relative">
@@ -324,14 +324,14 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                     {step === 2 && (
                         <div className="space-y-4">
                             <div className="space-y-1.5">
-                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">TIÊU ĐỀ</label>
+                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">TITLE</label>
                                 <Input value={title} onChange={e => setTitle(e.target.value)}
                                     placeholder={selectedTypeConfig.label}
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white placeholder:text-[#8899aa]" />
                             </div>
                             <div className="space-y-1.5">
                                 <div className="flex items-center justify-between">
-                                    <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">MÔ TẢ CHI TIẾT</label>
+                                    <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">DETAILED DESCRIPTION</label>
                                     <button
                                         type="button"
                                         onClick={handleAiAssist}
@@ -339,13 +339,13 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                         className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest px-2 py-1 rounded border border-[rgba(255,215,0,0.4)] bg-[rgba(255,215,0,0.08)] text-[#ffd700] hover:bg-[rgba(255,215,0,0.15)] transition-all disabled:opacity-30"
                                     >
                                         {isAiLoading
-                                            ? <><Loader2 className="h-3 w-3 animate-spin" />AI đang phân tích...</>
-                                            : <><Zap className="h-3 w-3" />AI tự điền</>
+                                            ? <><Loader2 className="h-3 w-3 animate-spin" />AI analyzing...</>
+                                            : <><Zap className="h-3 w-3" />AI Autofill</>
                                         }
                                     </button>
                                 </div>
                                 <Textarea value={description} onChange={e => setDescription(e.target.value)}
-                                    rows={3} placeholder="Mô tả sự việc bằng lời tự do, AI sẽ tự điền các trường còn lại..."
+                                    rows={3} placeholder="Describe the incident freely, AI will autofill the remaining fields..."
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white placeholder:text-[#8899aa] resize-none" />
                                 {aiError && (
                                     <div className="flex items-center gap-2 rounded border border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.08)] px-3 py-2">
@@ -355,12 +355,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                 )}
                             </div>
                             <div className="space-y-1.5">
-                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">THỜI GIAN XẢY RA</label>
+                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">TIME OF INCIDENT</label>
                                 <Input type="datetime-local" value={reportedAt} onChange={e => setReportedAt(e.target.value)}
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">LINK VIDEO (YouTube, Vimeo...)</label>
+                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">VIDEO LINK (YouTube, Vimeo...)</label>
                                 <Input
                                     value={videoUrl}
                                     onChange={e => setVideoUrl(e.target.value)}
@@ -370,7 +370,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                             </div>
                             <div className="space-y-2">
                                 <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">
-                                    TẢI LÊN BẰNG CHỨNG ({uploadedFiles.length + existingAttachments.length}/5)
+                                    UPLOAD EVIDENCE ({uploadedFiles.length + existingAttachments.length}/5)
                                 </label>
                                 <div
                                     onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
@@ -384,8 +384,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                     <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
                                         onChange={e => { handleFileUpload(e.target.files); e.target.value = ''; }} />
                                     {isUploading ? <Loader2 className="h-8 w-8 mx-auto text-[#00d4ff] animate-spin" /> : <Upload className="h-8 w-8 mx-auto text-[#00d4ff]/40" />}
-                                    <p className="font-mono text-[10px] text-[#8899aa] mt-2">DRAG & DROP hoặc nhấn để chọn</p>
-                                    <p className="font-mono text-[9px] text-[#8899aa]/50 mt-0.5">JPG · PNG · MP4 · WebM · Tối đa {MAX_FILE_SIZE_MB}MB</p>
+                                    <p className="font-mono text-[10px] text-[#8899aa] mt-2">DRAG & DROP or click to select</p>
+                                    <p className="font-mono text-[9px] text-[#8899aa]/50 mt-0.5">JPG · PNG · MP4 · WebM · Max {MAX_FILE_SIZE_MB}MB</p>
                                 </div>
                                 {uploadError && (
                                     <div className="flex items-center gap-2 rounded border border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.08)] px-3 py-2">
@@ -423,12 +423,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                     {step === 3 && (
                         <div className="space-y-3">
                             {[
-                                { label: 'VỊ TRÍ', value: locationData.address, color: '#00d4ff' },
-                                { label: 'LOẠI TỘI PHẠM', value: selectedTypeConfig.label, color: selectedTypeConfig.color },
-                                { label: 'MỨC ĐỘ', value: selectedSeverityConfig.label, color: selectedSeverityConfig.color },
-                                { label: 'TIÊU ĐỀ', value: title || selectedTypeConfig.label, color: '#fff' },
-                                { label: 'MÔ TẢ', value: description || '(Không có)', color: '#8899aa' },
-                                { label: 'THỜI GIAN', value: reportedAt ? new Date(reportedAt).toLocaleString('vi-VN') : 'Ngay bây giờ', color: '#fff' },
+                                { label: 'LOCATION', value: locationData.address, color: '#00d4ff' },
+                                { label: 'CRIME TYPE', value: selectedTypeConfig.label, color: selectedTypeConfig.color },
+                                { label: 'SEVERITY', value: selectedSeverityConfig.label, color: selectedSeverityConfig.color },
+                                { label: 'TITLE', value: title || selectedTypeConfig.label, color: '#fff' },
+                                { label: 'DESCRIPTION', value: description || '(None)', color: '#8899aa' },
+                                { label: 'TIME', value: reportedAt ? new Date(reportedAt).toLocaleString('en-US') : 'Right now', color: '#fff' },
                             ].map(row => (
                                 <div key={row.label} className="flex gap-3 px-3 py-2.5 rounded border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)]">
                                     <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">{row.label}</span>
@@ -437,19 +437,19 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                             ))}
                             {(uploadedFiles.length + existingAttachments.length) > 0 && (
                                 <div className="flex gap-3 px-3 py-2.5 rounded border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)]">
-                                    <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">BẰNG CHỨNG</span>
-                                    <span className="font-mono text-xs text-white">{uploadedFiles.length + existingAttachments.length} file đính kèm</span>
+                                    <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">EVIDENCE</span>
+                                    <span className="font-mono text-xs text-white">{uploadedFiles.length + existingAttachments.length} attached file(s)</span>
                                 </div>
                             )}
                             {videoUrl.trim() && (
                                 <div className="flex gap-3 px-3 py-2.5 rounded border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)]">
-                                    <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">LINK VIDEO</span>
+                                    <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">VIDEO LINK</span>
                                     <span className="font-mono text-xs text-[#00d4ff] truncate">{videoUrl.trim()}</span>
                                 </div>
                             )}
                             <div className="rounded border border-[rgba(255,215,0,0.2)] bg-[rgba(255,215,0,0.05)] p-3">
                                 <p className="font-mono text-[10px] text-[#ffd700] text-center">
-                                    Thông tin sẽ được gửi đến hệ thống giám sát. Vui lòng xác nhận nếu thông tin chính xác.
+                                    This information will be submitted to the monitoring system. Please confirm if the information is accurate.
                                 </p>
                             </div>
                         </div>
@@ -461,25 +461,25 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                     {step > 0 ? (
                         <Button type="button" variant="outline" onClick={() => setStep(s => s - 1)}
                             className="flex-1 font-mono text-xs border-[rgba(0,212,255,0.2)] text-[#8899aa] hover:text-white hover:border-[rgba(0,212,255,0.5)] bg-transparent h-10">
-                            <ChevronLeft className="h-4 w-4 mr-1" /> QUAY LẠI
+                            <ChevronLeft className="h-4 w-4 mr-1" /> BACK
                         </Button>
                     ) : (
                         <Button type="button" variant="outline" onClick={onClose}
                             className="flex-1 font-mono text-xs border-[rgba(255,255,255,0.1)] text-[#8899aa] hover:text-white bg-transparent h-10">
-                            HỦY
+                            CANCEL
                         </Button>
                     )}
                     {step < STEPS.length - 1 ? (
                         <Button type="button" onClick={() => setStep(s => s + 1)} disabled={!canProceed}
                             className="flex-1 font-mono text-xs h-10 bg-[rgba(0,212,255,0.1)] border border-[rgba(0,212,255,0.4)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.2)] hover:text-white disabled:opacity-30">
-                            TIẾP THEO <ChevronRight className="h-4 w-4 ml-1" />
+                            NEXT <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                     ) : (
                         <Button type="button" onClick={handleSubmit} disabled={isSubmitting}
                             className="flex-1 font-mono text-xs font-bold h-10 bg-[rgba(255,59,59,0.15)] border border-[rgba(255,59,59,0.5)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white disabled:opacity-40">
                             {isSubmitting
-                                ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{isEditMode ? 'ĐANG CẬP NHẬT...' : 'ĐANG GỬI...'}</>
-                                : <><Check className="h-4 w-4 mr-1" />{isEditMode ? 'CẬP NHẬT' : 'GỬI BÁO CÁO'}</>
+                                ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />{isEditMode ? 'UPDATING...' : 'SUBMITTING...'}</>
+                                : <><Check className="h-4 w-4 mr-1" />{isEditMode ? 'UPDATE' : 'SUBMIT REPORT'}</>
                             }
                         </Button>
                     )}

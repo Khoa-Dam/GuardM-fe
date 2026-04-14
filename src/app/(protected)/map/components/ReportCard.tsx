@@ -79,18 +79,18 @@ const NativeVideoPlayer: React.FC<{ src: string; className?: string }> = ({ src,
 const severityConf = (level: string | undefined) => {
     if (!level) return { color: '#8899aa', label: 'N/A' };
     const map: Record<string, { color: string; label: string }> = {
-        high: { color: '#ff3b3b', label: 'NGUY HIỂM' },
-        medium: { color: '#ffd700', label: 'CẢNH BÁO' },
-        low: { color: '#00ff88', label: 'THẤP' },
+        high: { color: '#ff3b3b', label: 'DANGEROUS' },
+        medium: { color: '#ffd700', label: 'WARNING' },
+        low: { color: '#00ff88', label: 'LOW' },
     };
     return map[level] ?? { color: '#8899aa', label: level.toUpperCase() };
 };
 
 const verificationConf: Record<VerificationLevel, { label: string; color: string }> = {
-    [VerificationLevel.CONFIRMED]: { label: 'CHÍNH XÁC', color: '#00ff88' },
-    [VerificationLevel.VERIFIED]: { label: 'ĐÃ XÁC MINH', color: '#00d4ff' },
-    [VerificationLevel.PENDING]: { label: 'CHỜ XÁC MINH', color: '#ffd700' },
-    [VerificationLevel.UNVERIFIED]: { label: 'CHƯA XÁC MINH', color: '#ff3b3b' },
+    [VerificationLevel.CONFIRMED]: { label: 'CONFIRMED', color: '#00ff88' },
+    [VerificationLevel.VERIFIED]: { label: 'VERIFIED', color: '#00d4ff' },
+    [VerificationLevel.PENDING]: { label: 'PENDING REVIEW', color: '#ffd700' },
+    [VerificationLevel.UNVERIFIED]: { label: 'UNVERIFIED', color: '#ff3b3b' },
 };
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
                                 {videoCount > 0 && <span className="flex items-center gap-1 font-mono text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded backdrop-blur-sm"><Play className="h-2.5 w-2.5" />{videoCount}</span>}
                             </div>
                             <span className="font-mono text-[9px] bg-black/70 text-[#8899aa] px-1.5 py-0.5 rounded backdrop-blur-sm">
-                                {new Date(report.createdAt).toLocaleDateString('vi-VN')}
+                                {new Date(report.createdAt).toLocaleDateString('en-US')}
                             </span>
                         </div>
 
@@ -249,14 +249,14 @@ const ReportCard: React.FC<ReportCardProps> = ({
                             )}
                             <span className="flex items-center gap-1">
                                 <Clock className="h-2.5 w-2.5" />
-                                {new Date(report.reportedAt ?? report.createdAt).toLocaleString('vi-VN')}
+                                {new Date(report.reportedAt ?? report.createdAt).toLocaleString('en-US')}
                             </span>
                         </div>
 
                         {/* Trust score */}
                         <div className="rounded border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-3 space-y-2">
                             <div className="flex justify-between items-center">
-                                <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest">Độ tin cậy</span>
+                                <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest">Trust Score</span>
                                 <span className="font-mono text-xs font-bold" style={{ color: trustColor }}>{trustScore}/100</span>
                             </div>
                             <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
@@ -266,11 +266,11 @@ const ReportCard: React.FC<ReportCardProps> = ({
                             <div className="flex justify-between font-mono text-[9px]">
                                 <span className="flex items-center gap-1 text-[#00ff88]">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88]" />
-                                    {report.confirmationCount ?? 0} xác nhận
+                                    {report.confirmationCount ?? 0} confirmed
                                 </span>
                                 <span className="flex items-center gap-1 text-[#ff3b3b]">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3b]" />
-                                    {report.disputeCount ?? 0} báo sai
+                                    {report.disputeCount ?? 0} disputed
                                 </span>
                             </div>
                         </div>
@@ -294,7 +294,7 @@ const ReportCard: React.FC<ReportCardProps> = ({
                                                 : "border-[rgba(255,255,255,0.06)] text-[#8899aa] cursor-not-allowed opacity-50"
                                     )}>
                                     {isConfirming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
-                                    {isConfirming ? 'Đang xử lý' : voteStatus?.hasConfirmed ? 'Đã xác nhận' : 'Xác nhận'}
+                                    {isConfirming ? 'Processing' : voteStatus?.hasConfirmed ? 'Confirmed' : 'Confirm'}
                                 </button>
                                 <button onClick={() => onDispute(report.id)}
                                     disabled={isDisputing || !canDispute || loadingVote}
@@ -307,14 +307,14 @@ const ReportCard: React.FC<ReportCardProps> = ({
                                                 : "border-[rgba(255,255,255,0.06)] text-[#8899aa] cursor-not-allowed opacity-50"
                                     )}>
                                     {isDisputing ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertTriangle className="h-3 w-3" />}
-                                    {isDisputing ? 'Đang xử lý' : voteStatus?.hasDisputed ? 'Đã báo sai' : 'Báo sai'}
+                                    {isDisputing ? 'Processing' : voteStatus?.hasDisputed ? 'Disputed' : 'Dispute'}
                                 </button>
                             </div>
                         )}
 
                         {voteStatus && voteStatus.voteCount > 0 && (
                             <p className="font-mono text-[9px] text-[#8899aa]/50 text-center">
-                                Đã vote {voteStatus.voteCount}/2 lần{voteStatus.voteCount >= 2 ? ' (đạt giới hạn)' : ''}
+                                Voted {voteStatus.voteCount}/2 time(s){voteStatus.voteCount >= 2 ? ' (limit reached)' : ''}
                             </p>
                         )}
 
@@ -324,13 +324,13 @@ const ReportCard: React.FC<ReportCardProps> = ({
                                 {onEdit && (
                                     <button onClick={() => onEdit(report)}
                                         className="flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.06)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.12)] transition-colors">
-                                        <Pencil className="h-3 w-3" /> Chỉnh sửa
+                                        <Pencil className="h-3 w-3" /> Edit
                                     </button>
                                 )}
                                 {onDelete && (
                                     <button onClick={() => setShowDeleteDialog(true)}
                                         className="flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.06)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.12)] transition-colors">
-                                        <Trash2 className="h-3 w-3" /> Xóa
+                                        <Trash2 className="h-3 w-3" /> Delete
                                     </button>
                                 )}
                             </div>
@@ -347,20 +347,20 @@ const ReportCard: React.FC<ReportCardProps> = ({
                 <DialogContent className="sm:max-w-md border-[rgba(255,59,59,0.3)] bg-[rgba(8,12,24,0.98)]" style={{ backdropFilter: 'blur(20px)' }}>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 font-mono text-[#ff3b3b]">
-                            <AlertTriangle className="h-4 w-4" /> XÁC NHẬN XÓA
+                            <AlertTriangle className="h-4 w-4" /> CONFIRM DELETE
                         </DialogTitle>
                         <DialogDescription className="font-mono text-xs text-[#8899aa]">
-                            Bạn có chắc chắn muốn xóa báo cáo này? Hành động này không thể hoàn tác.
+                            Are you sure you want to delete this report? This action cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2">
                         <Button variant="outline" onClick={() => setShowDeleteDialog(false)}
                             className="font-mono text-xs border-[rgba(255,255,255,0.1)] text-[#8899aa] bg-transparent hover:text-white">
-                            Hủy
+                            Cancel
                         </Button>
                         <Button onClick={() => { onDelete?.(report.id); setShowDeleteDialog(false); }}
                             className="font-mono text-xs bg-[rgba(255,59,59,0.15)] border border-[rgba(255,59,59,0.4)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white">
-                            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Xóa báo cáo
+                            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete Report
                         </Button>
                     </DialogFooter>
                 </DialogContent>

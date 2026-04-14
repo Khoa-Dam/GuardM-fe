@@ -87,7 +87,7 @@ function GlobeComponent({ points = [] }: GlobeVizProps) {
           backdrop-filter: blur(10px);
         ">
           <div style="color:#00d4ff;font-weight:bold;margin-bottom:4px;">${d.label || ''}</div>
-          <div style="color:${d.color};font-size:10px;">● ${d.severity === 'high' ? 'NGUY HIỂM CAO' : d.severity === 'medium' ? 'CẢNH BÁO' : 'MỨC THẤP'}</div>
+          <div style="color:${d.color};font-size:10px;">● ${d.severity === 'high' ? 'HIGH RISK' : d.severity === 'medium' ? 'WARNING' : 'LOW LEVEL'}</div>
         </div>
       `}
       onGlobeReady={() => {

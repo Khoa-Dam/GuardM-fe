@@ -19,21 +19,21 @@ const typeMeta: Record<
     { label: string; description: string; color: string; icon: React.ElementType }
 > = {
     [WeatherNewsType.DISASTER_WARNING]: {
-        label: 'Cảnh báo thiên tai',
-        description: 'Các cảnh báo bão, lũ, sạt lở...',
+        label: 'Disaster Warning',
+        description: 'Storm, flood, landslide warnings...',
         color: 'bg-red-100 text-red-700',
         icon: AlertTriangle,
     },
     [WeatherNewsType.WEATHER_FORECAST]: {
-        label: 'Dự báo khí tượng',
-        description: 'Thông tin dự báo thời tiết, thủy văn',
+        label: 'Weather Forecast',
+        description: 'Weather and hydrological forecast information',
         color: 'bg-blue-100 text-blue-700',
         icon: CloudDrizzle,
     },
 };
 
 const formatDateTime = (value?: string | Date) => {
-    if (!value) return 'Không rõ thời gian';
+    if (!value) return 'Unknown time';
     const date = typeof value === 'string' ? new Date(value) : value;
     return date.toLocaleString('vi-VN', {
         hour: '2-digit',
@@ -101,19 +101,19 @@ export default function WeatherPage() {
                     <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>Đăng: {formatDateTime(news.publishedDate ?? news.createdAt)}</span>
+                            <span>Published: {formatDateTime(news.publishedDate ?? news.createdAt)}</span>
                         </div>
                         {news.nextUpdateAt && (
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                 <Calendar className="h-3.5 w-3.5" />
-                                <span>Lần cập nhật tiếp theo: {formatDateTime(news.nextUpdateAt)}</span>
+                                <span>Next update: {formatDateTime(news.nextUpdateAt)}</span>
                             </div>
                         )}
                     </div>
                     {news.severity && (
                         <div className="flex items-center gap-2 text-amber-600">
                             <AlertTriangle className="h-4 w-4" />
-                            <span>Mức độ: {news.severity}</span>
+                            <span>Severity: {news.severity}</span>
                         </div>
                     )}
                     {news.content && (
@@ -121,12 +121,12 @@ export default function WeatherPage() {
                     )}
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 pt-2 border-t border-border/60">
                         <span className="text-xs text-muted-foreground break-all">
-                            Nguồn: {news.sourceUrl ?? 'Chưa rõ'}
+                            Source: {news.sourceUrl ?? 'Unknown'}
                         </span>
                         {news.sourceUrl && (
                             <Button variant="outline" size="sm" asChild className="shrink-0">
                                 <a href={news.sourceUrl} target="_blank" rel="noreferrer">
-                                    Xem chi tiết
+                                    View Details
                                 </a>
                             </Button>
                         )}
@@ -140,9 +140,9 @@ export default function WeatherPage() {
         <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">Thiên Tai & Khí Tượng</h1>
+                    <h1 className="text-2xl font-semibold tracking-tight">Disasters & Meteorology</h1>
                     <p className="text-sm text-muted-foreground">
-                        Đồng bộ dữ liệu từ Trung tâm dự báo khí tượng thủy văn quốc gia
+                        Data synced from the National Center for Hydro-Meteorological Forecasting
                     </p>
                 </div>
                 <div className="flex gap-3">
@@ -153,7 +153,7 @@ export default function WeatherPage() {
                         className="flex items-center gap-2"
                     >
                         <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
-                        Làm mới
+                        Refresh
                     </Button>
                 </div>
             </div>
@@ -161,7 +161,7 @@ export default function WeatherPage() {
             <Card className="border border-border/70">
                 <CardContent className="pt-6 space-y-4">
                     <div className="space-y-4">
-                        {/* Mobile: Select (chỉ hiển thị 1 tab) */}
+                        {/* Mobile: Select (show single tab) */}
                         <div className="md:hidden">
                             <Select
                                 value={activeType ?? 'all'}
@@ -172,21 +172,21 @@ export default function WeatherPage() {
                                 <SelectTrigger className="w-full">
                                     <SelectValue>
                                         {activeType === undefined
-                                            ? 'Tất cả'
+                                            ? 'All'
                                             : activeType === WeatherNewsType.DISASTER_WARNING
-                                                ? 'Cảnh báo thiên tai'
-                                                : 'Dự báo khí tượng'}
+                                                ? 'Disaster Warning'
+                                                : 'Weather Forecast'}
                                     </SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Tất cả</SelectItem>
-                                    <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Cảnh báo thiên tai</SelectItem>
-                                    <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Dự báo khí tượng</SelectItem>
+                                    <SelectItem value="all">All</SelectItem>
+                                    <SelectItem value={WeatherNewsType.DISASTER_WARNING}>Disaster Warning</SelectItem>
+                                    <SelectItem value={WeatherNewsType.WEATHER_FORECAST}>Weather Forecast</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
 
-                        {/* Desktop: Tabs (3 tabs ngang) */}
+                        {/* Desktop: Tabs (3 horizontal tabs) */}
                         <div className="hidden md:block">
                             <Tabs
                                 value={activeType ?? 'all'}
@@ -196,12 +196,12 @@ export default function WeatherPage() {
                                 className="w-full"
                             >
                                 <TabsList className="w-full grid grid-cols-3">
-                                    <TabsTrigger value="all" className="text-sm">Tất cả</TabsTrigger>
+                                    <TabsTrigger value="all" className="text-sm">All</TabsTrigger>
                                     <TabsTrigger value={WeatherNewsType.DISASTER_WARNING} className="text-sm">
-                                        Cảnh báo thiên tai
+                                        Disaster Warning
                                     </TabsTrigger>
                                     <TabsTrigger value={WeatherNewsType.WEATHER_FORECAST} className="text-sm">
-                                        Dự báo khí tượng
+                                        Weather Forecast
                                     </TabsTrigger>
                                 </TabsList>
                             </Tabs>
@@ -209,7 +209,7 @@ export default function WeatherPage() {
                         <div className="relative">
                             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Tìm theo tiêu đề, địa điểm, mức độ..."
+                                placeholder="Search by title, location, severity..."
                                 className="pl-9"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -217,9 +217,9 @@ export default function WeatherPage() {
                         </div>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                        Tổng cộng:{' '}
+                        Total:{' '}
                         <span className="font-medium text-foreground">
-                            {filteredNews.length.toLocaleString('vi-VN')} bản tin
+                            {filteredNews.length.toLocaleString('vi-VN')} articles
                         </span>
                     </div>
                 </CardContent>
@@ -227,7 +227,7 @@ export default function WeatherPage() {
 
             {error && (
                 <Alert variant="destructive">
-                    <AlertTitle>Lỗi</AlertTitle>
+                    <AlertTitle>Error</AlertTitle>
                     <AlertDescription>{error.message}</AlertDescription>
                 </Alert>
             )}
@@ -243,7 +243,7 @@ export default function WeatherPage() {
             ) : (
                 <Card>
                     <CardContent className="py-10 text-center text-muted-foreground">
-                        Không tìm thấy bản tin phù hợp.
+                        No matching articles found.
                     </CardContent>
                 </Card>
             )}

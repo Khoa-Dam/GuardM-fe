@@ -18,8 +18,8 @@ export const MyReportsSection: React.FC<MyReportsSectionProps> = ({ reports, loa
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="text-base md:text-lg">Báo cáo của tôi</CardTitle>
-                <CardDescription>Theo dõi báo cáo bạn đã gửi</CardDescription>
+                <CardTitle className="text-base md:text-lg">My Reports</CardTitle>
+                <CardDescription>Track reports you have submitted</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
                 {loading ? (
@@ -32,9 +32,9 @@ export const MyReportsSection: React.FC<MyReportsSectionProps> = ({ reports, loa
                             <div className="flex flex-col gap-2">
                                 <div className="flex items-start justify-between gap-2">
                                     <div>
-                                        <p className="font-medium">{report.title || 'Báo cáo không tiêu đề'}</p>
+                                        <p className="font-medium">{report.title || 'Untitled Report'}</p>
                                         <p className="text-xs text-muted-foreground">
-                                            Cập nhật {formatDate(report.updatedAt)}
+                                            Updated {formatDate(report.updatedAt)}
                                         </p>
                                     </div>
                                     <ReportStatusBadge report={report} />
@@ -42,41 +42,41 @@ export const MyReportsSection: React.FC<MyReportsSectionProps> = ({ reports, loa
                                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                                     <span>Trust score: {report.trustScore ?? 0}</span>
                                     <span>
-                                        Vote: {report.confirmationCount ?? 0} xác nhận / {report.disputeCount ?? 0} tranh cãi
+                                        Vote: {report.confirmationCount ?? 0} confirmed / {report.disputeCount ?? 0} disputed
                                     </span>
-                                    <span>Mức độ: {severityLabels[report.severityLevel] ?? 'Không rõ'}</span>
+                                    <span>Severity: {severityLabels[report.severityLevel] ?? 'Unknown'}</span>
                                 </div>
                                 {report.description && (
                                     <p className="text-xs text-muted-foreground line-clamp-2">{report.description}</p>
                                 )}
                                 <div className="grid gap-2 rounded-lg border border-dashed border-border/70 p-3 text-xs text-muted-foreground">
                                     <div className="flex justify-between gap-2">
-                                        <span>Trạng thái</span>
+                                        <span>Status</span>
                                         <span className="font-medium text-foreground">
-                                            {statusLabels[report.status] ?? 'Không rõ'}
+                                            {statusLabels[report.status] ?? 'Unknown'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between gap-2">
-                                        <span>Độ xác thực</span>
+                                        <span>Verification</span>
                                         <span className="font-medium text-foreground">
                                             {verificationText[report.verificationLevel]}
                                         </span>
                                     </div>
                                     <div className="flex justify-between gap-2">
-                                        <span>Vị trí</span>
+                                        <span>Location</span>
                                         <span className="font-medium text-foreground">
                                             {report.address ||
                                                 [report.district, report.province].filter(Boolean).join(', ') ||
-                                                'Chưa rõ'}
+                                                'Unknown'}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button asChild variant="outline" size="sm" className="flex-1">
-                                        <Link href={`/map?focus=${report.id}`}>Xem trên bản đồ</Link>
+                                        <Link href={`/map?focus=${report.id}`}>View on Map</Link>
                                     </Button>
                                     <Button asChild size="sm" className="flex-1">
-                                        <Link href={`/map?edit=${report.id}`}>Chỉnh sửa</Link>
+                                        <Link href={`/map?edit=${report.id}`}>Edit</Link>
                                     </Button>
                                 </div>
                             </div>
@@ -84,9 +84,9 @@ export const MyReportsSection: React.FC<MyReportsSectionProps> = ({ reports, loa
                     ))
                 ) : (
                     <div className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-                        Bạn chưa có báo cáo nào.{' '}
+                        You have no reports yet.{' '}
                         <Link href="/map" className="text-primary underline">
-                            Gửi báo cáo ngay
+                            Submit a report now
                         </Link>
                         .
                     </div>

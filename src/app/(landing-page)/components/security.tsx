@@ -4,15 +4,15 @@ import React from 'react';
 import { Lock, Users, Server } from 'lucide-react';
 
 const securityItems = [
-  'Đăng nhập qua phiên NextAuth, không cho truy cập dashboard khi chưa xác thực',
-  'Phân quyền cơ bản theo vai trò người dùng (user / admin)',
-  'API phía server kiểm soát quyền truy cập cho chức năng báo cáo và truy nã',
+  'Session-based authentication via NextAuth — dashboard access requires verified login',
+  'Role-based access control with distinct permissions for user and admin roles',
+  'Server-side API enforcement for protected reporting and wanted-persons features',
 ];
 
 const securityBadges = [
-  { label: 'Phiên đăng nhập', value: 'NextAuth session', color: '#00ff88' },
-  { label: 'Vùng được bảo vệ', value: 'Dashboard & bản đồ', color: '#00d4ff' },
-  { label: 'API nhạy cảm', value: 'Báo cáo & truy nã', color: '#ffd700' },
+  { label: 'Auth Session', value: 'NextAuth session', color: '#00ff88' },
+  { label: 'Protected Zones', value: 'Dashboard & Map', color: '#00d4ff' },
+  { label: 'Sensitive APIs', value: 'Reports & Wanted', color: '#ffd700' },
 ];
 
 export const SecuritySection: React.FC = () => (
@@ -25,17 +25,17 @@ export const SecuritySection: React.FC = () => (
       <div className="space-y-6">
         <div className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.25em] uppercase px-3 py-1.5 rounded border border-[rgba(0,212,255,0.25)] bg-[rgba(0,212,255,0.06)] text-[#00d4ff]">
           <Lock className="w-3 h-3" />
-          Bảo mật lớp kép
+          Multi-Layer Security
         </div>
 
         <h3 className="font-mono text-3xl font-bold text-white leading-tight">
-          HẠ TẦNG ĐƯỢC GIA CỐ<br />
-          <span style={{ color: '#00ff88' }}>CHUẨN DOANH NGHIỆP</span>
+          HARDENED INFRASTRUCTURE<br />
+          <span style={{ color: '#00ff88' }}>ENTERPRISE-GRADE STANDARDS</span>
         </h3>
 
         <p className="font-mono text-sm text-[#8899aa] leading-relaxed">
-          GuardM mã hóa end-to-end dữ liệu định vị, áp dụng cơ chế phân quyền chặt chẽ
-          và lưu trữ trên nền tảng đạt chuẩn ISO/IEC 27001.
+          GuardM applies end-to-end encryption for all location data, enforces strict
+          role-based access control, and stores data on infrastructure certified to ISO/IEC 27001.
         </p>
 
         <div className="space-y-3">

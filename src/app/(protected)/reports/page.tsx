@@ -49,30 +49,30 @@ export default function ReportsPage() {
   const summaryCards = useMemo<SummaryCardConfig[]>(
     () => [
       {
-        title: "Tổng số báo cáo",
+        title: "Total Reports",
         value: stats?.total ?? 0,
-        description: "Tất cả báo cáo đã ghi nhận",
+        description: "All recorded reports",
         icon: FileText,
         showSpinner: true,
       },
       {
-        title: "Báo cáo đang hoạt động",
+        title: "Active Reports",
         value: stats?.activeAlerts ?? 0,
         description: "Status = 0",
         icon: AlertTriangle,
         showSpinner: true,
       },
       {
-        title: "Báo cáo mức độ cao",
+        title: "High Severity Reports",
         value: stats?.highSeverity ?? 0,
         description: "Severity ≥ 4",
         icon: ShieldCheck,
         showSpinner: true,
       },
       {
-        title: "Báo cáo của tôi",
+        title: "My Reports",
         value: myReports.length,
-        description: "Bạn đã gửi",
+        description: "Submitted by you",
         icon: UserCircle2,
         showSpinner: false,
       },
@@ -87,9 +87,9 @@ export default function ReportsPage() {
 
       {(statsError || reportsError || myReportsError) && (
         <Alert variant="destructive">
-          <AlertTitle>Có lỗi xảy ra</AlertTitle>
+          <AlertTitle>An error occurred</AlertTitle>
           <AlertDescription>
-            {statsError?.message || reportsError?.message || myReportsError?.message || "Không thể tải dữ liệu. Vui lòng thử lại sau."}
+            {statsError?.message || reportsError?.message || myReportsError?.message || "Unable to load data. Please try again later."}
           </AlertDescription>
         </Alert>
       )}

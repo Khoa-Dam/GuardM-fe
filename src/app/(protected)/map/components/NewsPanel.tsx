@@ -14,17 +14,17 @@ interface NewsPanelProps {
 }
 
 const SEVERITY_CONFIG = {
-    high:   { label: 'Nguy hiểm', color: '#ff3b3b', bg: 'bg-[#ff3b3b]/10', border: 'border-[#ff3b3b]/30', dot: 'bg-[#ff3b3b]' },
-    medium: { label: 'Cảnh báo',  color: '#ffd700', bg: 'bg-[#ffd700]/10', border: 'border-[#ffd700]/30', dot: 'bg-[#ffd700]' },
-    low:    { label: 'Thấp',      color: '#00ff88', bg: 'bg-[#00ff88]/10', border: 'border-[#00ff88]/20', dot: 'bg-[#00ff88]' },
+    high:   { label: 'Dangerous', color: '#ff3b3b', bg: 'bg-[#ff3b3b]/10', border: 'border-[#ff3b3b]/30', dot: 'bg-[#ff3b3b]' },
+    medium: { label: 'Warning',   color: '#ffd700', bg: 'bg-[#ffd700]/10', border: 'border-[#ffd700]/30', dot: 'bg-[#ffd700]' },
+    low:    { label: 'Low',       color: '#00ff88', bg: 'bg-[#00ff88]/10', border: 'border-[#00ff88]/20', dot: 'bg-[#00ff88]' },
 } as const;
 
 function timeAgo(dateStr: string) {
     const diff = Date.now() - new Date(dateStr).getTime();
     const h = Math.floor(diff / 3_600_000);
-    if (h < 1) return `${Math.floor(diff / 60_000)}p trước`;
-    if (h < 24) return `${h}h trước`;
-    return `${Math.floor(h / 24)}d trước`;
+    if (h < 1) return `${Math.floor(diff / 60_000)}m ago`;
+    if (h < 24) return `${h}h ago`;
+    return `${Math.floor(h / 24)}d ago`;
 }
 
 function AlertItem({ alert, onClick }: { alert: GlobalAlert; onClick: () => void }) {
@@ -80,7 +80,7 @@ function AlertItem({ alert, onClick }: { alert: GlobalAlert; onClick: () => void
                             className="flex items-center gap-1 text-[10px] text-[#6b7a8d] hover:text-[#00d4ff] transition-colors"
                         >
                             <ExternalLink className="h-2.5 w-2.5" />
-                            <span className="hidden sm:inline">Nguồn</span>
+                            <span className="hidden sm:inline">Source</span>
                         </a>
                     )}
                 </div>
@@ -116,7 +116,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8 flex-shrink-0">
                 <Newspaper className="h-4 w-4 text-[#ff9a3c]" />
                 <span className="font-mono text-xs font-bold tracking-[0.15em] text-[#e8edf2] uppercase flex-1">
-                    Tin tức
+                    News
                 </span>
                 <span className="font-mono text-[10px] text-[#8899aa] bg-white/6 px-1.5 py-0.5 rounded">
                     {alerts.length}
@@ -130,10 +130,10 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
             {/* Severity filter tabs */}
             <div className="flex gap-1 px-3 py-2 border-b border-white/5 flex-shrink-0">
                 {([
-                    { v: 'all',    label: 'Tất cả', count: alerts.length, color: '#8899aa' },
-                    { v: 'high',   label: 'Nguy hiểm', count: counts.high,   color: '#ff3b3b' },
-                    { v: 'medium', label: 'Cảnh báo',  count: counts.medium, color: '#ffd700' },
-                    { v: 'low',    label: 'Thấp',       count: counts.low,    color: '#00ff88' },
+                    { v: 'all',    label: 'All',       count: alerts.length, color: '#8899aa' },
+                    { v: 'high',   label: 'Dangerous', count: counts.high,   color: '#ff3b3b' },
+                    { v: 'medium', label: 'Warning',   count: counts.medium, color: '#ffd700' },
+                    { v: 'low',    label: 'Low',       count: counts.low,    color: '#00ff88' },
                 ] as const).map(tab => (
                     <button key={tab.v}
                         onClick={() => setSevFilter(tab.v)}
@@ -156,7 +156,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
                 <input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
-                    placeholder="Tìm kiếm tin tức..."
+                    placeholder="Search news..."
                     className="w-full bg-white/5 border border-white/8 rounded px-3 py-1.5 font-mono text-[11px] text-[#e8edf2] placeholder:text-[#6b7a8d] outline-none focus:border-[#00d4ff]/40 transition-colors"
                 />
             </div>
@@ -165,7 +165,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
             {filtered.length > 0 && (
                 <div className="px-4 py-1.5 flex-shrink-0">
                     <span className="font-mono text-[9px] tracking-widest text-[#6b7a8d] uppercase">
-                        {filtered.length} kết quả
+                        {filtered.length} result(s)
                     </span>
                 </div>
             )}
@@ -175,7 +175,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
                 {filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 gap-2">
                         <AlertTriangle className="h-6 w-6 text-[#6b7a8d]" />
-                        <p className="font-mono text-[11px] text-[#6b7a8d]">Không có kết quả</p>
+                        <p className="font-mono text-[11px] text-[#6b7a8d]">No results found</p>
                     </div>
                 ) : (
                     filtered.map(alert => (

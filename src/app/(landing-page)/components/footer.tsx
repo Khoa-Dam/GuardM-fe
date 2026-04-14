@@ -23,7 +23,7 @@ export const LandingFooter: React.FC = () => (
       <div className="flex gap-8">
         {[
           { label: 'GitHub', href: siteConfig.links.github },
-          { label: 'Liên hệ', href: `mailto:${siteConfig.author.email}` },
+          { label: 'Contact', href: `mailto:${siteConfig.author.email}` },
         ].map(item => (
           <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer"
             className="font-mono text-[10px] tracking-widest uppercase text-[#8899aa] hover:text-[#00d4ff] transition-colors duration-200 relative group">

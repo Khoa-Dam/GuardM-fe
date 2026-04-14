@@ -21,8 +21,8 @@ export const RecentReportsSection: React.FC<RecentReportsSectionProps> = ({ repo
     return (
         <Card>
             <CardHeader className="pb-3">
-                <CardTitle className="text-base md:text-lg">Báo cáo gần đây</CardTitle>
-                <CardDescription>Danh sách được cập nhật từ dữ liệu thực</CardDescription>
+                <CardTitle className="text-base md:text-lg">Recent Reports</CardTitle>
+                <CardDescription>List updated from live data</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
                 {loading ? (
@@ -36,56 +36,56 @@ export const RecentReportsSection: React.FC<RecentReportsSectionProps> = ({ repo
                                 <div className="flex items-start justify-between gap-3">
                                     <div>
                                         <p className="font-semibold leading-tight">
-                                            {report.title || 'Báo cáo không tiêu đề'}
+                                            {report.title || 'Untitled Report'}
                                         </p>
                                         <p className="text-xs text-muted-foreground">
-                                            Gửi ngày {formatDate(report.createdAt)} • {report.address || 'Chưa có địa chỉ'}
+                                            Submitted on {formatDate(report.createdAt)} • {report.address || 'No address'}
                                         </p>
                                     </div>
                                     <ReportStatusBadge report={report} />
                                 </div>
                                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                                     <span>
-                                        Loại:{' '}
+                                        Type:{' '}
                                         {report.type
                                             ? crimeTypeLabels[report.type as CrimeType] ?? report.type
-                                            : 'Chưa rõ'}
+                                            : 'Unknown'}
                                     </span>
                                     <span>Trust score: {report.trustScore ?? 0}</span>
-                                    <span>Mức độ: {severityLabels[report.severityLevel] ?? 'Không rõ'}</span>
+                                    <span>Severity: {severityLabels[report.severityLevel] ?? 'Unknown'}</span>
                                 </div>
                                 {report.description && (
                                     <p className="text-xs text-muted-foreground line-clamp-2">{report.description}</p>
                                 )}
                                 <div className="grid gap-2 rounded-lg border border-dashed border-border/70 p-3 text-xs text-muted-foreground">
                                     <div className="flex justify-between gap-2">
-                                        <span>Trạng thái</span>
+                                        <span>Status</span>
                                         <span className="font-medium text-foreground">
-                                            {statusLabels[report.status] ?? 'Không rõ'}
+                                            {statusLabels[report.status] ?? 'Unknown'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between gap-2">
-                                        <span>Độ xác thực</span>
+                                        <span>Verification</span>
                                         <span className="font-medium text-foreground">
                                             {verificationText[report.verificationLevel]}
                                         </span>
                                     </div>
                                     <div className="flex justify-between gap-2">
-                                        <span>Vote cộng đồng</span>
+                                        <span>Community vote</span>
                                         <span className="font-medium text-foreground">
-                                            {report.confirmationCount ?? 0} xác nhận / {report.disputeCount ?? 0} phủ nhận
+                                            {report.confirmationCount ?? 0} confirmed / {report.disputeCount ?? 0} disputed
                                         </span>
                                     </div>
                                 </div>
                                 <Separator className="my-1" />
                                 <Button asChild variant="outline" size="sm" className="justify-start">
-                                    <Link href={`/map?focus=${report.id}`}>Xem trên bản đồ</Link>
+                                    <Link href={`/map?focus=${report.id}`}>View on Map</Link>
                                 </Button>
                             </div>
                         </Card>
                     ))
                 ) : (
-                    <p className="text-sm text-muted-foreground">Chưa có báo cáo nào.</p>
+                    <p className="text-sm text-muted-foreground">No reports yet.</p>
                 )}
             </CardContent>
         </Card>

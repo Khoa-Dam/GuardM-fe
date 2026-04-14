@@ -10,9 +10,9 @@ const severityColors = {
 };
 
 const severityLabels = {
-    low: 'Nguy hiểm thấp',
-    medium: 'Nguy hiểm trung bình',
-    high: 'Nguy hiểm cao',
+    low: 'Low danger',
+    medium: 'Medium danger',
+    high: 'High danger',
 };
 
 export const MapLegend: React.FC = () => {
@@ -20,7 +20,7 @@ export const MapLegend: React.FC = () => {
         <Card className="map-legend absolute bottom-20 left-4 z-[44] pointer-events-auto rounded">
             {/* Desktop: full legend */}
             <div className="hidden sm:block p-3 space-y-2">
-                <h3 className="text-sm font-semibold mb-2">Chú thích icon</h3>
+                <h3 className="text-sm font-semibold mb-2">Icon legend</h3>
                 <div className="space-y-1.5">
                     {(['high', 'medium', 'low'] as const).map((level) => (
                         <div key={level} className="flex items-center gap-2 text-xs">
@@ -38,14 +38,14 @@ export const MapLegend: React.FC = () => {
                             <div className="absolute inset-0 rounded-full animate-ping"
                                 style={{ backgroundColor: severityColors.high, opacity: 0.4 }} />
                         </div>
-                        <span>Đã xác minh</span>
+                        <span>Verified</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs pt-1 border-t mt-1">
                         <div className="w-4 h-4 rounded flex items-center justify-center shrink-0 text-[10px]"
                             style={{ background: 'rgba(255,154,60,0.15)', border: '1.5px solid #ff9a3c' }}>
                             📰
                         </div>
-                        <span>Tin tức toàn cầu</span>
+                        <span>Global news</span>
                     </div>
                 </div>
             </div>

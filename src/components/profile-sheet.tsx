@@ -64,14 +64,14 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
 
     const handleSave = async () => {
         if (!name.trim()) {
-            toast.error('Tên không được để trống');
+            toast.error('Name cannot be empty');
             return;
         }
         setIsSaving(true);
         try {
             await userService.updateMe({ name: name.trim(), avatar: avatarFile ?? undefined });
             await queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-            toast.success('Cập nhật thành công');
+            toast.success('Updated successfully');
             onOpenChange(false);
         } catch {
             // error toasted by service
@@ -86,8 +86,8 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                 side="right"
                 className="w-full max-w-sm p-0 flex flex-col overflow-hidden z-[300]"
             >
-                <SheetTitle className="sr-only">Chỉnh sửa hồ sơ</SheetTitle>
-                <SheetDescription className="sr-only">Cập nhật thông tin cá nhân và ảnh đại diện</SheetDescription>
+                <SheetTitle className="sr-only">Edit Profile</SheetTitle>
+                <SheetDescription className="sr-only">Update personal information and profile picture</SheetDescription>
                 {/* Hero section */}
                 <div className="relative bg-gradient-to-br from-red-500 to-red-700 px-6 pt-10 pb-16 flex flex-col items-center gap-3 shrink-0">
                     {/* Decorative circles */}
@@ -110,7 +110,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
                                 className="absolute bottom-0.5 right-0.5 rounded-full bg-white p-1.5 shadow-lg hover:bg-gray-50 transition-colors border border-gray-100"
-                                aria-label="Đổi ảnh đại diện"
+                                aria-label="Change profile picture"
                             >
                                 <Camera className="h-3.5 w-3.5 text-red-600" />
                             </button>
@@ -129,7 +129,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                             <svg className="h-3.5 w-3.5 text-white" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
                             </svg>
-                            <span className="text-white text-xs font-medium">Tài khoản Google</span>
+                            <span className="text-white text-xs font-medium">Google Account</span>
                         </div>
                     )}
 
@@ -143,13 +143,13 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                         {/* Edit name */}
                         <div className="flex flex-col gap-1.5">
                             <Label htmlFor="profile-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                                Tên hiển thị
+                                Display Name
                             </Label>
                             <Input
                                 id="profile-name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                placeholder="Nhập tên của bạn"
+                                placeholder="Enter your name"
                                 className="h-10"
                             />
                         </div>
@@ -158,7 +158,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
 
                         {/* Info rows */}
                         <div className="flex flex-col gap-3">
-                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Thông tin tài khoản</p>
+                            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Account Information</p>
 
                             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
                                 <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
@@ -175,7 +175,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                                     <Shield className="h-4 w-4 text-amber-500" />
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-[11px] text-muted-foreground">Vai trò</p>
+                                    <p className="text-[11px] text-muted-foreground">Role</p>
                                     <p className="text-sm font-medium">{profile?.role ?? '—'}</p>
                                 </div>
                             </div>
@@ -186,7 +186,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                                         <CheckCircle2 className="h-4 w-4 text-green-600" />
                                     </div>
                                     <div>
-                                        <p className="text-[11px] text-green-600">Ảnh mới đã chọn</p>
+                                        <p className="text-[11px] text-green-600">New image selected</p>
                                         <p className="text-sm font-medium text-green-700 truncate max-w-[180px]">{avatarFile.name}</p>
                                     </div>
                                 </div>
@@ -206,9 +206,9 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                                 )}
                             >
                                 {isSaving ? (
-                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang lưu...</>
+                                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
                                 ) : (
-                                    'Lưu thay đổi'
+                                    'Save Changes'
                                 )}
                             </Button>
                             <Button
@@ -217,7 +217,7 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
                                 disabled={isSaving}
                                 className="w-full h-10 text-muted-foreground"
                             >
-                                Hủy
+                                Cancel
                             </Button>
                         </div>
                     </div>

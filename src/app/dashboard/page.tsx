@@ -36,9 +36,9 @@ const DistrictBarChart = dynamic(() => import('./components/DistrictBarChart'), 
 gsap.registerPlugin(ScrollTrigger);
 
 const crimeTypeLabels: Record<string, string> = {
-  truy_na: 'Truy nã', nghi_pham: 'Nghi phạm', dang_ngo: 'Đáng ngờ',
-  de_doa: 'Đe dọa', giet_nguoi: 'Giết người', bat_coc: 'Bắt cóc',
-  cuop_giat: 'Cướp giật', trom_cap: 'Trộm cắp',
+  truy_na: 'Wanted', nghi_pham: 'Suspect', dang_ngo: 'Suspicious',
+  de_doa: 'Threat', giet_nguoi: 'Homicide', bat_coc: 'Kidnapping',
+  cuop_giat: 'Robbery', trom_cap: 'Theft',
 };
 const typeColors = ['#ff3b3b', '#ff6b35', '#ffd700', '#00ff88', '#00d4ff', '#a855f7', '#ec4899', '#14b8a6'];
 
@@ -47,7 +47,7 @@ const severityColor = (s: string) =>
     s === 'medium' ? 'text-[#ffd700] border-[#ffd700]/30 bg-[#ffd700]/10' :
       'text-[#00ff88] border-[#00ff88]/30 bg-[#00ff88]/10';
 
-const severityLabel = (s: string) => s === 'high' ? 'NGUY HIỂM' : s === 'medium' ? 'CẢNH BÁO' : 'AN TOÀN';
+const severityLabel = (s: string) => s === 'high' ? 'DANGEROUS' : s === 'medium' ? 'WARNING' : 'SAFE';
 
 export default function DashboardPage() {
   const { data: homeData, isLoading: homeLoading } = useHomeData();
@@ -95,10 +95,10 @@ export default function DashboardPage() {
   }, []);
 
   const summaryCards = useMemo(() => [
-    { title: 'TỔNG BÁO CÁO', value: statistics?.total, icon: FileWarning, color: '#00d4ff' },
-    { title: 'ĐANG HOẠT ĐỘNG', value: statistics?.activeAlerts, icon: Activity, color: '#ffd700' },
-    { title: 'MỨC ĐỘ CAO', value: statistics?.highSeverity, icon: AlertTriangle, color: '#ff3b3b' },
-    { title: 'ĐỐI TƯỢNG TRUY NÃ', value: homeData?.statistics.totalWanted, icon: Users, color: '#00ff88' },
+    { title: 'TOTAL REPORTS', value: statistics?.total, icon: FileWarning, color: '#00d4ff' },
+    { title: 'ACTIVE ALERTS', value: statistics?.activeAlerts, icon: Activity, color: '#ffd700' },
+    { title: 'HIGH SEVERITY', value: statistics?.highSeverity, icon: AlertTriangle, color: '#ff3b3b' },
+    { title: 'WANTED CRIMINALS', value: homeData?.statistics.totalWanted, icon: Users, color: '#00ff88' },
   ], [statistics, homeData]);
 
   const crimeTypeData = useMemo(() =>
@@ -148,7 +148,7 @@ export default function DashboardPage() {
             <div key={item.label} className="flex items-center gap-3 hud-border px-3 py-1.5 text-right">
               <span className="font-mono text-[9px] text-[#00d4ff]/50 tracking-widest">{item.label}</span>
               <span className="font-mono text-sm font-bold" style={{ color: item.color, textShadow: `0 0 10px ${item.color}80` }}>
-                {loading ? '—' : (item.val ?? 0).toLocaleString('vi-VN')}
+                {loading ? '—' : (item.val ?? 0).toLocaleString('en-US')}
               </span>
             </div>
           ))}
@@ -163,7 +163,7 @@ export default function DashboardPage() {
             </span>
             <span className="font-mono text-[10px] text-[#00d4ff]/40">|</span>
             <span className="font-mono text-[10px] text-[#00d4ff]/60">
-              {new Date().toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}
             </span>
             <span className="font-mono text-[10px] text-[#00d4ff]/40">|</span>
             <Link href="/map" className="flex items-center gap-1 font-mono text-[10px] text-[#00d4ff] hover:text-white transition-colors">
@@ -190,7 +190,7 @@ export default function DashboardPage() {
                 <stat.icon className="h-3.5 w-3.5 shrink-0" style={{ color: stat.color }} />
               </div>
               <div className="font-mono text-2xl md:text-3xl font-bold" style={{ color: stat.color, textShadow: `0 0 20px ${stat.color}60` }}>
-                {loading ? <Spinner className="h-6 w-6" /> : (stat.value ?? 0).toLocaleString('vi-VN')}
+                {loading ? <Spinner className="h-6 w-6" /> : (stat.value ?? 0).toLocaleString('en-US')}
               </div>
               {/* Bottom glow line */}
               <div className="absolute bottom-0 left-0 right-0 h-px opacity-40 group-hover:opacity-80 transition-opacity"
@@ -204,10 +204,10 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 ref={(el) => { headingRefs.current[0] = el; }} className="flex items-center gap-2 font-mono text-sm font-bold text-[#ff3b3b] uppercase tracking-widest">
               <Eye className="h-4 w-4" />
-              <span className="border-l-2 border-[#ff3b3b] pl-3">ĐỐI TƯỢNG TRUY NÃ MỚI NHẤT</span>
+              <span className="border-l-2 border-[#ff3b3b] pl-3">LATEST WANTED CRIMINALS</span>
             </h2>
             <Link href="/wanted" className="flex items-center gap-1 font-mono text-[10px] text-[#00d4ff] hover:text-white transition-colors">
-              XEM TẤT CẢ <ChevronRight className="h-3 w-3" />
+              VIEW ALL <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
           <div className="grid gap-3 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                   <p className="font-mono text-[10px] text-[#ffd700]/70 truncate">{person.crime}</p>
                   <p className="flex items-center gap-1 font-mono text-[10px] text-muted-foreground truncate">
                     <MapPin className="h-2.5 w-2.5 shrink-0" />
-                    {person.address ?? 'Chưa rõ'}
+                    {person.address ?? 'Unknown'}
                   </p>
                 </div>
                 {/* Right accent line */}
@@ -243,12 +243,12 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
             <Shield className="h-4 w-4 text-[#00d4ff]" />
             <h2 ref={(el) => { headingRefs.current[1] = el; }} className="font-mono text-sm font-bold text-[#00d4ff] uppercase tracking-widest">
-              THỐNG KÊ BÁO CÁO
+              REPORT STATISTICS
             </h2>
           </div>
           <div className="grid gap-6 lg:grid-cols-2 p-5">
             <div>
-              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-3">THEO LOẠI TỘI PHẠM</p>
+              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-3">BY CRIME TYPE</p>
               <div className="h-64">
                 <CrimeTypePieChart data={crimeTypeData} colors={typeColors} />
               </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
               )}
             </div>
             <div>
-              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-3">TOP QUẬN/HUYỆN</p>
+              <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest mb-3">TOP DISTRICTS</p>
               <div className="h-64">
                 <DistrictBarChart data={topDistricts} />
               </div>
@@ -277,7 +277,7 @@ export default function DashboardPage() {
           <div ref={(el) => { sectionRefs.current[2] = el; }} className="glass-card p-0 overflow-hidden">
             <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
               <Globe className="h-4 w-4 text-[#ffd700]" />
-              <h2 className="font-mono text-sm font-bold text-[#ffd700] uppercase tracking-widest">ĐIỂM NÓNG</h2>
+              <h2 className="font-mono text-sm font-bold text-[#ffd700] uppercase tracking-widest">HOTSPOTS</h2>
             </div>
             <div className="p-4 space-y-2">
               {heatmapLoading ? (
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                   <div className="space-y-0.5 min-w-0">
                     <p className="font-mono text-xs font-semibold text-white truncate">{point.district || point.province || 'N/A'}</p>
                     <p className="font-mono text-[10px] text-muted-foreground truncate">
-                      {crimeTypeLabels[point.crimeType] ?? point.crimeType} · {point.count.toLocaleString('vi-VN')} báo cáo
+                      {crimeTypeLabels[point.crimeType] ?? point.crimeType} · {point.count.toLocaleString('en-US')} reports
                     </p>
                   </div>
                   <span className={`font-mono text-[9px] font-bold px-2 py-1 rounded border shrink-0 ${severityColor(point.severity)}`}>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
               )) : (
-                <p className="font-mono text-[10px] text-muted-foreground py-4 text-center">KHÔNG CÓ DỮ LIỆU</p>
+                <p className="font-mono text-[10px] text-muted-foreground py-4 text-center">NO DATA AVAILABLE</p>
               )}
             </div>
           </div>
@@ -303,7 +303,7 @@ export default function DashboardPage() {
           <div ref={(el) => { sectionRefs.current[3] = el; }} className="glass-card p-0 overflow-hidden">
             <div className="flex items-center gap-3 px-5 py-4 border-b border-border/50">
               <Zap className="h-4 w-4 text-[#00ff88]" />
-              <h2 className="font-mono text-sm font-bold text-[#00ff88] uppercase tracking-widest">THÔNG BÁO HỆ THỐNG</h2>
+              <h2 className="font-mono text-sm font-bold text-[#00ff88] uppercase tracking-widest">SYSTEM NOTIFICATIONS</h2>
             </div>
             <div className="p-4 space-y-3">
               <div className="rounded border border-[#00ff88]/20 bg-[#00ff88]/5 p-3">
@@ -311,18 +311,18 @@ export default function DashboardPage() {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
                   <span className="font-mono text-[10px] text-[#00ff88] font-bold uppercase">ALL SYSTEMS NOMINAL</span>
                 </div>
-                <p className="font-mono text-[10px] text-muted-foreground">Không có cảnh báo nghiêm trọng. Hệ thống hoạt động bình thường.</p>
+                <p className="font-mono text-[10px] text-muted-foreground">No critical alerts. System operating normally.</p>
               </div>
               <div className="rounded border border-[#00d4ff]/20 bg-[#00d4ff]/5 p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Activity className="h-3 w-3 text-[#00d4ff]" />
                   <span className="font-mono text-[10px] text-[#00d4ff] font-bold uppercase">DATA SYNC ACTIVE</span>
                 </div>
-                <p className="font-mono text-[10px] text-muted-foreground">Dữ liệu đang được đồng bộ liên tục từ các nguồn báo cáo.</p>
+                <p className="font-mono text-[10px] text-muted-foreground">Data is being continuously synced from all report sources.</p>
               </div>
               <div className="mt-4 pt-4 border-t border-border/30">
                 <Link href="/map" className="flex items-center justify-between group rounded border border-[#ff3b3b]/30 bg-[#ff3b3b]/5 hover:bg-[#ff3b3b]/10 px-4 py-3 transition-colors">
-                  <span className="font-mono text-xs font-bold text-[#ff3b3b] uppercase">GỬI BÁO CÁO SỰ CỐ</span>
+                  <span className="font-mono text-xs font-bold text-[#ff3b3b] uppercase">SUBMIT INCIDENT REPORT</span>
                   <ChevronRight className="h-4 w-4 text-[#ff3b3b] group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>

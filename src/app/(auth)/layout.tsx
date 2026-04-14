@@ -67,7 +67,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
               </span>
             </Link>
             <p className="text-[10px] tracking-[0.28em] text-[#6b7a8d] uppercase">
-              Giám sát · Xác minh · Cảnh báo
+              Monitor · Verify · Alert
             </p>
           </div>
         </div>

@@ -3,10 +3,10 @@
 import React from 'react';
 
 const stats = [
-  { value: 'Real-time', label: 'Dashboard thống kê', color: '#00d4ff' },
-  { value: 'Bản đồ', label: 'Heatmap & marker tội phạm', color: '#ffd700' },
-  { value: 'Truy nã', label: 'Đồng bộ dữ liệu thật', color: '#ff3b3b' },
-  { value: 'Weather', label: 'Cảnh báo thiên tai', color: '#00ff88' },
+  { value: 'Real-time', label: 'Analytics Dashboard', color: '#00d4ff' },
+  { value: 'Map', label: 'Crime Heatmap & Markers', color: '#ffd700' },
+  { value: 'Wanted', label: 'Live Data Sync', color: '#ff3b3b' },
+  { value: 'Weather', label: 'Disaster Alerts', color: '#00ff88' },
 ];
 
 export const StatsSection: React.FC = () => (

@@ -9,7 +9,6 @@ import { useRealtime } from '@/hooks/use-realtime';
 import { useReportsQuery } from '@/hooks/use-crime-reports';
 import { AnimatePresence, motion } from 'motion/react';
 import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
 
 const severityIcon = (s: string) => {
     if (s === 'high')   return <AlertTriangle className="h-3.5 w-3.5 text-[#ff3b3b]" />;
@@ -75,7 +74,7 @@ export function NotificationBell() {
                         ? 'border-[rgba(0,212,255,0.4)] bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
                         : 'border-[rgba(255,255,255,0.1)] bg-transparent text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
                 )}
-                aria-label="Thông báo">
+                aria-label="Notifications">
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
                     <motion.span
@@ -102,21 +101,21 @@ export function NotificationBell() {
                         <div className="flex items-center justify-between px-4 py-3 border-b border-[rgba(0,212,255,0.1)]">
                             <div className="flex items-center gap-2">
                                 <div className="w-1.5 h-1.5 rounded-full bg-[#00ff88] animate-pulse" />
-                                <span className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">Thông Báo</span>
+                                <span className="font-mono text-[10px] text-[#00d4ff]/60 uppercase tracking-widest">Notifications</span>
                                 {unreadCount > 0 && (
                                     <span className="font-mono text-[9px] text-[#ff3b3b] border border-[rgba(255,59,59,0.3)] px-1.5 rounded">
-                                        {unreadCount} mới
+                                        {unreadCount} new
                                     </span>
                                 )}
                             </div>
                             <div className="flex items-center gap-1">
                                 {unreadCount > 0 && (
-                                    <button onClick={markAllRead} className="p-1 rounded text-[#8899aa] hover:text-[#00d4ff] transition-colors" title="Đánh dấu tất cả đã đọc">
+                                    <button onClick={markAllRead} className="p-1 rounded text-[#8899aa] hover:text-[#00d4ff] transition-colors" title="Mark all as read">
                                         <CheckCheck className="h-3.5 w-3.5" />
                                     </button>
                                 )}
                                 {notifications.length > 0 && (
-                                    <button onClick={clearAll} className="p-1 rounded text-[#8899aa] hover:text-[#ff3b3b] transition-colors" title="Xóa tất cả">
+                                    <button onClick={clearAll} className="p-1 rounded text-[#8899aa] hover:text-[#ff3b3b] transition-colors" title="Clear all">
                                         <Trash2 className="h-3.5 w-3.5" />
                                     </button>
                                 )}
@@ -131,7 +130,7 @@ export function NotificationBell() {
                             {notifications.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center py-10 gap-3">
                                     <Bell className="h-8 w-8 text-[#8899aa]/20" />
-                                    <p className="font-mono text-[10px] text-[#8899aa]/50 tracking-widest uppercase">Không có thông báo</p>
+                                    <p className="font-mono text-[10px] text-[#8899aa]/50 tracking-widest uppercase">No notifications</p>
                                 </div>
                             ) : (
                                 <AnimatePresence initial={false}>
@@ -161,7 +160,7 @@ export function NotificationBell() {
                                                 </div>
                                                 <p className="font-mono text-[9px] text-[#8899aa] truncate">{n.address}</p>
                                                 <p className="font-mono text-[9px] text-[#8899aa]/40">
-                                                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true, locale: vi })}
+                                                    {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
                                                 </p>
                                             </div>
 

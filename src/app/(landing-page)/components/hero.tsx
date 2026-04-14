@@ -133,20 +133,20 @@ export const HeroSection: React.FC<HeroProps> = ({ appUrl }) => {
           {/* Headline */}
           <div className="space-y-2">
             <h1 className="font-mono text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
-              <span className="text-white">BẢN ĐỒ</span><br />
-              <span className="text-white">CẢNH BÁO</span><br />
+              <span className="text-white">CRIME</span><br />
+              <span className="text-white">ALERT</span><br />
               <span style={{
                 background: 'linear-gradient(90deg, #ff3b3b, #ff6b35)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-              }}>TỘI PHẠM</span>
+              }}>MAP</span>
             </h1>
           </div>
 
           <p className="font-mono text-sm text-[#8899aa] leading-relaxed max-w-lg">
-            GuardM — hệ thống giám sát an ninh thời gian thực. Dashboard thống kê,
-            bản đồ tội phạm, báo cáo cộng đồng, danh sách truy nã và cảnh báo thời
-            tiết kết nối dữ liệu thật.
+            GuardM — a real-time security surveillance system. Statistics dashboard,
+            crime map, community reports, wanted criminals list, and weather alerts
+            connected to live data.
           </p>
 
           {/* Feature pills */}
@@ -154,7 +154,7 @@ export const HeroSection: React.FC<HeroProps> = ({ appUrl }) => {
             {[
               { icon: Activity, label: 'Real-time data', color: '#00d4ff' },
               { icon: MapPin, label: 'Heatmap & markers', color: '#ffd700' },
-              { icon: Shield, label: 'Phân quyền bảo mật', color: '#00ff88' },
+              { icon: Shield, label: 'Role-based security', color: '#00ff88' },
             ].map(({ icon: Icon, label, color }) => (
               <span key={label} className="flex items-center gap-1.5 font-mono text-[10px] px-2.5 py-1 rounded border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] text-[#8899aa]">
                 <Icon className="w-3 h-3" style={{ color }} />
@@ -168,7 +168,7 @@ export const HeroSection: React.FC<HeroProps> = ({ appUrl }) => {
             <a href={appUrl}
               className="group relative flex items-center gap-2.5 font-mono text-sm font-bold tracking-widest uppercase px-6 py-3 rounded border border-[rgba(255,59,59,0.5)] bg-[rgba(255,59,59,0.12)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.2)] hover:text-white transition-all duration-200 overflow-hidden">
               <span className="absolute inset-0 bg-gradient-to-r from-[rgba(255,59,59,0.1)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span className="relative">Truy cập ứng dụng</span>
+              <span className="relative">Access the app</span>
               <ChevronRight className="w-4 h-4 relative group-hover:translate-x-1 transition-transform" />
             </a>
           </div>

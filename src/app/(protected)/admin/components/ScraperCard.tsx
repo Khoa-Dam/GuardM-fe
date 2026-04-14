@@ -28,7 +28,7 @@ export function ScraperCard({
 }: ScraperCardProps) {
     const getStatusBadge = () => {
         if (!status?.status) {
-            return <Badge variant="outline">Chưa chạy</Badge>;
+            return <Badge variant="outline">Not run yet</Badge>;
         }
 
         switch (status.status.toLowerCase()) {
@@ -36,21 +36,21 @@ export function ScraperCard({
                 return (
                     <Badge className="bg-green-500">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Thành công
+                        Success
                     </Badge>
                 );
             case 'running':
                 return (
                     <Badge className="bg-blue-500">
                         <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        Đang chạy
+                        Running
                     </Badge>
                 );
             case 'error':
                 return (
                     <Badge variant="destructive">
                         <XCircle className="w-3 h-3 mr-1" />
-                        Lỗi
+                        Error
                     </Badge>
                 );
             default:
@@ -59,9 +59,9 @@ export function ScraperCard({
     };
 
     const formatDate = (dateString?: string) => {
-        if (!dateString) return 'Chưa có';
+        if (!dateString) return 'Never';
         try {
-            return new Date(dateString).toLocaleString('vi-VN');
+            return new Date(dateString).toLocaleString('en-US');
         } catch {
             return dateString;
         }
@@ -86,13 +86,13 @@ export function ScraperCard({
                     <div>
                         <p className="text-muted-foreground flex items-center gap-2">
                             <Clock className="w-4 h-4" />
-                            Lần chạy cuối
+                            Last run
                         </p>
                         <p className="font-medium">{formatDate(status?.lastRun)}</p>
                     </div>
                     <div>
-                        <p className="text-muted-foreground">Số lượng</p>
-                        <p className="font-medium">{status?.count ?? 0} bản ghi</p>
+                        <p className="text-muted-foreground">Count</p>
+                        <p className="font-medium">{status?.count ?? 0} records</p>
                     </div>
                 </div>
 
@@ -105,12 +105,12 @@ export function ScraperCard({
                     {isTriggering ? (
                         <>
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Đang chạy...
+                            Running...
                         </>
                     ) : (
                         <>
                             <Play className="w-4 h-4 mr-2" />
-                            Chạy Scraper
+                            Run Scraper
                         </>
                     )}
                 </Button>
