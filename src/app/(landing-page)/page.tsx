@@ -341,7 +341,7 @@ export default function LandingPage() {
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', letterSpacing: '0.3em', color: '#ff3b3b', textTransform: 'uppercase', marginBottom: '32px' }}>
             THREAT MONITOR / ACTIVE
           </div>
-          <h1 style={{ fontSize: 'clamp(3rem, 8vw, 8rem)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.02em', marginBottom: '32px' }}>
+          <h1 style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 'clamp(2rem, 6vw, 7rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: '32px' }}>
             {['Every', 'threat', 'leaves', 'a', 'trace'].map((w, i) => (
               <span key={i} className="hero-word" style={{ display: 'inline-block', marginRight: '0.25em' }}>{w}</span>
             ))}
@@ -452,7 +452,7 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', maxWidth: '600px', padding: '0 24px' }}>
             <div className="section-label" style={{ ...labelStyle, textAlign: 'center', marginBottom: '24px' }}>GUARDM / JOIN</div>
-            <h2 className="cta-heading" style={{ fontSize: 'clamp(2rem, 5vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '20px' }}>
+            <h2 className="cta-heading" style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 'clamp(2rem, 5vw, 4.5rem)', fontWeight: 800, lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: '20px' }}>
               Join the network.<br/>Protect your community.
             </h2>
             <p className="cta-body" style={{ fontFamily: "'Inter', sans-serif", fontSize: '1rem', color: '#6b7a8d', marginBottom: '40px', lineHeight: 1.6 }}>
@@ -492,10 +492,11 @@ const labelStyle: React.CSSProperties = {
 };
 
 const headingStyle: React.CSSProperties = {
+  fontFamily: "'Orbitron', sans-serif",
   fontSize: 'clamp(1.8rem, 3.5vw, 3.8rem)',
   fontWeight: 800,
   lineHeight: 1.1,
-  letterSpacing: '-0.02em',
+  letterSpacing: '0.02em',
   color: '#e8edf2',
   marginBottom: '20px',
 };

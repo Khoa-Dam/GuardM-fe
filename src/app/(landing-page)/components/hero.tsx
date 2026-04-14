@@ -132,7 +132,7 @@ export const HeroSection: React.FC<HeroProps> = ({ appUrl }) => {
 
           {/* Headline */}
           <div className="space-y-2">
-            <h1 className="font-mono text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight">
+            <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.1] tracking-wide">
               <span className="text-white">CRIME</span><br />
               <span className="text-white">ALERT</span><br />
               <span style={{
