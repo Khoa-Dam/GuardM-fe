@@ -1,4 +1,4 @@
-import { Inter, JetBrains_Mono, Merriweather } from "next/font/google";
+import { Inter, JetBrains_Mono, Merriweather, Orbitron } from "next/font/google";
 import localFont from "next/font/local";
 
 /* -----------------------------------------------------------------------------------------------
@@ -27,9 +27,10 @@ export const merriweather = Merriweather({
  * Local Fonts
  * -----------------------------------------------------------------------------------------------*/
 
-export const fontHeading = localFont({
-    src: "../../public/fonts/CalSans-SemiBold.woff",
+export const fontHeading = Orbitron({
     variable: "--font-heading",
+    subsets: ["latin"],
+    weight: ["400", "500", "600", "700", "800", "900"],
     display: "swap",
 });
 

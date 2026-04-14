@@ -412,16 +412,14 @@ export default function LandingPage() {
           style={{ position: 'absolute', inset: 0, opacity: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '48px', padding: '0 8vw', width: '100%' }}>
             {[
-              { value: '1247', suffix: '',   label: 'Reports Processed' },
-              { value: '5',    suffix: 'km', label: 'Alert Radius' },
-              { value: '98',   suffix: '%',  label: 'Verification Accuracy' },
-              { value: '200',  suffix: 'ms', label: 'WebSocket Latency' },
+              { value: 'Real-time', label: 'Crime Map Updates' },
+              { value: 'AI-powered', label: 'Area Risk Analysis' },
+              { value: 'Community', label: 'Verified Reports' },
+              { value: 'Open', label: 'Free to Use' },
             ].map((s, i) => (
               <div key={i} className="stat" style={{ textAlign: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
-                  <span className="stat-number" data-value={s.value} data-decimals="0"
-                    style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(2rem, 4vw, 4.5rem)', fontWeight: 800, color: '#e8edf2', lineHeight: 1 }}>0</span>
-                  {s.suffix && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '1.5rem', fontWeight: 400, color: '#ff3b3b' }}>{s.suffix}</span>}
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 'clamp(1.2rem, 2.5vw, 2.5rem)', fontWeight: 800, color: '#e8edf2', lineHeight: 1 }}>{s.value}</span>
                 </div>
                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '11px', letterSpacing: '0.15em', color: '#6b7a8d', textTransform: 'uppercase', marginTop: '8px' }}>{s.label}</div>
               </div>
