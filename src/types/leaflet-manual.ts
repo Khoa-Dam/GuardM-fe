@@ -12,6 +12,7 @@ export interface LeafletMarker {
     setLatLng(latLng: { lat: number; lng: number } | [number, number]): void;
     bindPopup(content: string, options?: Record<string, unknown>): LeafletMarker;
     setPopupContent(content: string): LeafletMarker;
+    bindTooltip(content: string, options?: Record<string, unknown>): LeafletMarker;
     openPopup(): void;
     getLatLng(): { lat: number; lng: number };
     on(event: string, handler: (...args: unknown[]) => void): void;
@@ -22,6 +23,18 @@ export interface LeafletLayerGroup {
     clearLayers(): void;
     addLayer(layer: unknown): LeafletLayerGroup;
     addTo(map: LeafletMap): LeafletLayerGroup;
+    remove(): void;
+}
+
+export interface LeafletCircle {
+    addTo(map: LeafletMap): LeafletCircle;
+    remove(): void;
+}
+
+export interface LeafletHeatLayer {
+    addTo(map: LeafletMap): LeafletHeatLayer;
+    remove(): void;
+    setLatLngs(latlngs: [number, number, number][]): void;
 }
 
 export interface LeafletWindow {
@@ -32,6 +45,9 @@ export interface LeafletWindow {
         map: (...args: unknown[]) => LeafletMap;
         tileLayer: (...args: unknown[]) => { addTo(map: LeafletMap): void };
         layerGroup: (...args: unknown[]) => LeafletLayerGroup;
+        markerClusterGroup?: (options?: Record<string, unknown>) => LeafletLayerGroup;
+        circle?: (latlng: [number, number], options?: Record<string, unknown>) => LeafletCircle;
+        heatLayer?: (latlngs: [number, number, number][], options?: Record<string, unknown>) => LeafletHeatLayer;
         control: { zoom: (...args: unknown[]) => { addTo(map: LeafletMap): void } };
         DomEvent: { stopPropagation: (e: unknown) => void };
     };

@@ -28,6 +28,11 @@ export const useLeaflet = () => {
     link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
     document.head.appendChild(link);
 
+    const clusterLink = document.createElement('link');
+    clusterLink.rel = 'stylesheet';
+    clusterLink.href = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css';
+    document.head.appendChild(clusterLink);
+
     const style = document.createElement('style');
     style.innerHTML = `
       .base-marker {
@@ -76,6 +81,29 @@ export const useLeaflet = () => {
       }
 
       @media (max-width: 640px) { .leaflet-control-zoom { display: none; } }
+
+      /* ── Marker Cluster dark theme ── */
+      .marker-cluster-small,
+      .marker-cluster-medium,
+      .marker-cluster-large {
+        background-color: rgba(0, 212, 255, 0.15) !important;
+      }
+      .marker-cluster-small div,
+      .marker-cluster-medium div,
+      .marker-cluster-large div {
+        background-color: rgba(0, 212, 255, 0.35) !important;
+        color: #fff !important;
+        font-family: 'Space Mono', monospace !important;
+        font-size: 11px !important;
+        font-weight: bold !important;
+        border: 1px solid rgba(0, 212, 255, 0.5) !important;
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.4) !important;
+      }
+      .marker-cluster-large div {
+        background-color: rgba(255, 59, 59, 0.4) !important;
+        border-color: rgba(255, 59, 59, 0.6) !important;
+        box-shadow: 0 0 12px rgba(255, 59, 59, 0.4) !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -84,7 +112,23 @@ export const useLeaflet = () => {
     script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
     script.async = true;
     script.crossOrigin = '';
-    script.onload = checkLeafletReady;
+    script.onload = () => {
+      // Load markercluster after Leaflet
+      const clusterScript = document.createElement('script');
+      clusterScript.id = 'leaflet-cluster-script';
+      clusterScript.src = 'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js';
+      clusterScript.async = true;
+      clusterScript.onload = () => {
+        // Load heat layer after markercluster
+        const heatScript = document.createElement('script');
+        heatScript.id = 'leaflet-heat-script';
+        heatScript.src = 'https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js';
+        heatScript.async = true;
+        heatScript.onload = checkLeafletReady;
+        document.body.appendChild(heatScript);
+      };
+      document.body.appendChild(clusterScript);
+    };
     document.body.appendChild(script);
   }, []);
 

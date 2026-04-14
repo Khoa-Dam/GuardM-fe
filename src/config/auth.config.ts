@@ -137,13 +137,6 @@ export const authConfig = {
             return refreshAccessToken(token)
         },
         async session({ session, token }) {
-            // Force sign out if token refresh failed
-            if (token.error) {
-                console.error('[Session Callback] Token refresh error detected, invalidating session')
-                // Return session with error flag — client will detect and sign out
-                return { ...session, error: token.error } as unknown as Session
-            }
-
             if (token) {
                 session.user = {
                     ...session.user,
@@ -153,8 +146,14 @@ export const authConfig = {
                     avatar: token.avatar as string | null,
                     isGoogleUser: token.isGoogleUser as boolean,
                 }
+                // Keep accessToken even on error so public requests still work
                 session.accessToken = token.accessToken as string
                 session.refreshToken = token.refreshToken as string
+            }
+            // Propagate error so useUser can sign out gracefully
+            if (token.error) {
+                console.error('[Session Callback] Token refresh error:', token.error)
+                return { ...session, error: token.error } as unknown as Session
             }
             return session
         },

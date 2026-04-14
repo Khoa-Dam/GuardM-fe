@@ -10,6 +10,7 @@ import { userService } from '@/service/user.service';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { NotificationBell } from './notification-bell';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -58,7 +59,7 @@ export function AppHeader() {
     };
 
     return (
-        <header className="sticky top-0 z-40 flex items-center justify-between w-full border-b bg-background px-4 md:px-6 py-1 shadow-sm">
+        <header className="sticky top-0 z-[200] flex items-center justify-between w-full border-b bg-background px-4 md:px-6 py-1 shadow-sm">
             {/* Left side */}
             <div className="flex items-center gap-2">
                 <Button
@@ -83,7 +84,8 @@ export function AppHeader() {
 
             {/* Right side */}
             <div className="flex items-center gap-3 md:gap-4">
-                <ThemeToggler className="border-dashed size-10 md:size-14" />
+                {/* <ThemeToggler className="border-dashed size-10 md:size-14" /> */}
+                {isAuthenticated && <NotificationBell />}
 
                 {isAuthenticated ? (
                     <>

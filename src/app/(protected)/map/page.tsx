@@ -1,394 +1,187 @@
 'use client';
 
-import type { LeafletMarker, LeafletWindow } from '@/types/leaflet-manual';
+import type { LeafletWindow } from '@/types/leaflet-manual';
 
-import { useEffect, useMemo, useRef, useState, Suspense } from 'react'; 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { toast } from 'sonner';
 import { useLeaflet } from '@/hooks/use-leaflet';
-import {
-    useReportsQuery,
-    useCreateReport,
-    useUpdateReport,
-    useDeleteReport,
-    useConfirmReport,
-    useDisputeReport
-} from '@/hooks/use-crime-reports';
+import { useReportsQuery } from '@/hooks/use-crime-reports';
 import ReportCard from './components/ReportCard';
 import { FilterBtn, DangerAlert, SearchBox, ReportForm } from './components';
+import { NewsPanel } from './components/NewsPanel';
 import { MapLegend } from './components/MapLegend';
-import { SAMPLE_DATA } from './mock-data';
-import { FilterType, VerificationCrimeReport } from '@/types/map';
-import { useMapInit, useMapGeolocation, useMapCrimeMarkers } from './hooks';
-import { reverseGeocode } from '@/utils/geocoding';
-import type { ReportLocationData, ReportFormPayload } from './components/ReportForm';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Loader2 } from 'lucide-react';
+import type { FilterType, VerificationCrimeReport } from '@/types/map';
+import {
+    useMapInit, useMapGeolocation, useMapCrimeMarkers, useMapHeatmap, useMapGlobalAlerts,
+    useMapFilters, useReportingMode, useMapActions,
+} from './hooks';
+import { CRIME_TYPE_OPTIONS, TIME_OPTIONS } from './hooks/use-map-filters';
+import { useGlobalAlerts } from '@/hooks/use-global-alerts';
+import {
+    Plus, Loader2, MapPin, Crosshair, Thermometer,
+    Clock, ChevronDown, ChevronUp, Filter, Brain, Globe,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { LiveIndicator } from './components/LiveIndicator';
+import { AISafetyPanel } from '@/components/ai-safety-panel';
+import { useRealtime } from '@/hooks/use-realtime';
+import { useNotifications } from '@/hooks/use-notifications';
+import { motion, AnimatePresence } from 'motion/react';
 
+// ── Crosshair overlay ─────────────────────────────────────────────────────────
+const CrosshairOverlay = () => (
+    <div className="absolute inset-0 pointer-events-none z-[44] flex items-center justify-center">
+        <div className="absolute top-1/2 left-0 right-0 h-px -translate-y-1/2"
+            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(0,212,255,0.25) 20%, rgba(0,212,255,0.7) 50%, rgba(0,212,255,0.25) 80%, transparent 100%)' }} />
+        <div className="absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2"
+            style={{ background: 'linear-gradient(180deg, transparent 0%, rgba(0,212,255,0.25) 20%, rgba(0,212,255,0.7) 50%, rgba(0,212,255,0.25) 80%, transparent 100%)' }} />
+        <div className="relative w-5 h-5">
+            <div className="absolute inset-0 rounded-full border border-[#00d4ff] animate-ping opacity-40" />
+            <div className="absolute inset-1 rounded-full bg-[#00d4ff]/80" style={{ boxShadow: '0 0 8px #00d4ff' }} />
+        </div>
+        {[['top-[calc(50%-28px)]','left-[calc(50%-28px)]','border-t','border-l'],
+          ['top-[calc(50%-28px)]','right-[calc(50%-28px)]','border-t','border-r'],
+          ['bottom-[calc(50%-28px)]','left-[calc(50%-28px)]','border-b','border-l'],
+          ['bottom-[calc(50%-28px)]','right-[calc(50%-28px)]','border-b','border-r'],
+        ].map((cls, i) => (
+            <div key={i} className={cn('absolute w-4 h-4 border-[#00d4ff]/60', ...cls)} style={{ borderWidth: '1.5px' }} />
+        ))}
+    </div>
+);
+
+// ── HUD overlay when in reporting mode ────────────────────────────────────────
+const HudOverlay = ({ lat, lng, address, isLoading }: { lat: number | null; lng: number | null; address: string; isLoading: boolean }) => (
+    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[46] pointer-events-none w-full max-w-sm px-4">
+        <div className="rounded border border-[rgba(0,212,255,0.4)] px-4 py-2.5"
+            style={{ background: 'rgba(6,10,20,0.92)', backdropFilter: 'blur(16px)', boxShadow: '0 0 24px rgba(0,212,255,0.15)' }}>
+            <div className="flex items-center gap-2 mb-1.5">
+                <Crosshair className="h-3 w-3 text-[#00d4ff] shrink-0" />
+                <span className="font-mono text-[9px] tracking-[0.25em] text-[#00d4ff]/60 uppercase">Chọn Vị Trí Báo Cáo</span>
+                {isLoading && <Loader2 className="h-3 w-3 text-[#00d4ff] animate-spin ml-auto" />}
+            </div>
+            <div className="flex gap-4 mb-1.5">
+                <span className="font-mono text-[10px] text-[#00d4ff]/50">
+                    LAT <span className="text-[#00d4ff] font-bold">{lat !== null ? lat.toFixed(6) : '—'}</span>
+                </span>
+                <span className="font-mono text-[10px] text-[#00d4ff]/50">
+                    LNG <span className="text-[#00d4ff] font-bold">{lng !== null ? lng.toFixed(6) : '—'}</span>
+                </span>
+            </div>
+            <p className="font-mono text-[10px] text-white/70 truncate leading-relaxed">
+                {isLoading ? 'Đang xác định địa chỉ...' : address || 'Kéo bản đồ để chọn vị trí'}
+            </p>
+        </div>
+    </div>
+);
+
+// ── Main map content ──────────────────────────────────────────────────────────
 const CrimeMapContent = () => {
-    const searchParams = useSearchParams();
-    const reportMarkerRef = useRef<LeafletMarker | null>(null);
-    const hasHandledQueryParams = useRef<string>('');
     const markerClickedRef = useRef(false);
-
-    const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
-    const [filter, setFilter] = useState<FilterType>('all');
-    const [isReportingMode, setIsReportingMode] = useState(false);
-    const [showReportForm, setShowReportForm] = useState(false);
-    const [reportLocation, setReportLocation] = useState<ReportLocationData | null>(null);
-    const [editingReportId, setEditingReportId] = useState<string | null>(null);
-    const [isLoadingAddress, setIsLoadingAddress] = useState(false);
-    
-    // Action state for UI feedback
-    const [actionState, setActionState] = useState<{ id: string | null; type: string | null }>({ id: null, type: null });
+    const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+    const [showAiPanel, setShowAiPanel] = useState(false);
 
     const isLeafletLoaded = useLeaflet();
-    
-    // React Query Hooks
+    const { addFromReport } = useNotifications();
+    const { subscribeArea } = useRealtime({ onReportCreated: addFromReport, onNearbyAlert: addFromReport });
+
     const { data: reports = [], isLoading: loading, error } = useReportsQuery();
-    const createReportMutation = useCreateReport();
-    const updateReportMutation = useUpdateReport();
-    const deleteReportMutation = useDeleteReport();
-    const confirmReportMutation = useConfirmReport();
-    const disputeReportMutation = useDisputeReport();
+    const { data: globalAlerts = [] } = useGlobalAlerts();
 
-    // Khởi tạo map
-    const { mapContainerRef, mapInstanceRef, markersLayerRef } = useMapInit(isLeafletLoaded);
-
-    // Quản lý geolocation và cảnh báo nguy hiểm
+    const { mapContainerRef, mapInstanceRef, markersLayerRef, zonesLayerRef } = useMapInit(isLeafletLoaded);
     const { handleGetLocation, alertMessage, setAlertMessage, currentLocation } = useMapGeolocation({
+        isLeafletLoaded, mapInstanceRef, reports,
+    });
+
+    // ── Domain hooks ─────────────────────────────────────────────────────────
+    const filters = useMapFilters(reports);
+
+    // Break circular dependency: reporting ↔ actions via refs
+    const onSelectReportRef = useRef<(id: string | null) => void>(() => {});
+    const onEditReportRef   = useRef<(r: VerificationCrimeReport) => void>(() => {});
+
+    const reporting = useReportingMode({
+        mapInstanceRef,
         isLeafletLoaded,
+        reports,
+        onSelectReport: useCallback((id) => onSelectReportRef.current(id), []),
+    });
+
+    const actions = useMapActions({
         mapInstanceRef,
         reports,
-    });
-
-    // Lọc reports theo filter
-    const filteredReports = useMemo(() => {
-        return reports.filter((report) => {
-            if (filter === 'all') return true;
-            return report.severityLevel === filter;
-        });
-    }, [reports, filter]);
-
-    // Render crime markers trên map
-    useMapCrimeMarkers({
+        loading,
         isLeafletLoaded,
-        mapInstanceRef,
-        markersLayerRef,
-        reports: isReportingMode ? [] : filteredReports,
-        onMarkerClick: (reportId) => {
-            markerClickedRef.current = true;
-            setSelectedReportId(reportId);
-        },
-        selectedReportId,
+        onEditReport: useCallback((r) => onEditReportRef.current(r), []),
     });
 
-    // Xử lý click trên map để đóng report card
-    // Kiểm tra markerClickedRef để tránh race condition với marker click handler
+    // Wire refs after both hooks are initialized
+    onSelectReportRef.current = actions.setSelectedReportId;
+    onEditReportRef.current   = reporting.handleEditReport;
+
+    // ── Map layer hooks ───────────────────────────────────────────────────────
+    useMapCrimeMarkers({
+        isLeafletLoaded, mapInstanceRef, markersLayerRef, zonesLayerRef,
+        reports: reporting.isReportingMode ? [] : filters.filteredReports,
+        onMarkerClick: useCallback((reportId: string) => {
+            markerClickedRef.current = true;
+            actions.setSelectedReportId(reportId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [actions.setSelectedReportId]),
+        selectedReportId: actions.selectedReportId,
+    });
+
+    useMapHeatmap({ isLeafletLoaded, mapInstanceRef, reports: filters.filteredReports, enabled: filters.showHeatmap });
+    useMapGlobalAlerts({ isLeafletLoaded, mapInstanceRef, alerts: globalAlerts, visible: filters.showGlobalAlerts && !reporting.isReportingMode });
+
+    // ── Track map center for AI panel ─────────────────────────────────────────
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map || !isLeafletLoaded) return;
+        const center = map.getCenter();
+        setMapCenter({ lat: center.lat, lng: center.lng });
+        const onMoveEnd = () => { const c = map.getCenter(); setMapCenter({ lat: c.lat, lng: c.lng }); };
+        map.on('moveend', onMoveEnd);
+        return () => { map.off('moveend', onMoveEnd); };
+    }, [mapInstanceRef, isLeafletLoaded]);
+
+    // Click map to deselect
     useEffect(() => {
         const map = mapInstanceRef.current;
         const L = (window as unknown as LeafletWindow).L;
         if (!map || !L) return;
         const handler = () => {
-            if (markerClickedRef.current) {
-                markerClickedRef.current = false;
-                return;
-            }
-            setSelectedReportId(null);
+            if (markerClickedRef.current) { markerClickedRef.current = false; return; }
+            actions.setSelectedReportId(null);
         };
         map.on('click', handler);
-        return () => {
-            map.off('click', handler);
-        };
-    }, [mapInstanceRef]);
+        return () => { map.off('click', handler); };
+    }, [mapInstanceRef, actions]);
 
-    // Xử lý lỗi
     useEffect(() => {
-        if (error) {
-            toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu');
-        }
+        if (error) toast.error(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải dữ liệu');
     }, [error]);
-
-    // Xử lý query params: focus hoặc edit report từ URL
-    useEffect(() => {
-        if (loading || !reports.length || !isLeafletLoaded) return;
-
-        const focusId = searchParams.get('focus');
-        const editId = searchParams.get('edit');
-        const currentParams = searchParams.toString();
-
-        // Nếu params chưa thay đổi so với lần xử lý trước thì bỏ qua
-        if (hasHandledQueryParams.current === currentParams) return;
-
-        const map = mapInstanceRef.current;
-
-        if (focusId) {
-            const report = reports.find((r) => r.id === focusId);
-            if (report && report.lat && report.lng) {
-                setSelectedReportId(focusId);
-                if (map) {
-                    map.flyTo([report.lat, report.lng], 16, { duration: 1.5 });
-                }
-                hasHandledQueryParams.current = currentParams;
-            } else if (report) {
-                setSelectedReportId(focusId);
-                hasHandledQueryParams.current = currentParams;
-            }
-        } else if (editId) {
-            const report = reports.find((r) => r.id === editId);
-            if (report) {
-                handleEditReport(report);
-                hasHandledQueryParams.current = currentParams;
-            } else {
-                // Nếu không tìm thấy report (có thể do không thuộc về user hoặc lỗi)
-                // Chỉ hiện thông báo 1 lần
-                if (hasHandledQueryParams.current !== currentParams) {
-                   // toast.error('Không tìm thấy báo cáo hoặc bạn không có quyền chỉnh sửa');
-                   // Không set handled = true để có thể retry nếu data update? 
-                   // Nhưng nếu data đã load xong mà không thấy thì là không thấy.
-                   hasHandledQueryParams.current = currentParams;
-                }
-            }
-        } else {
-            // No focus or edit param, but we should update ref to avoid stale state
-            // if user navigated from ?edit=1 to ?
-            hasHandledQueryParams.current = currentParams;
-        }
-    }, [searchParams, reports, loading, isLeafletLoaded, mapInstanceRef]);
-
-    // Handle reporting marker
-    useEffect(() => {
-        if (!isReportingMode || showReportForm) {
-            if (reportMarkerRef.current && mapInstanceRef.current) {
-                const map = mapInstanceRef.current;
-                map.removeLayer(reportMarkerRef.current);
-                reportMarkerRef.current = null;
-            }
-            // Removed auto-clear of reportLocation here to avoid race condition with handleEditReport
-            return;
-        }
-
-        const L = (window as unknown as { L: typeof import('leaflet') }).L;
-        const map = mapInstanceRef.current;
-        if (!L || !map) return;
-
-        const markerIcon = L.icon({
-            iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-        });
-
-        const center = map.getCenter();
-        const marker = L.marker([center.lat, center.lng], {
-            draggable: false,
-            icon: markerIcon,
-            zIndexOffset: 1000,
-        }).addTo(map);
-        reportMarkerRef.current = marker;
-
-        let isMounted = true;
-        const updateLocation = async () => {
-            const center = map.getCenter();
-            marker.setLatLng(center);
-
-            const { lat, lng } = center;
-
-            // Show loading state
-            setIsLoadingAddress(true);
-            marker.bindPopup(`<b>Vị trí đã chọn:</b><br/><span class="text-muted-foreground">Đang tải địa chỉ...</span>`, { autoPan: false }).openPopup();
-
-            const data = await reverseGeocode(lat, lng);
-            if (!isMounted) return;
-
-            setIsLoadingAddress(false);
-            setReportLocation({
-                lat,
-                lng,
-                address: data?.display_name || 'Không xác định được địa chỉ',
-                addressDetails: data?.address,
-            });
-            marker.bindPopup(`<b>Vị trí đã chọn:</b><br/>${data?.display_name || 'Không xác định được địa chỉ'}`, { autoPan: false }).openPopup();
-        };
-
-        // Update marker position immediately on move and show loading
-        const onMove = () => {
-            marker.setLatLng(map.getCenter());
-            setIsLoadingAddress(true);
-        };
-
-        // Update address only on moveend to save API calls
-        map.on('move', onMove);
-        map.on('moveend', updateLocation);
-
-        updateLocation();
-
-        return () => {
-            isMounted = false;
-            map.off('move', onMove);
-            map.off('moveend', updateLocation);
-            map.removeLayer(marker);
-            reportMarkerRef.current = null;
-        };
-    }, [isReportingMode, showReportForm, isLeafletLoaded, mapInstanceRef]);
-
-    const handleSelectSearchLocation = async (lat: number, lng: number) => {
-        const map = mapInstanceRef.current;
-        if (!map) return;
-        map.flyTo([lat, lng], 16, { duration: 1.5 });
-    };
-
-    const updateReportMarkerLocation = async (latitude: number, longitude: number) => {
-        const map = mapInstanceRef.current;
-        if (!map) return;
-        map.flyTo([latitude, longitude], 16, { duration: 1.5 });
-    };
 
     const handleLocationButtonClick = () => {
         handleGetLocation();
-
-        if (isReportingMode && !showReportForm) {
+        if (reporting.isReportingMode && !reporting.showReportForm) {
             if (currentLocation) {
-                updateReportMarkerLocation(currentLocation.lat, currentLocation.lng);
+                mapInstanceRef.current?.flyTo([currentLocation.lat, currentLocation.lng], 16, { duration: 1.5 });
             } else if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    ({ coords }) => updateReportMarkerLocation(coords.latitude, coords.longitude),
-                    () => toast.error('Không thể xác định vị trí hiện tại của bạn')
+                    ({ coords }) => mapInstanceRef.current?.flyTo([coords.latitude, coords.longitude], 16, { duration: 1.5 }),
+                    () => toast.error('Không thể xác định vị trí'),
                 );
             }
         }
     };
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const selectedReport = reports.find(r => r.id === actions.selectedReportId);
 
-    const buildReportPayload = (data: ReportFormPayload) => ({
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        lat: data.lat,
-        lng: data.lng,
-        address: data.address,
-        areaCode: data.areaCode,
-        province: data.province,
-        district: data.district,
-        ward: data.ward,
-        street: data.street,
-        source: data.source,
-        severity: data.severity,
-        reportedAt: data.reportedAt ? new Date(data.reportedAt) : undefined,
-        attachments: data.attachments,
-    });
-
-    const router = useRouter(); // Add useRouter
-
-    const handleReportSubmit = async (data: ReportFormPayload) => {
-        setIsSubmitting(true);
-        try {
-            const payload = buildReportPayload(data);
-            if (editingReportId) {
-                await updateReportMutation.mutateAsync({ id: editingReportId, payload });
-                toast.success('Đã cập nhật báo cáo thành công');
-            } else {
-                const created = await createReportMutation.mutateAsync(payload);
-                toast.success('Đã gửi báo cáo thành công!');
-                setSelectedReportId(created.id);
-            }
-            setShowReportForm(false);
-            setIsReportingMode(false);
-            setReportLocation(null);
-            setEditingReportId(null);
-            
-            // Clear query params
-            router.replace('/map');
-        } catch (err: unknown) {
-            console.error('Report submit error:', err);
-            toast.error(err instanceof Error ? err.message : 'Không thể xử lý báo cáo');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleCancelReporting = () => {
-        setIsReportingMode(false);
-        setShowReportForm(false);
-        setReportLocation(null);
-        setEditingReportId(null);
-        
-        // Clear query params
-        router.replace('/map');
-    };
-
-    const handleConfirm = async (id: string) => {
-        setActionState({ id, type: 'confirm' });
-        try {
-            await confirmReportMutation.mutateAsync(id);
-            toast.success('Đã gửi xác nhận (+5 điểm tin cậy)');
-        } catch (err: unknown) {
-            toast.error(err instanceof Error ? err.message : 'Không thể xác nhận báo cáo');
-        } finally {
-            setActionState({ id: null, type: null });
-        }
-    };
-
-    const handleDispute = async (id: string) => {
-        setActionState({ id, type: 'dispute' });
-        try {
-            await disputeReportMutation.mutateAsync(id);
-            toast.error('Đã báo cáo sai lệch (-10 điểm tin cậy)');
-        } catch (err: unknown) {
-            toast.error(err instanceof Error ? err.message : 'Không thể báo cáo sai lệch');
-        } finally {
-            setActionState({ id: null, type: null });
-        }
-    };
-
-    const handleEditReport = (report: VerificationCrimeReport) => {
-        setEditingReportId(report.id);
-        setSelectedReportId(null);
-        // Set location for edit form
-        if (report.lat && report.lng) {
-            const lat = Number(report.lat);
-            const lng = Number(report.lng);
-            setReportLocation({
-                lat,
-                lng,
-                address: report.address || '',
-                addressDetails: {
-                    city: report.district || '',
-                    city_district: report.ward || '',
-                    province: report.province || '',
-                    road: report.street || '',
-                },
-            });
-            setIsReportingMode(true);
-            setShowReportForm(true);
-        } else {
-            toast.error('Báo cáo này không có thông tin vị trí');
-        }
-    };
-
-    const handleDeleteReport = async (id: string) => {
-        try {
-            await deleteReportMutation.mutateAsync(id);
-            toast.success('Đã xóa báo cáo thành công');
-            if (selectedReportId === id) {
-                setSelectedReportId(null);
-            }
-        } catch (err: unknown) {
-            toast.error(err instanceof Error ? err.message : 'Không thể xóa báo cáo');
-        }
-    };
-
-    const selectedReport = reports.find((r) => r.id === selectedReportId);
-
+    // ── Render ────────────────────────────────────────────────────────────────
     return (
         <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14]">
-            {alertMessage && (
-                <DangerAlert message={alertMessage} onClose={() => setAlertMessage(null)} />
-            )}
+            {alertMessage && <DangerAlert message={alertMessage} onClose={() => setAlertMessage(null)} />}
+
             {(!isLeafletLoaded || loading) && (
                 <div className="absolute inset-0 bg-[rgba(6,10,20,0.92)] backdrop-blur-sm z-[2000] flex flex-col items-center justify-center">
                     <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
@@ -396,167 +189,242 @@ const CrimeMapContent = () => {
                 </div>
             )}
 
-            <div className="absolute top-4 left-4 right-4 z-45 flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x pointer-events-none">
-                {!isReportingMode ? (
-                    <>
-                        {/* Mobile: Select (chỉ hiển thị 1 filter) */}
-                        <div className="md:hidden pointer-events-auto dark:text-black">
-                            <Select
-                                value={filter}
-                                onValueChange={(value: FilterType) => setFilter(value)}
-                            >
-                                <SelectTrigger className="w-full min-w-[140px]">
-                                    <SelectValue>
-                                        {filter === 'all'
-                                            ? 'Tất cả'
-                                            : filter === 'high'
-                                                ? 'Nguy hiểm cao'
-                                                : filter === 'medium'
-                                                    ? 'Trung bình'
-                                                    : 'Thấp'}
-                                    </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Tất cả</SelectItem>
-                                    <SelectItem value="high">Nguy hiểm cao</SelectItem>
-                                    <SelectItem value="medium">Trung bình</SelectItem>
-                                    <SelectItem value="low">Thấp</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+            {reporting.isReportingMode && !reporting.showReportForm && <CrosshairOverlay />}
 
-                        {/* Desktop: Filter buttons */}
-                        <div className="hidden md:flex gap-2 pointer-events-auto dark:text-black">
-                            <FilterBtn active={filter === 'all'} onClick={() => setFilter('all')}>
-                                Tất cả
-                            </FilterBtn>
-                            <FilterBtn active={filter === 'high'} onClick={() => setFilter('high')}>
-                                Nguy hiểm cao
-                            </FilterBtn>
-                            <FilterBtn active={filter === 'medium'} onClick={() => setFilter('medium')}>
-                                Trung bình
-                            </FilterBtn>
-                            <FilterBtn active={filter === 'low'} onClick={() => setFilter('low')}>
-                                Thấp
-                            </FilterBtn>
+            {/* HUD / Filter bar */}
+            {reporting.isReportingMode && !reporting.showReportForm ? (
+                <HudOverlay
+                    lat={reporting.liveCoords?.lat ?? reporting.reportLocation?.lat ?? null}
+                    lng={reporting.liveCoords?.lng ?? reporting.reportLocation?.lng ?? null}
+                    address={reporting.reportLocation?.address ?? ''}
+                    isLoading={reporting.isLoadingAddress}
+                />
+            ) : !reporting.isReportingMode && (
+                <div className="absolute top-3 left-3 right-3 z-[45] space-y-1.5 pointer-events-none">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <div className="flex gap-1.5 pointer-events-auto flex-wrap">
+                            {([
+                                { value: 'all' as FilterType,    label: 'Tất cả',     color: '#00d4ff' },
+                                { value: 'high' as FilterType,   label: 'Nguy hiểm',  color: '#ff3b3b' },
+                                { value: 'medium' as FilterType, label: 'Trung bình', color: '#ffd700' },
+                                { value: 'low' as FilterType,    label: 'Thấp',       color: '#00ff88' },
+                            ] as const).map(opt => (
+                                <FilterBtn key={opt.value} active={filters.severityFilter === opt.value}
+                                    onClick={() => filters.setSeverityFilter(opt.value)} color={opt.color}>
+                                    {opt.label}
+                                </FilterBtn>
+                            ))}
                         </div>
-                    </>
-                ) : (
-                    <Badge variant="secondary" className="mx-auto bg-black/70 text-white border-0 pointer-events-auto flex items-center gap-2">
-                        {isLoadingAddress && <Loader2 className="h-3 w-3 animate-spin" />}
-                        {isLoadingAddress ? 'Đang tải địa chỉ...' : 'Kéo bản đồ để chọn vị trí chính xác'}
-                    </Badge>
-                )}
-            </div>
+                        <div className="ml-auto flex gap-1.5 pointer-events-auto">
+                            <button onClick={() => filters.setShowGlobalAlerts(v => !v)}
+                                title={`${filters.showGlobalAlerts ? 'Ẩn' : 'Hiện'} tin tức (${globalAlerts.length})`}
+                                className={cn(
+                                    'relative flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                                    filters.showGlobalAlerts
+                                        ? 'border-[rgba(255,154,60,0.6)] bg-[rgba(255,154,60,0.15)] text-[#ff9a3c]'
+                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
+                                )}>
+                                <Globe className="h-3 w-3" />
+                                <span className="hidden sm:inline">Tin tức</span>
+                                {globalAlerts.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff9a3c] font-mono text-[7px] flex items-center justify-center text-white font-bold">
+                                        {globalAlerts.length > 99 ? '99' : globalAlerts.length}
+                                    </span>
+                                )}
+                            </button>
+                            <button onClick={() => filters.setShowHeatmap(v => !v)}
+                                className={cn(
+                                    'flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                                    filters.showHeatmap
+                                        ? 'border-[rgba(255,107,53,0.6)] bg-[rgba(255,107,53,0.15)] text-[#ff6b35]'
+                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
+                                )}>
+                                <Thermometer className="h-3 w-3" />
+                                <span className="hidden sm:inline">Nhiệt</span>
+                            </button>
+                            <button onClick={() => filters.setShowExtraFilters(v => !v)}
+                                className={cn(
+                                    'relative flex items-center gap-1 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                                    filters.showExtraFilters
+                                        ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
+                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white'
+                                )}>
+                                <Filter className="h-3 w-3" />
+                                {filters.activeFilterCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff3b3b] font-mono text-[8px] flex items-center justify-center text-white">
+                                        {filters.activeFilterCount}
+                                    </span>
+                                )}
+                                {filters.showExtraFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                            </button>
+                        </div>
+                    </div>
+
+                    {filters.showExtraFilters && (
+                        <div className="space-y-1.5 pointer-events-auto">
+                            <div className="flex items-center gap-1.5 flex-wrap rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
+                                style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
+                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">LOẠI TỘI</span>
+                                <div className="flex gap-1 flex-wrap">
+                                    {CRIME_TYPE_OPTIONS.map(opt => (
+                                        <button key={opt.value}
+                                            onClick={() => filters.setCrimeTypeFilter(opt.value)}
+                                            className={cn(
+                                                'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
+                                                filters.crimeTypeFilter === opt.value
+                                                    ? 'text-white'
+                                                    : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)] bg-transparent'
+                                            )}
+                                            style={filters.crimeTypeFilter === opt.value ? {
+                                                borderColor: `${opt.color}60`,
+                                                backgroundColor: `${opt.color}18`,
+                                                color: opt.color,
+                                            } : {}}>
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
+                                style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
+                                <Clock className="h-3 w-3 text-[#00d4ff]/40 shrink-0" />
+                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">THỜI GIAN</span>
+                                <div className="flex gap-1">
+                                    {TIME_OPTIONS.map(opt => (
+                                        <button key={opt.value}
+                                            onClick={() => filters.setTimeRange(opt.value)}
+                                            className={cn(
+                                                'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
+                                                filters.timeRange === opt.value
+                                                    ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.15)] text-[#00d4ff]'
+                                                    : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white bg-transparent'
+                                            )}>
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                                <span className="ml-auto font-mono text-[9px] text-[#8899aa]">
+                                    {filters.filteredReports.length} <span className="text-[#00d4ff]/50">kết quả</span>
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {!reporting.isReportingMode && <LiveIndicator />}
+
+            <NewsPanel
+                alerts={globalAlerts}
+                open={filters.showGlobalAlerts && !reporting.isReportingMode}
+                onClose={() => filters.setShowGlobalAlerts(() => false)}
+                onSelectAlert={(alert) => {
+                    if (alert.lat && alert.lng) {
+                        mapInstanceRef.current?.flyTo([alert.lat, alert.lng], 13, { duration: 1.2 });
+                    }
+                }}
+            />
 
             <div ref={mapContainerRef} className="w-full h-full z-0 bg-[#060a14]" />
 
-            {/* Map Legend - Chú thích các icon */}
-            {!isReportingMode && <MapLegend />}
+            {!reporting.isReportingMode && <MapLegend />}
 
-            {isReportingMode && !showReportForm && (
-                <>
-                    <SearchBox onSelectLocation={handleSelectSearchLocation} />
-                    <div className="absolute bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-1000 flex gap-3 w-full max-w-xs px-4 pointer-events-auto">
-                        <Button
-                            variant="outline"
-                            onClick={handleCancelReporting}
-                            className="flex-1 shadow-lg dark:text-black dark:border-black"
-                            size="lg"
-                        >
-                            Hủy
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                if (!reportLocation || isLoadingAddress) {
-                                    toast.warning('Đang lấy vị trí, vui lòng đợi...');
-                                    return;
-                                }
-                                setShowReportForm(true);
-                            }}
-                            className="flex-1 shadow-lg"
-                            size="lg"
-                            disabled={!reportLocation || isLoadingAddress}
-                        >
-                            {isLoadingAddress ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    Đang tải...
-                                </>
-                            ) : (
-                                'Tiếp tục'
-                            )}
-                        </Button>
-                    </div>
-                </>
+            {reporting.isReportingMode && !reporting.showReportForm && (
+                <SearchBox onSelectLocation={(lat, lng) => mapInstanceRef.current?.flyTo([lat, lng], 16, { duration: 1.5 })} />
             )}
 
-            <Button
-                onClick={() => setIsReportingMode(true)}
-                className="absolute bottom-6 left-8  z-44 rounded-full shadow-lg pointer-events-auto bg-red-600 hover:bg-red-700"
-                size="lg"
-                disabled={isReportingMode}
+            {reporting.isReportingMode && !reporting.showReportForm && (
+                <div className="absolute bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[44] flex gap-2 w-full max-w-xs px-4 pointer-events-auto">
+                    <button onClick={reporting.handleCancelReporting}
+                        className="flex-1 font-mono text-xs border border-[rgba(255,255,255,0.15)] rounded bg-[rgba(6,10,20,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.3)] py-2.5 transition-all"
+                        style={{ backdropFilter: 'blur(12px)' }}>
+                        Hủy
+                    </button>
+                    <button onClick={reporting.handleConfirmLocation}
+                        disabled={!reporting.reportLocation || reporting.isLoadingAddress}
+                        className="flex-1 font-mono text-xs rounded border border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.12)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.2)] hover:text-white py-2.5 transition-all disabled:opacity-40"
+                        style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}>
+                        {reporting.isLoadingAddress
+                            ? <><Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1" />Đang tải...</>
+                            : <><Crosshair className="h-3.5 w-3.5 inline mr-1" />Xác nhận vị trí</>}
+                    </button>
+                </div>
+            )}
 
+            {!reporting.isReportingMode && (
+                <div className="absolute bottom-20 right-3 z-[44] w-auto sm:w-72 pointer-events-auto">
+                    <AnimatePresence>
+                        {showAiPanel && (
+                            <motion.div initial={{ opacity: 0, y: 10, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 10, scale: 0.97 }} transition={{ duration: 0.2 }} className="mb-2">
+                                <AISafetyPanel lat={mapCenter?.lat ?? null} lng={mapCenter?.lng ?? null} />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                    <button onClick={() => setShowAiPanel(v => !v)}
+                        className={cn(
+                            'flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest rounded border px-3 py-2 transition-all w-full justify-center',
+                            showAiPanel
+                                ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
+                                : 'border-[rgba(0,212,255,0.2)] bg-[rgba(6,10,20,0.85)] text-[#8899aa] hover:text-[#00d4ff]'
+                        )}
+                        style={{ backdropFilter: 'blur(12px)' }}>
+                        <Brain className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">AI Safety Analysis</span>
+                    </button>
+                </div>
+            )}
 
-            >
-                <Plus className="h-5 w-5 mr-2" />
-                Báo cáo ngay
-            </Button>
+            <button onClick={() => reporting.setIsReportingMode(true)} disabled={reporting.isReportingMode}
+                className="absolute bottom-6 left-6 z-[44] pointer-events-auto flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest rounded border border-[rgba(255,59,59,0.6)] bg-[rgba(255,59,59,0.15)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white px-4 py-2.5 transition-all disabled:opacity-40"
+                style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 20px rgba(255,59,59,0.2)' }}>
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Báo cáo ngay</span>
+                <span className="sm:hidden">Báo cáo</span>
+            </button>
 
-            <Button
-                variant="outline"
-                size="icon"
-                onClick={handleLocationButtonClick}
-                className="absolute bottom-6 right-12 z-[44] rounded-full shadow-lg pointer-events-auto h-12 w-12 group bg-[rgba(0,212,255,0.1)] border border-[rgba(0,212,255,0.3)] hover:bg-[rgba(0,212,255,0.2)] transition-colors"
-                title="Vị trí của tôi"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                    className="text-blue-600 group-hover:text-blue-700 transition-colors" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
-                </svg>
-            </Button>
+            <button onClick={handleLocationButtonClick}
+                className="absolute bottom-6 right-12 z-[44] pointer-events-auto w-11 h-11 rounded-full border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.1)] hover:bg-[rgba(0,212,255,0.2)] transition-all flex items-center justify-center"
+                title="Vị trí của tôi" style={{ backdropFilter: 'blur(12px)' }}>
+                <MapPin className="h-4 w-4 text-[#00d4ff]" />
+            </button>
 
-            {showReportForm && reportLocation && (
+            {reporting.showReportForm && reporting.reportLocation && (
                 <ReportForm
-                    locationData={reportLocation}
-                    onClose={() => {
-                        setShowReportForm(false);
-                        setEditingReportId(null);
-                    }}
-                    onSubmit={handleReportSubmit}
-                    isSubmitting={isSubmitting}
-                    report={editingReportId ? reports.find(r => r.id === editingReportId) : undefined}
+                    locationData={reporting.reportLocation}
+                    onClose={() => { reporting.setShowReportForm(false); reporting.setEditingReportId(null); }}
+                    onSubmit={reporting.handleReportSubmit}
+                    isSubmitting={reporting.isSubmitting}
+                    report={reporting.editingReportId ? reports.find(r => r.id === reporting.editingReportId) : undefined}
                 />
             )}
 
             {selectedReport && (
                 <ReportCard
                     report={selectedReport}
-                    onClose={() => setSelectedReportId(null)}
-                    onConfirm={handleConfirm}
-                    onDispute={handleDispute}
-                    onEdit={handleEditReport}
-                    onDelete={handleDeleteReport}
-                    isConfirming={actionState.id === selectedReport.id && actionState.type === 'confirm'}
-                    isDisputing={actionState.id === selectedReport.id && actionState.type === 'dispute'}
+                    onClose={() => actions.setSelectedReportId(null)}
+                    onConfirm={actions.handleConfirm}
+                    onDispute={actions.handleDispute}
+                    onEdit={reporting.handleEditReport}
+                    onDelete={actions.handleDeleteReport}
+                    isConfirming={actions.actionState.id === selectedReport.id && actions.actionState.type === 'confirm'}
+                    isDisputing={actions.actionState.id === selectedReport.id && actions.actionState.type === 'dispute'}
                 />
             )}
         </div>
     );
 };
 
-// 3. Tạo wrapper component để export và xử lý Suspense
-const CrimeMap = () => {
-    return (
-        <Suspense fallback={
-            <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14] flex flex-col items-center justify-center">
-                <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
-                <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Đang khởi tạo bản đồ...</span>
-            </div>
-        }>
-            <CrimeMapContent />
-        </Suspense>
-    );
-};
+// ── Export wrapper ────────────────────────────────────────────────────────────
+const CrimeMap = () => (
+    <Suspense fallback={
+        <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14] flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
+            <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Đang khởi tạo bản đồ...</span>
+        </div>
+    }>
+        <CrimeMapContent />
+    </Suspense>
+);
 
 export default CrimeMap;

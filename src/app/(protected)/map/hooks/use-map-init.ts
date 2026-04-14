@@ -6,6 +6,7 @@ export const useMapInit = (isLeafletLoaded: boolean) => {
     const mapContainerRef = useRef<HTMLDivElement>(null);
     const mapInstanceRef = useRef<LeafletMap | null>(null);
     const markersLayerRef = useRef<LeafletLayerGroup | null>(null);
+    const zonesLayerRef = useRef<LeafletLayerGroup | null>(null);
 
     useEffect(() => {
         if (!isLeafletLoaded || !mapContainerRef.current || mapInstanceRef.current) return;
@@ -22,10 +23,27 @@ export const useMapInit = (isLeafletLoaded: boolean) => {
             }).addTo(map);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            const markersLayer = L.layerGroup().addTo(map);
+            // Danger zone circles layer (regular layerGroup — circles can't be in cluster group)
+            const zonesLayer = L.layerGroup().addTo(map);
+
+            // Markers in cluster group with fallback
+            const markersLayer = (L.markerClusterGroup
+                ? L.markerClusterGroup({
+                    maxClusterRadius: 60,
+                    spiderfyOnMaxZoom: true,
+                    showCoverageOnHover: false,
+                    zoomToBoundsOnClick: true,
+                    chunkedLoading: true,
+                    animate: true,
+                    animateAddingMarkers: false,
+                    disableClusteringAtZoom: 17,
+                })
+                : L.layerGroup()
+            ).addTo(map);
 
             mapInstanceRef.current = map;
             markersLayerRef.current = markersLayer;
+            zonesLayerRef.current = zonesLayer;
         } catch (error) {
             console.error('Map Init Error:', error);
         }
@@ -35,6 +53,6 @@ export const useMapInit = (isLeafletLoaded: boolean) => {
         mapContainerRef,
         mapInstanceRef,
         markersLayerRef,
+        zonesLayerRef,
     };
 };
-

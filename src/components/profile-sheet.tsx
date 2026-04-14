@@ -7,6 +7,8 @@ import { Camera, Loader2, User, Mail, Shield, CheckCircle2 } from 'lucide-react'
 import {
     Sheet,
     SheetContent,
+    SheetTitle,
+    SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -82,8 +84,10 @@ export function ProfileSheet({ open, onOpenChange, profile, isGoogleUser }: Prof
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
                 side="right"
-                className="w-full max-w-sm p-0 flex flex-col overflow-hidden"
+                className="w-full max-w-sm p-0 flex flex-col overflow-hidden z-[300]"
             >
+                <SheetTitle className="sr-only">Chỉnh sửa hồ sơ</SheetTitle>
+                <SheetDescription className="sr-only">Cập nhật thông tin cá nhân và ảnh đại diện</SheetDescription>
                 {/* Hero section */}
                 <div className="relative bg-gradient-to-br from-red-500 to-red-700 px-6 pt-10 pb-16 flex flex-col items-center gap-3 shrink-0">
                     {/* Decorative circles */}

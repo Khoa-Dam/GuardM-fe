@@ -21,7 +21,7 @@ const DistrictBarChart = ({ data }: DistrictBarChartProps) => {
     }
 
     return (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height={256} minWidth={0}>
             <BarChart data={data}>
                 <XAxis
                     dataKey="district"

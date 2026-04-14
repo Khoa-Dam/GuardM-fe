@@ -3,27 +3,23 @@ import type { LeafletMap, LeafletLayerGroup, LeafletWindow } from '@/types/leafl
 import { useEffect } from 'react';
 import { VerificationLevel } from '@/types/map';
 import { VerificationCrimeReport } from '@/types/map';
+import { CRIME_TYPE_LABEL, SEVERITY_COLOR } from '@/constants/crime-constants';
 
 interface UseMapCrimeMarkersProps {
     isLeafletLoaded: boolean;
     mapInstanceRef: React.MutableRefObject<LeafletMap | null>;
     markersLayerRef: React.MutableRefObject<LeafletLayerGroup | null>;
+    zonesLayerRef: React.MutableRefObject<LeafletLayerGroup | null>;
     reports: VerificationCrimeReport[];
     onMarkerClick: (reportId: string) => void;
     selectedReportId?: string | null;
 }
 
-// Màu marker dựa trên mức độ nghiêm trọng (severityLevel)
-const severityColorMap: Record<string, { hex: string; rgb: string; shadow: string }> = {
-    low: { hex: '#56a381', rgb: '86, 163, 129', shadow: '0 0 0 2px rgba(86, 163, 129, 0.3)' },      // Xanh - Nguy hiểm thấp
-    medium: { hex: '#fcf160', rgb: '252, 241, 96', shadow: '0 0 0 2px rgba(252, 241, 96, 0.3)' },  // Vàng - Nguy hiểm trung bình
-    high: { hex: '#dd3121', rgb: '221, 49, 33', shadow: '0 0 0 2px rgba(221, 49, 33, 0.3)' },     // Đỏ - Nguy hiểm cao
-};
-
 export const useMapCrimeMarkers = ({
     isLeafletLoaded,
     mapInstanceRef,
     markersLayerRef,
+    zonesLayerRef,
     reports,
     onMarkerClick,
     selectedReportId,
@@ -33,29 +29,41 @@ export const useMapCrimeMarkers = ({
         if (!isLeafletLoaded || !mapInstanceRef.current || !markersLayerRef.current || !L) return;
 
         markersLayerRef.current.clearLayers();
+        if (zonesLayerRef.current) zonesLayerRef.current.clearLayers();
 
         reports.forEach((report) => {
             if (!report.lat || !report.lng) return;
 
             const isSelected = report.id === selectedReportId;
-
-            // Màu marker được quyết định bởi mức độ nghiêm trọng (severityLevel)
-            const color = severityColorMap[report.severityLevel] ?? severityColorMap.low;
+            const color = SEVERITY_COLOR[report.severityLevel] ?? SEVERITY_COLOR.low;
 
             const isVerified = [VerificationLevel.VERIFIED, VerificationLevel.CONFIRMED].includes(
                 report.verificationLevel ?? VerificationLevel.UNVERIFIED
             );
             const isUnverified = report.verificationLevel === VerificationLevel.UNVERIFIED;
 
-            // Tăng size nếu được chọn
+            // ── Danger zone circle for high severity ───────────────────────
+            if (report.severityLevel === 'high' && zonesLayerRef.current && L.circle) {
+                const zone = L.circle([report.lat as number, report.lng as number], {
+                    radius: 500,
+                    color: '#ff3b3b',
+                    fillColor: '#ff3b3b',
+                    fillOpacity: 0.04,
+                    opacity: 0.25,
+                    weight: 1,
+                    dashArray: '4 6',
+                });
+                // LeafletCircle.addTo accepts LeafletMap, cast via unknown
+                (zone.addTo as unknown as (layer: LeafletLayerGroup) => void)(zonesLayerRef.current);
+            }
+
+            // ── Marker ─────────────────────────────────────────────────────
             let size = isVerified ? 22 : 16;
-            if (isSelected) size = 32; // Size lớn hơn hẳn khi được chọn
+            if (isSelected) size = 32;
 
             const markerClass = isUnverified ? 'base-marker marker-unverified' : 'base-marker';
-            
-            // Style đặc biệt cho marker được chọn
-            const selectedStyle = isSelected 
-                ? `border: 3px solid #3b82f6; z-index: 1000; transform: scale(1.1); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), ${color.shadow};` 
+            const selectedStyle = isSelected
+                ? `border: 3px solid #3b82f6; z-index: 1000; transform: scale(1.1); box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5), ${color.shadow};`
                 : `box-shadow:${color.shadow}, 0 2px 4px rgba(0,0,0,0.2);`;
 
             const avatarUrl = report.reporterAvatar;
@@ -65,10 +73,10 @@ export const useMapCrimeMarkers = ({
 
             const html = `
         <div style="position: relative; width: ${size}px; height: ${size}px;">
-          ${isVerified || isSelected ? `<div class="pulse-ring" style="--color-rgb:${isSelected ? '59, 130, 246' : color.rgb}; width: ${size*2}px; height: ${size*2}px; top: -${size/2}px; left: -${size/2}px;"></div>` : ''}
+          ${isVerified || isSelected ? `<div class="pulse-ring" style="--color-rgb:${isSelected ? '59, 130, 246' : color.hex.replace('#', '').match(/.{2}/g)?.map(h => parseInt(h, 16)).join(', ') ?? '0,212,255'}; width: ${size * 2}px; height: ${size * 2}px; top: -${size / 2}px; left: -${size / 2}px;"></div>` : ''}
           ${avatarUrl
-            ? `<div style="width:100%;height:100%;border-radius:50%;overflow:hidden;border:2px solid ${isSelected ? '#3b82f6' : color.hex};box-shadow:${isSelected ? `0 0 0 3px rgba(59,130,246,0.4),` : ''}${color.shadow},0 2px 4px rgba(0,0,0,0.2);">${innerContent}</div>`
-            : innerContent}
+                ? `<div style="width:100%;height:100%;border-radius:50%;overflow:hidden;border:2px solid ${isSelected ? '#3b82f6' : color.hex};box-shadow:${isSelected ? `0 0 0 3px rgba(59,130,246,0.4),` : ''}${color.shadow},0 2px 4px rgba(0,0,0,0.2);">${innerContent}</div>`
+                : innerContent}
         </div>`;
 
             const marker = L.marker([report.lat, report.lng], {
@@ -78,8 +86,40 @@ export const useMapCrimeMarkers = ({
                     iconSize: [size, size],
                     iconAnchor: [size / 2, size / 2],
                 }),
-                zIndexOffset: isSelected ? 1000 : 0, // Đưa marker được chọn lên trên cùng
+                zIndexOffset: isSelected ? 1000 : 0,
             });
+
+            // ── Hover tooltip ─────────────────────────────────────────────
+            const typeLabel = CRIME_TYPE_LABEL[report.type ?? ''] ?? (report.type ?? 'Sự cố');
+            const severityLabel = report.severityLevel === 'high' ? '🔴 NGUY HIỂM' : report.severityLevel === 'medium' ? '🟡 CẢNH BÁO' : '🟢 THẤP';
+            const timeStr = report.reportedAt
+                ? new Date(report.reportedAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                : new Date(report.createdAt).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+            const tooltipHtml = `
+        <div style="
+          font-family: 'Space Mono', monospace;
+          font-size: 10px;
+          line-height: 1.5;
+          min-width: 160px;
+          max-width: 220px;
+        ">
+          <div style="font-weight:bold;color:#e0e8f0;margin-bottom:4px;font-size:11px;">${report.title || typeLabel}</div>
+          <div style="color:${color.hex};margin-bottom:3px;">${severityLabel}</div>
+          <div style="color:#8899aa;font-size:9px;">${typeLabel} · ${timeStr}</div>
+          ${report.reporterName ? `<div style="color:#8899aa;font-size:9px;margin-top:2px;">👤 ${report.reporterName}</div>` : ''}
+          <div style="color:#00d4ff;font-size:9px;margin-top:4px;border-top:1px solid rgba(0,212,255,0.15);padding-top:3px;">Click để xem chi tiết →</div>
+        </div>`;
+
+            marker.bindPopup(tooltipHtml, {
+                maxWidth: 240,
+                autoPan: false,
+                closeButton: false,
+                className: 'crime-tooltip-popup',
+            });
+
+            marker.on('mouseover', () => { marker.openPopup(); });
+            marker.on('mouseout', () => { (marker as unknown as { closePopup?: () => void }).closePopup?.(); });
 
             marker.on('click', (e: unknown) => {
                 L.DomEvent.stopPropagation(e);
@@ -89,6 +129,5 @@ export const useMapCrimeMarkers = ({
 
             markersLayerRef.current?.addLayer(marker);
         });
-    }, [reports, isLeafletLoaded, mapInstanceRef, markersLayerRef, onMarkerClick, selectedReportId]);
+    }, [reports, isLeafletLoaded, mapInstanceRef, markersLayerRef, zonesLayerRef, onMarkerClick, selectedReportId]);
 };
-

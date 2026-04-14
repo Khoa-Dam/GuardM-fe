@@ -9,6 +9,7 @@ import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { SessionProvider } from "@/providers/session-provider";
 import { QueryProvider } from "@/providers/query-provider";
+import { RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "next-themes";
 
 export const viewport: Viewport = {
@@ -78,17 +79,13 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         >
           <QueryProvider>
             <SessionProvider>
-              <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-              <main className="container mx-auto">
-                {children}
-              </main>
-              <Toaster />
-            </ThemeProvider>
+              <RealtimeProvider>
+
+                <main className="container mx-auto">
+                  {children}
+                </main>
+                <Toaster />
+              </RealtimeProvider>
             </SessionProvider>
           </QueryProvider>
 

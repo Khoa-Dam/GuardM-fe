@@ -4,157 +4,96 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { VerificationCrimeReport, VerificationLevel } from '@/types/map';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+    Dialog, DialogContent, DialogDescription,
+    DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { HeroVideoDialog } from '@/components/ui/hero-video-dialog';
-import { X, MapPin, Check, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Play, Image as ImageIcon, Pencil, Trash2 } from 'lucide-react';
+import { X, MapPin, Check, AlertTriangle, Loader2, ChevronLeft, ChevronRight, Play, Image as ImageIcon, Pencil, Trash2, Clock, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'motion/react';
 import reportService, { VoteStatus } from '@/service/report.service';
 import { useUser } from '@/hooks/use-user';
 
-// Helper to detect if URL is a video
-const isVideoUrl = (url: string): boolean => {
-    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
-    const videoHosts = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com'];
-
-    const lowerUrl = url.toLowerCase();
-
-    if (videoExtensions.some(ext => lowerUrl.includes(ext))) return true;
-    if (videoHosts.some(host => lowerUrl.includes(host))) return true;
-
-    return false;
+// ── Helpers ──────────────────────────────────────────────────────────────────
+const isVideoUrl = (url: string) => {
+    if (url.startsWith('data:video/')) return true;
+    const exts = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv'];
+    const hosts = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com'];
+    const l = url.toLowerCase();
+    return exts.some(e => l.includes(e)) || hosts.some(h => l.includes(h));
 };
+const isEmbeddable = (url: string) =>
+    ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com'].some(h => url.toLowerCase().includes(h));
 
-// Helper to check if video is embeddable (YouTube, Vimeo, etc.)
-const isEmbeddableVideo = (url: string): boolean => {
-    const videoHosts = ['youtube.com', 'youtu.be', 'vimeo.com', 'dailymotion.com'];
-    return videoHosts.some(host => url.toLowerCase().includes(host));
-};
-
-// Helper to get video embed URL
-const getVideoEmbedUrl = (url: string): string => {
-    // YouTube
-    if (url.includes('youtube.com/watch')) {
-        const videoId = new URL(url).searchParams.get('v');
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-    }
-    if (url.includes('youtu.be/')) {
-        const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-        return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-    }
-    // Vimeo
-    if (url.includes('vimeo.com/')) {
-        const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-        return `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-    }
+const getEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com/watch')) return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}?autoplay=1`;
+    if (url.includes('youtu.be/')) return `https://www.youtube.com/embed/${url.split('youtu.be/')[1]?.split('?')[0]}?autoplay=1`;
+    if (url.includes('vimeo.com/')) return `https://player.vimeo.com/video/${url.split('vimeo.com/')[1]?.split('?')[0]}?autoplay=1`;
     return url;
 };
-
-// Helper to get video thumbnail for embeddable videos
-const getVideoThumbnail = (url: string): string => {
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        let videoId = '';
-        if (url.includes('youtube.com/watch')) {
-            videoId = new URL(url).searchParams.get('v') || '';
-        } else if (url.includes('youtu.be/')) {
-            videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
-        }
-        return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-    }
-    return '';
+const getYtThumb = (url: string) => {
+    let id = '';
+    if (url.includes('youtube.com/watch')) id = new URL(url).searchParams.get('v') || '';
+    else if (url.includes('youtu.be/')) id = url.split('youtu.be/')[1]?.split('?')[0] || '';
+    return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : '';
 };
 
-// Native video player component for direct video files
+// ── Native video player ───────────────────────────────────────────────────────
 const NativeVideoPlayer: React.FC<{ src: string; className?: string }> = ({ src, className }) => {
     const [isPlaying, setIsPlaying] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
-
-    const handleClose = () => {
-        setIsPlaying(false);
-        if (videoRef.current) {
-            videoRef.current.pause();
-            videoRef.current.currentTime = 0;
-        }
-    };
-
+    const close = () => { setIsPlaying(false); videoRef.current?.pause(); if (videoRef.current) videoRef.current.currentTime = 0; };
     return (
-        <div className={cn("relative", className)}>
-            {/* Thumbnail/Preview */}
-            <button
-                type="button"
-                className="group relative w-full cursor-pointer border-0 bg-transparent p-0"
-                onClick={() => setIsPlaying(true)}
-            >
-                <video
-                    src={src}
-                    className="w-full h-auto max-h-72 object-cover rounded-md"
-                    style={{ aspectRatio: '16 / 9' }}
-                    muted
-                    playsInline
-                    preload="metadata"
-                />
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors rounded-md">
-                    <div className="bg-primary/90 flex size-14 items-center justify-center rounded-full backdrop-blur-sm shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="size-6 fill-white text-white ml-1" />
+        <div className={cn('relative', className)}>
+            <button type="button" className="group relative w-full cursor-pointer border-0 bg-transparent p-0" onClick={() => setIsPlaying(true)}>
+                <video src={src} className="w-full h-auto max-h-64 object-cover rounded" style={{ aspectRatio: '16/9' }} muted playsInline preload="metadata" />
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors rounded">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[rgba(0,212,255,0.15)] border border-[rgba(0,212,255,0.3)] backdrop-blur-sm">
+                        <Play className="h-5 w-5 fill-white text-white ml-0.5" />
                     </div>
                 </div>
             </button>
-
-            {/* Fullscreen Modal */}
-            {/* Fullscreen Modal */}
             {typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
                     {isPlaying && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md"
-                            onClick={handleClose}
-                        >
-                            <motion.div
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.9, opacity: 0 }}
-                                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                                className="relative w-full max-w-4xl mx-4"
-                                onClick={(e) => e.stopPropagation()}
-                            >
-                                <button
-                                    onClick={handleClose}
-                                    className="absolute -top-12 right-0 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-colors"
-                                >
-                                    <X className="size-5" />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md" onClick={close}>
+                            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+                                className="relative w-full max-w-4xl mx-4" onClick={e => e.stopPropagation()}>
+                                <button onClick={close} className="absolute -top-10 right-0 p-1.5 rounded border border-[rgba(255,255,255,0.1)] text-white/70 hover:text-white">
+                                    <X className="h-4 w-4" />
                                 </button>
-                                <video
-                                    ref={videoRef}
-                                    src={src}
-                                    className="w-full rounded-xl"
-                                    controls
-                                    autoPlay
-                                    playsInline
-                                />
+                                <video ref={videoRef} src={src} className="w-full rounded-lg" controls autoPlay playsInline />
                             </motion.div>
                         </motion.div>
                     )}
-                </AnimatePresence>,
-                document.body
+                </AnimatePresence>, document.body
             )}
         </div>
     );
 };
 
+// ── Severity config ──────────────────────────────────────────────────────────
+const severityConf = (level: string | undefined) => {
+    if (!level) return { color: '#8899aa', label: 'N/A' };
+    const map: Record<string, { color: string; label: string }> = {
+        high: { color: '#ff3b3b', label: 'NGUY HIỂM' },
+        medium: { color: '#ffd700', label: 'CẢNH BÁO' },
+        low: { color: '#00ff88', label: 'THẤP' },
+    };
+    return map[level] ?? { color: '#8899aa', label: level.toUpperCase() };
+};
+
+const verificationConf: Record<VerificationLevel, { label: string; color: string }> = {
+    [VerificationLevel.CONFIRMED]: { label: 'CHÍNH XÁC', color: '#00ff88' },
+    [VerificationLevel.VERIFIED]: { label: 'ĐÃ XÁC MINH', color: '#00d4ff' },
+    [VerificationLevel.PENDING]: { label: 'CHỜ XÁC MINH', color: '#ffd700' },
+    [VerificationLevel.UNVERIFIED]: { label: 'CHƯA XÁC MINH', color: '#ff3b3b' },
+};
+
+// ── Props ────────────────────────────────────────────────────────────────────
 interface ReportCardProps {
     report: VerificationCrimeReport;
     onClose: () => void;
@@ -166,460 +105,279 @@ interface ReportCardProps {
     isDisputing?: boolean;
 }
 
-const badgeByLevel: Record<VerificationLevel, { label: string; classes: string }> = {
-    [VerificationLevel.CONFIRMED]: {
-        label: 'CHÍNH XÁC',
-        classes: 'bg-green-100 text-green-700 border border-green-200',
-    },
-    [VerificationLevel.VERIFIED]: {
-        label: 'ĐÃ XÁC MINH',
-        classes: 'bg-blue-100 text-blue-700 border border-blue-200',
-    },
-    [VerificationLevel.PENDING]: {
-        label: 'CHỜ XÁC MINH',
-        classes: 'bg-yellow-100 text-yellow-700 border border-yellow-200',
-    },
-    [VerificationLevel.UNVERIFIED]: {
-        label: 'CHƯA XÁC MINH',
-        classes: 'bg-red-100 text-red-700 border border-red-200',
-    },
-};
-
-const scoreColor = (score: number | undefined) => {
-    if ((score ?? 0) >= 85) return 'bg-blue-500';
-    if ((score ?? 0) >= 70) return 'bg-green-500';
-    if ((score ?? 0) >= 40) return 'bg-yellow-500';
-    return 'bg-gray-400';
-};
-
+// ── Main component ───────────────────────────────────────────────────────────
 const ReportCard: React.FC<ReportCardProps> = ({
-    report,
-    onClose,
-    onConfirm,
-    onDispute,
-    onEdit,
-    onDelete,
-    isConfirming = false,
-    isDisputing = false,
+    report, onClose, onConfirm, onDispute, onEdit, onDelete,
+    isConfirming = false, isDisputing = false,
 }) => {
     const { userId } = useUser();
-    const badge = badgeByLevel[report.verificationLevel ?? VerificationLevel.UNVERIFIED];
-    const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+    const vconf = verificationConf[report.verificationLevel ?? VerificationLevel.UNVERIFIED];
+    const sconf = severityConf(report.severityLevel);
+
+    const [currentIdx, setCurrentIdx] = useState(0);
     const [voteStatus, setVoteStatus] = useState<VoteStatus | null>(null);
-    const [loadingVoteStatus, setLoadingVoteStatus] = useState(true);
+    const [loadingVote, setLoadingVote] = useState(true);
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
     const [isImageExpanded, setIsImageExpanded] = useState(false);
 
     const attachments = report.attachments || [];
-    const hasMultipleMedia = attachments.length > 1;
-    const currentMedia = attachments[currentMediaIndex];
+    const currentMedia = attachments[currentIdx];
     const isCurrentVideo = currentMedia ? isVideoUrl(currentMedia) : false;
-    const isCurrentEmbeddable = currentMedia ? isEmbeddableVideo(currentMedia) : false;
+    const imageCount = attachments.filter(u => !isVideoUrl(u)).length;
+    const videoCount = attachments.filter(u => isVideoUrl(u)).length;
 
-    // Fetch vote status
     useEffect(() => {
-        const fetchVoteStatus = async () => {
-            try {
-                setLoadingVoteStatus(true);
-                const status = await reportService.getVoteStatus(report.id);
-                setVoteStatus(status);
-            } catch {
-                // If error (e.g., not authenticated), set default
-                setVoteStatus({
-                    hasConfirmed: false,
-                    hasDisputed: false,
-                    voteCount: 0,
-                    canVote: true,
-                    isOwner: false,
-                });
-            } finally {
-                setLoadingVoteStatus(false);
-            }
-        };
-
-        fetchVoteStatus();
+        reportService.getVoteStatus(report.id)
+            .then(s => setVoteStatus(s))
+            .catch(() => setVoteStatus({ hasConfirmed: false, hasDisputed: false, voteCount: 0, canVote: true, isOwner: false }))
+            .finally(() => setLoadingVote(false));
     }, [report.id]);
 
-    // Refresh vote status after successful vote
-    const prevIsConfirmingRef = useRef(isConfirming);
-    const prevIsDisputingRef = useRef(isDisputing);
-
+    const prevConfRef = useRef(isConfirming);
+    const prevDispRef = useRef(isDisputing);
     useEffect(() => {
-        // Refresh when vote action completes (transitions from true to false)
-        if (
-            (prevIsConfirmingRef.current && !isConfirming) ||
-            (prevIsDisputingRef.current && !isDisputing)
-        ) {
-            const refreshVoteStatus = async () => {
-                try {
-                    const status = await reportService.getVoteStatus(report.id);
-                    setVoteStatus(status);
-                } catch {
-                    // Silently fail
-                }
-            };
-            refreshVoteStatus();
+        if ((prevConfRef.current && !isConfirming) || (prevDispRef.current && !isDisputing)) {
+            reportService.getVoteStatus(report.id).then(s => setVoteStatus(s)).catch(() => {});
         }
-
-        prevIsConfirmingRef.current = isConfirming;
-        prevIsDisputingRef.current = isDisputing;
+        prevConfRef.current = isConfirming;
+        prevDispRef.current = isDisputing;
     }, [isConfirming, isDisputing, report.id]);
 
-    // Check if user is owner - use both voteStatus.isOwner and direct comparison
     const isOwner = useMemo(() => {
-        // Primary check: from API vote status
-        if (voteStatus?.isOwner !== undefined) {
-            return voteStatus.isOwner;
-        }
-        // Fallback check: compare reporterId with userId
-        if (userId && report.reporterId) {
-            return report.reporterId === userId;
-        }
+        if (voteStatus?.isOwner !== undefined) return voteStatus.isOwner;
+        if (userId && report.reporterId) return report.reporterId === userId;
         return false;
     }, [voteStatus?.isOwner, userId, report.reporterId]);
 
-    // Calculate if buttons should be disabled
-    const canConfirm = voteStatus
-        ? voteStatus.canVote && !voteStatus.hasConfirmed && !isOwner
-        : !isOwner; // If no vote status, check ownership only
-    const canDispute = voteStatus
-        ? voteStatus.canVote && !voteStatus.hasDisputed && !isOwner
-        : !isOwner; // If no vote status, check ownership only
-
-    const goToPrevious = () => {
-        setCurrentMediaIndex((prev) => (prev === 0 ? attachments.length - 1 : prev - 1));
-    };
-
-    const goToNext = () => {
-        setCurrentMediaIndex((prev) => (prev === attachments.length - 1 ? 0 : prev + 1));
-    };
-
-    // Count images and videos
-    const imageCount = attachments.filter(url => !isVideoUrl(url)).length;
-    const videoCount = attachments.filter(url => isVideoUrl(url)).length;
+    const canConfirm = voteStatus ? voteStatus.canVote && !voteStatus.hasConfirmed && !isOwner : !isOwner;
+    const canDispute = voteStatus ? voteStatus.canVote && !voteStatus.hasDisputed && !isOwner : !isOwner;
+    const trustScore = report.trustScore ?? 0;
+    const trustColor = trustScore >= 70 ? '#00ff88' : trustScore >= 40 ? '#ffd700' : '#ff3b3b';
 
     return (
-        <div className="fixed md:absolute z-49 md:z-45 inset-0 md:inset-auto md:top-20 md:right-4 md:w-80 pointer-events-none md:pointer-events-auto flex items-center justify-center md:block p-4 md:p-0 bg-black/50 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
-            <Card className="w-full max-w-sm md:max-w-none max-h-full shadow-2xl pointer-events-auto animate-in zoom-in-95 p-1 gap-1 ">
-                {attachments.length ? (
-                    <div className="w-full overflow-hidden rounded-t-lg bg-muted">
-                        <div className="relative w-full">
-                            {isCurrentVideo ? (
-                                isCurrentEmbeddable ? (
-                                    // YouTube, Vimeo, etc. - use HeroVideoDialog with iframe
-                                    <HeroVideoDialog
-                                        animationStyle="from-center"
-                                        videoSrc={getVideoEmbedUrl(currentMedia)}
-                                        thumbnailSrc={getVideoThumbnail(currentMedia)}
-                                        thumbnailAlt="Video bằng chứng"
-                                        className="w-full"
-                                    />
-                                ) : (
-                                    // Direct video files (.mp4, .webm, etc.) - use native player
-                                    <NativeVideoPlayer
-                                        src={currentMedia}
-                                        className="w-full"
-                                    />
-                                )
-                            ) : (
-                                <div
-                                    className="relative w-full aspect-video max-h-72 rounded-md overflow-hidden cursor-zoom-in bg-muted"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsImageExpanded(true);
-                                    }}
-                                >
-                                    <Image
-                                        src={currentMedia}
-                                        alt={`Bằng chứng ${currentMediaIndex + 1}`}
-                                        fill
-                                        className="object-cover"
-                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                    />
-                                </div>
-                            )}
+        <div className="fixed md:absolute z-[49] md:z-[45] inset-0 md:inset-auto md:top-20 md:right-4 md:w-80 pointer-events-none md:pointer-events-auto flex items-center justify-center md:block p-4 md:p-0 bg-black/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none">
+            <div className="relative w-full max-w-sm md:max-w-none pointer-events-auto rounded border border-[rgba(0,212,255,0.18)] bg-[rgba(6,10,20,0.97)] overflow-hidden"
+                style={{ backdropFilter: 'blur(20px)', maxHeight: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
+                {/* Top accent */}
+                <div className="h-px w-full shrink-0" style={{ background: `linear-gradient(90deg, transparent, ${sconf.color}, transparent)`, opacity: 0.5 }} />
 
-                            {/* Navigation arrows for multiple media */}
-                            {hasMultipleMedia && (
-                                <>
-                                    <Button
-                                        variant="secondary"
-                                        size="icon"
-                                        onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
-                                        className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/80 text-white border-0"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        variant="secondary"
-                                        size="icon"
-                                        onClick={(e) => { e.stopPropagation(); goToNext(); }}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/60 hover:bg-black/80 text-white border-0"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
-                                </>
-                            )}
-
-                            {/* Top badges row */}
-                            <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
-                                {/* Media counts */}
-                                <div className="flex gap-1.5">
-                                    {imageCount > 0 && (
-                                        <Badge variant="secondary" className="bg-black/60 text-white border-0 text-[10px] px-1.5">
-                                            <ImageIcon className="h-3 w-3 mr-1" />
-                                            {imageCount}
-                                        </Badge>
-                                    )}
-                                    {videoCount > 0 && (
-                                        <Badge variant="secondary" className="bg-black/60 text-white border-0 text-[10px] px-1.5">
-                                            <Play className="h-3 w-3 mr-1" />
-                                            {videoCount}
-                                        </Badge>
-                                    )}
-                                </div>
-
-                                {/* Date badge */}
-                                <Badge variant="secondary" className="bg-black/60 text-white border-0">
-                                    {new Date(report.createdAt).toLocaleDateString('vi-VN')}
-                                </Badge>
+                {/* Media gallery */}
+                {attachments.length > 0 && (
+                    <div className="relative bg-black shrink-0">
+                        {isCurrentVideo ? (
+                            isEmbeddable(currentMedia)
+                                ? <HeroVideoDialog animationStyle="from-center" videoSrc={getEmbedUrl(currentMedia)} thumbnailSrc={getYtThumb(currentMedia)} thumbnailAlt="Video" className="w-full" />
+                                : <NativeVideoPlayer src={currentMedia} className="w-full" />
+                        ) : (
+                            <div className="relative w-full aspect-video max-h-56 overflow-hidden cursor-zoom-in"
+                                onClick={e => { e.stopPropagation(); setIsImageExpanded(true); }}>
+                                <Image src={currentMedia} alt={`Media ${currentIdx + 1}`} fill className="object-cover" sizes="320px" />
+                                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40" />
                             </div>
+                        )}
 
-                            {/* Dots indicator */}
-                            {hasMultipleMedia && (
-                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
-                                    {attachments.map((url, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={(e) => { e.stopPropagation(); setCurrentMediaIndex(index); }}
-                                            className={cn(
-                                                "w-2 h-2 rounded-full transition-[background-color,transform]",
-                                                index === currentMediaIndex
-                                                    ? "bg-white scale-110"
-                                                    : "bg-white/50 hover:bg-white/70"
-                                            )}
-                                            aria-label={`Xem ${isVideoUrl(url) ? 'video' : 'ảnh'} ${index + 1}`}
-                                        />
+                        {/* Top overlay: badge + date */}
+                        <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-10">
+                            <div className="flex gap-1.5">
+                                {imageCount > 0 && <span className="flex items-center gap-1 font-mono text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded backdrop-blur-sm"><ImageIcon className="h-2.5 w-2.5" />{imageCount}</span>}
+                                {videoCount > 0 && <span className="flex items-center gap-1 font-mono text-[9px] bg-black/70 text-white px-1.5 py-0.5 rounded backdrop-blur-sm"><Play className="h-2.5 w-2.5" />{videoCount}</span>}
+                            </div>
+                            <span className="font-mono text-[9px] bg-black/70 text-[#8899aa] px-1.5 py-0.5 rounded backdrop-blur-sm">
+                                {new Date(report.createdAt).toLocaleDateString('vi-VN')}
+                            </span>
+                        </div>
+
+                        {/* Nav arrows */}
+                        {attachments.length > 1 && (
+                            <>
+                                <button onClick={e => { e.stopPropagation(); setCurrentIdx(i => i === 0 ? attachments.length - 1 : i - 1); }}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-white hover:bg-black/80 transition-colors">
+                                    <ChevronLeft className="h-3.5 w-3.5" />
+                                </button>
+                                <button onClick={e => { e.stopPropagation(); setCurrentIdx(i => i === attachments.length - 1 ? 0 : i + 1); }}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/60 border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-white hover:bg-black/80 transition-colors">
+                                    <ChevronRight className="h-3.5 w-3.5" />
+                                </button>
+                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+                                    {attachments.map((_, i) => (
+                                        <button key={i} onClick={e => { e.stopPropagation(); setCurrentIdx(i); }}
+                                            className={cn("w-1.5 h-1.5 rounded-full transition-all", i === currentIdx ? "bg-white scale-125" : "bg-white/40")} />
                                     ))}
                                 </div>
-                            )}
-                        </div>
+                            </>
+                        )}
                     </div>
-                ) : null}
+                )}
 
-                <div className=' overflow-y-auto max-h-80 '>
-
-                    <CardHeader>
-                        <div className="flex justify-between items-start">
-                            <div className="space-y-1.5">
-                                <Badge className={`text-xs font-bold ${badge.classes}`}>
-                                    {badge.label}
-                                </Badge>
-                                <h3 className="font-bold text-lg leading-tight">{report.title}</h3>
-                            </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onClose}
-                                className="h-8 w-8 rounded-full"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </CardHeader>
-
-                    <CardContent className="space-y-2">
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted p-2 rounded-lg">
-                            <MapPin className="h-3.5 w-3.5 shrink-0" />
-                            <span className="">{report.address}</span>
-                        </div>
-
-                        <div className="p-3 rounded-lg border bg-card shadow-sm space-y-2">
-                            <div className="flex justify-between text-xs font-medium">
-                                <span>Độ tin cậy</span>
-                                <span className={cn((report.trustScore ?? 0) >= 70 ? 'text-green-600' : 'text-muted-foreground')}>
-                                    {report.trustScore ?? 0}/100
+                {/* Scrollable body */}
+                <div className="overflow-y-auto flex-1">
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-2">
+                        <div className="space-y-1.5 min-w-0">
+                            <div className="flex items-center gap-2">
+                                <span className="font-mono text-[9px] font-bold px-2 py-0.5 rounded border"
+                                    style={{ color: vconf.color, borderColor: `${vconf.color}30`, background: `${vconf.color}10` }}>
+                                    {vconf.label}
+                                </span>
+                                <span className="font-mono text-[9px] font-bold px-2 py-0.5 rounded border"
+                                    style={{ color: sconf.color, borderColor: `${sconf.color}30`, background: `${sconf.color}10` }}>
+                                    {sconf.label}
                                 </span>
                             </div>
-                            <div className="w-full bg-muted h-2 rounded-full overflow-hidden">
-                                <div
-                                    className={cn('h-full transition-[width,background-color] duration-700 ease-out', scoreColor(report.trustScore))}
-                                    style={{ width: `${report.trustScore ?? 0}%` }}
-                                />
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between text-[11px] text-muted-foreground">
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                    {report.confirmationCount ?? 0} Xác nhận
+                            <h3 className="font-mono text-sm font-bold text-white leading-tight">{report.title}</h3>
+                        </div>
+                        <button onClick={onClose}
+                            className="shrink-0 w-7 h-7 rounded border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-[#8899aa] hover:text-white hover:border-[rgba(255,59,59,0.4)] transition-colors">
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    </div>
+
+                    <div className="px-4 pb-4 space-y-3">
+                        {/* Location */}
+                        <div className="flex items-start gap-2 px-2.5 py-2 rounded border border-[rgba(0,212,255,0.12)] bg-[rgba(0,212,255,0.04)]">
+                            <MapPin className="h-3.5 w-3.5 text-[#00d4ff]/60 shrink-0 mt-0.5" />
+                            <span className="font-mono text-[10px] text-[#8899aa] leading-relaxed">{report.address}</span>
+                        </div>
+
+                        {/* Meta row */}
+                        <div className="flex items-center gap-3 text-[9px] font-mono text-[#8899aa]">
+                            {report.reporterName && (
+                                <span className="flex items-center gap-1">
+                                    <User className="h-2.5 w-2.5" />
+                                    {report.reporterName}
                                 </span>
-                                <span className="flex items-center gap-1.5">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                    {report.disputeCount ?? 0} Báo sai
+                            )}
+                            <span className="flex items-center gap-1">
+                                <Clock className="h-2.5 w-2.5" />
+                                {new Date(report.reportedAt ?? report.createdAt).toLocaleString('vi-VN')}
+                            </span>
+                        </div>
+
+                        {/* Trust score */}
+                        <div className="rounded border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-3 space-y-2">
+                            <div className="flex justify-between items-center">
+                                <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest">Độ tin cậy</span>
+                                <span className="font-mono text-xs font-bold" style={{ color: trustColor }}>{trustScore}/100</span>
+                            </div>
+                            <div className="h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
+                                <div className="h-full rounded-full transition-all duration-700"
+                                    style={{ width: `${trustScore}%`, backgroundColor: trustColor }} />
+                            </div>
+                            <div className="flex justify-between font-mono text-[9px]">
+                                <span className="flex items-center gap-1 text-[#00ff88]">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#00ff88]" />
+                                    {report.confirmationCount ?? 0} xác nhận
+                                </span>
+                                <span className="flex items-center gap-1 text-[#ff3b3b]">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#ff3b3b]" />
+                                    {report.disputeCount ?? 0} báo sai
                                 </span>
                             </div>
                         </div>
 
-                        <p className="text-sm text-muted-foreground leading-relaxed">{report.description}</p>
+                        {/* Description */}
+                        {report.description && (
+                            <p className="font-mono text-[11px] text-[#8899aa] leading-relaxed">{report.description}</p>
+                        )}
 
-                        {/* Vote buttons - hidden for owner */}
+                        {/* Vote buttons */}
                         {!isOwner && (
-                            <div className="grid grid-cols-2 gap-3">
-                                <Button
-                                    onClick={() => onConfirm(report.id)}
-                                    disabled={isConfirming || !canConfirm || loadingVoteStatus}
-                                    className="w-full"
-                                    title={
+                            <div className="grid grid-cols-2 gap-2">
+                                <button onClick={() => onConfirm(report.id)}
+                                    disabled={isConfirming || !canConfirm || loadingVote}
+                                    className={cn(
+                                        "flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border transition-all duration-200",
                                         voteStatus?.hasConfirmed
-                                            ? 'Bạn đã xác nhận báo cáo này rồi'
-                                            : !voteStatus?.canVote
-                                                ? 'Bạn đã vote tối đa 2 lần cho báo cáo này'
-                                                : undefined
-                                    }
-                                >
-                                    {isConfirming ? (
-                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                        <Check className="h-4 w-4 mr-2" />
-                                    )}
-                                    {isConfirming
-                                        ? 'Đang xử lý...'
-                                        : voteStatus?.hasConfirmed
-                                            ? 'Đã xác nhận'
-                                            : 'Xác thực'}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => onDispute(report.id)}
-                                    disabled={isDisputing || !canDispute || loadingVoteStatus}
-                                    className="w-full"
-                                    title={
+                                            ? "border-[rgba(0,255,136,0.4)] bg-[rgba(0,255,136,0.1)] text-[#00ff88] opacity-70 cursor-not-allowed"
+                                            : canConfirm
+                                                ? "border-[rgba(0,255,136,0.3)] bg-[rgba(0,255,136,0.06)] text-[#00ff88] hover:bg-[rgba(0,255,136,0.12)]"
+                                                : "border-[rgba(255,255,255,0.06)] text-[#8899aa] cursor-not-allowed opacity-50"
+                                    )}>
+                                    {isConfirming ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                                    {isConfirming ? 'Đang xử lý' : voteStatus?.hasConfirmed ? 'Đã xác nhận' : 'Xác nhận'}
+                                </button>
+                                <button onClick={() => onDispute(report.id)}
+                                    disabled={isDisputing || !canDispute || loadingVote}
+                                    className={cn(
+                                        "flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border transition-all duration-200",
                                         voteStatus?.hasDisputed
-                                            ? 'Bạn đã báo sai báo cáo này rồi'
-                                            : !voteStatus?.canVote
-                                                ? 'Bạn đã vote tối đa 2 lần cho báo cáo này'
-                                                : undefined
-                                    }
-                                >
-                                    {isDisputing ? (
-                                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                                    ) : (
-                                        <AlertTriangle className="h-4 w-4 mr-2" />
-                                    )}
-                                    {isDisputing
-                                        ? 'Đang xử lý...'
-                                        : voteStatus?.hasDisputed
-                                            ? 'Đã báo sai'
-                                            : 'Báo sai'}
-                                </Button>
+                                            ? "border-[rgba(255,59,59,0.4)] bg-[rgba(255,59,59,0.1)] text-[#ff3b3b] opacity-70 cursor-not-allowed"
+                                            : canDispute
+                                                ? "border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.06)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.12)]"
+                                                : "border-[rgba(255,255,255,0.06)] text-[#8899aa] cursor-not-allowed opacity-50"
+                                    )}>
+                                    {isDisputing ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertTriangle className="h-3 w-3" />}
+                                    {isDisputing ? 'Đang xử lý' : voteStatus?.hasDisputed ? 'Đã báo sai' : 'Báo sai'}
+                                </button>
                             </div>
                         )}
 
-                        {/* Vote status indicator */}
                         {voteStatus && voteStatus.voteCount > 0 && (
-                            <div className="text-xs text-muted-foreground text-center pt-0.5">
-                                Bạn đã vote {voteStatus.voteCount}/2 lần
-                                {voteStatus.voteCount >= 2 && ' (đã đạt giới hạn)'}
-                            </div>
+                            <p className="font-mono text-[9px] text-[#8899aa]/50 text-center">
+                                Đã vote {voteStatus.voteCount}/2 lần{voteStatus.voteCount >= 2 ? ' (đạt giới hạn)' : ''}
+                            </p>
                         )}
 
-                        {/* Owner actions - Edit and Delete */}
+                        {/* Owner actions */}
                         {isOwner && (onEdit || onDelete) && (
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2">
                                 {onEdit && (
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => onEdit(report)}
-                                        className="w-full"
-                                    >
-                                        <Pencil className="h-4 w-4 mr-2" />
-                                        Chỉnh sửa
-                                    </Button>
+                                    <button onClick={() => onEdit(report)}
+                                        className="flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border border-[rgba(0,212,255,0.3)] bg-[rgba(0,212,255,0.06)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.12)] transition-colors">
+                                        <Pencil className="h-3 w-3" /> Chỉnh sửa
+                                    </button>
                                 )}
                                 {onDelete && (
-                                    <Button
-                                        variant="destructive"
-                                        onClick={() => setShowDeleteDialog(true)}
-                                        className="w-full"
-                                    >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Xóa báo cáo
-                                    </Button>
+                                    <button onClick={() => setShowDeleteDialog(true)}
+                                        className="flex items-center justify-center gap-1.5 font-mono text-[10px] font-bold tracking-widest uppercase py-2.5 rounded border border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.06)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.12)] transition-colors">
+                                        <Trash2 className="h-3 w-3" /> Xóa
+                                    </button>
                                 )}
                             </div>
                         )}
-                    </CardContent>
-
+                    </div>
                 </div>
-            </Card>
 
-            {/* Delete Confirmation Dialog */}
+                {/* Bottom accent */}
+                <div className="h-px w-full shrink-0 bg-gradient-to-r from-transparent via-[rgba(0,212,255,0.15)] to-transparent" />
+            </div>
+
+            {/* Delete dialog */}
             <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-md border-[rgba(255,59,59,0.3)] bg-[rgba(8,12,24,0.98)]" style={{ backdropFilter: 'blur(20px)' }}>
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2 text-destructive">
-                            <AlertTriangle className="h-5 w-5" />
-                            Xác nhận xóa báo cáo
+                        <DialogTitle className="flex items-center gap-2 font-mono text-[#ff3b3b]">
+                            <AlertTriangle className="h-4 w-4" /> XÁC NHẬN XÓA
                         </DialogTitle>
-                        <DialogDescription>
+                        <DialogDescription className="font-mono text-xs text-[#8899aa]">
                             Bạn có chắc chắn muốn xóa báo cáo này? Hành động này không thể hoàn tác.
                         </DialogDescription>
                     </DialogHeader>
-                    <DialogFooter className="gap-2 sm:gap-0">
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowDeleteDialog(false)}
-                        >
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setShowDeleteDialog(false)}
+                            className="font-mono text-xs border-[rgba(255,255,255,0.1)] text-[#8899aa] bg-transparent hover:text-white">
                             Hủy
                         </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => {
-                                onDelete?.(report.id);
-                                setShowDeleteDialog(false);
-                            }}
-                        >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Xóa báo cáo
+                        <Button onClick={() => { onDelete?.(report.id); setShowDeleteDialog(false); }}
+                            className="font-mono text-xs bg-[rgba(255,59,59,0.15)] border border-[rgba(255,59,59,0.4)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white">
+                            <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Xóa báo cáo
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Image Preview Overlay - Portal to body */}
+            {/* Image expand portal */}
             {isImageExpanded && !isCurrentVideo && typeof document !== 'undefined' && createPortal(
                 <AnimatePresence>
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-zoom-out"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setIsImageExpanded(false);
-                        }}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.9 }}
-                            className="relative w-[95vw] h-[90vh] max-w-7xl p-1 overflow-hidden flex items-center justify-center"
-                        >
-                            <div className="relative w-full h-full">
-                                <Image
-                                    src={currentMedia}
-                                    alt="Zoomed preview"
-                                    fill
-                                    className="object-contain rounded-lg shadow-2xl"
-                                    sizes="95vw"
-                                    priority
-                                />
-                            </div>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 backdrop-blur-md cursor-zoom-out"
+                        onClick={e => { e.stopPropagation(); setIsImageExpanded(false); }}>
+                        <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+                            className="relative w-[95vw] h-[90vh] max-w-7xl" onClick={e => e.stopPropagation()}>
+                            <Image src={currentMedia} alt="Expanded" fill className="object-contain rounded-lg" sizes="95vw" priority />
                         </motion.div>
                     </motion.div>
-                </AnimatePresence>,
-                document.body
+                </AnimatePresence>, document.body
             )}
         </div>
     );

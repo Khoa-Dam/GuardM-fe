@@ -9,10 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
-import { MapPin, X, Upload, Loader2, AlertCircle, ChevronRight, ChevronLeft, Check, Skull, Target, Eye, Flame, Shield, Package, AlertTriangle, Siren } from 'lucide-react';
+import { MapPin, X, Upload, Loader2, AlertCircle, ChevronRight, ChevronLeft, Check, Skull, Target, Eye, Flame, Shield, Package, AlertTriangle, Siren, Zap } from 'lucide-react';
 import type { VerificationCrimeReport } from '@/types/map';
 import { cn } from '@/lib/utils';
+import { parseReportAction } from '../actions/parse-report.action';
 
 const MAX_FILE_SIZE_MB = 100;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -92,6 +95,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
     const [isUploading, setIsUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [videoUrl, setVideoUrl] = useState('');
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [aiError, setAiError] = useState<string | null>(null);
 
     const selectedTypeConfig = crimeTypes.find(t => t.type === selectedType)!;
     const selectedSeverityConfig = severityConfig.find(s => s.level === severity)!;
@@ -134,7 +140,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
             title: title || selectedTypeConfig.label,
             type: selectedType,
             description,
-            attachments: [...existingAttachments, ...uploadedFiles],
+            attachments: [...existingAttachments, ...uploadedFiles, ...(videoUrl.trim() ? [videoUrl.trim()] : [])],
             lat: locationData.lat,
             lng: locationData.lng,
             address: String(locationData.address),
@@ -147,6 +153,29 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
         onSubmit(payload);
     };
 
+    const handleAiAssist = async () => {
+        if (!description.trim()) return;
+        setIsAiLoading(true);
+        setAiError(null);
+        try {
+            const result = await parseReportAction(description);
+            if (!result) throw new Error('No result');
+            if (result.title) setTitle(result.title);
+            if (result.type) {
+                const matched = crimeTypes.find(c => c.type === result.type);
+                if (matched) setSelectedType(matched.type);
+            }
+            if (result.severity && result.severity >= 1 && result.severity <= 5) {
+                setSeverity(result.severity);
+            }
+            if (result.description) setDescription(result.description);
+        } catch {
+            setAiError('AI không thể phân tích. Vui lòng thử lại.');
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
     const canProceed = useMemo(() => {
         if (step === 0) return true;
         if (step === 1) return !!selectedType;
@@ -157,6 +186,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
         <Dialog open onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="p-0 gap-0 w-full max-w-lg overflow-hidden border border-[rgba(0,212,255,0.2)] bg-[rgba(8,12,24,0.98)]"
                 style={{ backdropFilter: 'blur(20px)' }}>
+                <DialogTitle className="sr-only">Báo cáo sự cố</DialogTitle>
+                <DialogDescription className="sr-only">Form báo cáo sự cố tội phạm trên bản đồ</DialogDescription>
 
                 {/* Scan-line overlay */}
                 <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
@@ -299,15 +330,43 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white placeholder:text-[#8899aa]" />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">MÔ TẢ CHI TIẾT</label>
+                                <div className="flex items-center justify-between">
+                                    <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">MÔ TẢ CHI TIẾT</label>
+                                    <button
+                                        type="button"
+                                        onClick={handleAiAssist}
+                                        disabled={isAiLoading || !description.trim()}
+                                        className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest px-2 py-1 rounded border border-[rgba(255,215,0,0.4)] bg-[rgba(255,215,0,0.08)] text-[#ffd700] hover:bg-[rgba(255,215,0,0.15)] transition-all disabled:opacity-30"
+                                    >
+                                        {isAiLoading
+                                            ? <><Loader2 className="h-3 w-3 animate-spin" />AI đang phân tích...</>
+                                            : <><Zap className="h-3 w-3" />AI tự điền</>
+                                        }
+                                    </button>
+                                </div>
                                 <Textarea value={description} onChange={e => setDescription(e.target.value)}
-                                    rows={3} placeholder="Mô tả sự việc..."
+                                    rows={3} placeholder="Mô tả sự việc bằng lời tự do, AI sẽ tự điền các trường còn lại..."
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white placeholder:text-[#8899aa] resize-none" />
+                                {aiError && (
+                                    <div className="flex items-center gap-2 rounded border border-[rgba(255,59,59,0.3)] bg-[rgba(255,59,59,0.08)] px-3 py-2">
+                                        <AlertCircle className="h-3.5 w-3.5 text-[#ff3b3b] shrink-0" />
+                                        <span className="font-mono text-[10px] text-[#ff3b3b]">{aiError}</span>
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-1.5">
                                 <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">THỜI GIAN XẢY RA</label>
                                 <Input type="datetime-local" value={reportedAt} onChange={e => setReportedAt(e.target.value)}
                                     className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">LINK VIDEO (YouTube, Vimeo...)</label>
+                                <Input
+                                    value={videoUrl}
+                                    onChange={e => setVideoUrl(e.target.value)}
+                                    placeholder="https://youtube.com/watch?v=..."
+                                    className="font-mono text-sm bg-[rgba(0,212,255,0.04)] border-[rgba(0,212,255,0.2)] focus-visible:ring-0 focus-visible:border-[#00d4ff] text-white placeholder:text-[#8899aa]"
+                                />
                             </div>
                             <div className="space-y-2">
                                 <label className="font-mono text-[9px] tracking-widest text-[#00d4ff]/60 uppercase">
@@ -380,6 +439,12 @@ const ReportForm: React.FC<ReportFormProps> = ({ locationData, onClose, onSubmit
                                 <div className="flex gap-3 px-3 py-2.5 rounded border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)]">
                                     <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">BẰNG CHỨNG</span>
                                     <span className="font-mono text-xs text-white">{uploadedFiles.length + existingAttachments.length} file đính kèm</span>
+                                </div>
+                            )}
+                            {videoUrl.trim() && (
+                                <div className="flex gap-3 px-3 py-2.5 rounded border border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.02)]">
+                                    <span className="font-mono text-[9px] text-[#8899aa] uppercase tracking-widest w-28 shrink-0 mt-0.5">LINK VIDEO</span>
+                                    <span className="font-mono text-xs text-[#00d4ff] truncate">{videoUrl.trim()}</span>
                                 </div>
                             )}
                             <div className="rounded border border-[rgba(255,215,0,0.2)] bg-[rgba(255,215,0,0.05)] p-3">

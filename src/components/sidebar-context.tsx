@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, ReactNode } from "react"
 
 interface SidebarContextType {
     isOpen: boolean
@@ -10,8 +10,22 @@ interface SidebarContextType {
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 
+const MD = 768
+
 export function SidebarStateProvider({ children }: { children: ReactNode }) {
-    const [isOpen, setIsOpen] = useState(false) // Mặc định đóng trên mobile
+    const [isOpen, setIsOpen] = useState(false)
+
+    useEffect(() => {
+        // Auto-open on large screens at startup
+        setIsOpen(window.innerWidth >= MD)
+
+        // Only auto-close when shrinking to mobile — don't force open on desktop
+        const onResize = () => {
+            if (window.innerWidth < MD) setIsOpen(false)
+        }
+        window.addEventListener("resize", onResize)
+        return () => window.removeEventListener("resize", onResize)
+    }, [])
 
     const toggle = () => setIsOpen((prev) => !prev)
 

@@ -17,6 +17,7 @@ export interface CrimeReport {
     id: string;
     reporterId?: string;
     reporterAvatar?: string;
+    reporterName?: string;
     title?: string;
     description?: string;
     type?: string;
