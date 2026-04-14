@@ -6,4 +6,5 @@ node_modules
 *.md
 .git
 .gitignore
- 
+Dockerfile
+docker-compose.yml
