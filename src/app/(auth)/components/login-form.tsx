@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label"
 import { signIn } from "next-auth/react"
 import { login } from "@/utils/validation"
 import { toast } from "sonner"
-import { Loader2, AlertCircle } from "lucide-react"
+import { Loader2, AlertCircle, Lock, Mail } from "lucide-react"
 import Link from "next/link"
 import { Logo } from "@/components/icons"
 
@@ -23,6 +23,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [emailFocused, setEmailFocused] = useState(false)
+    const [passwordFocused, setPasswordFocused] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -93,28 +95,32 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     }, [redirectPath])
 
     return (
-        <div className={cn("flex flex-col gap-7", className)} {...props}>
+        <div className={cn("flex flex-col gap-8", className)} {...props}>
 
             {/* Mobile logo */}
             <Link href="/" className="flex lg:hidden items-center gap-2.5 self-start group">
                 <div className="p-1.5 rounded bg-[#ff3b3b]/10 border border-[#ff3b3b]/20 group-hover:bg-[#ff3b3b]/20 transition-colors">
                     <Logo className="w-5 h-5 text-[#ff3b3b]" />
                 </div>
-                <span className="font-mono text-base font-bold tracking-tight text-[#e8edf2]">
-                    GRD<span className="text-[#ff3b3b]">[M]</span>
+                <span className="font-heading text-base font-bold tracking-tight text-[#e8edf2]">
+                    GUARD<span className="text-[#ff3b3b]">[M]</span>
                 </span>
             </Link>
 
             {/* Header */}
-            <div className="space-y-1">
-                <p className="font-mono text-[10px] tracking-[0.3em] text-[#ff3b3b] uppercase">
-                    IDENTITY VERIFICATION
-                </p>
-                <h1 className="font-mono text-xl font-bold text-[#e8edf2] tracking-tight">
-                    Sign In
+            <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-3">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[#ff3b3b]/30" />
+                    <span className="font-mono text-[9px] tracking-[0.4em] text-[#ff3b3b]/70 uppercase">
+                        IDENTITY VERIFICATION
+                    </span>
+                    <div className="h-px flex-1 bg-gradient-to-l from-transparent to-[#ff3b3b]/30" />
+                </div>
+                <h1 className="font-heading text-2xl font-bold text-[#e8edf2] tracking-wide">
+                    ACCESS SYSTEM
                 </h1>
-                <p className="text-xs text-[#6b7a8d] tracking-wide">
-                    View crime information and receive nearby alerts
+                <p className="font-mono text-[11px] text-[#6b7a8d] leading-relaxed">
+                    Authenticate to view crime data and receive proximity alerts
                 </p>
             </div>
 
@@ -122,7 +128,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
                 {/* Error */}
                 {error && (
-                    <div className="flex items-start gap-2.5 rounded bg-[#ff3b3b]/8 border border-[#ff3b3b]/25 px-3 py-2.5">
+                    <div className="flex items-start gap-2.5 rounded border border-[#ff3b3b]/30 bg-[#ff3b3b]/6 px-3.5 py-3 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-[#ff3b3b]/60" />
                         <AlertCircle className="h-3.5 w-3.5 text-[#ff3b3b] mt-0.5 shrink-0" />
                         <p className="font-mono text-[11px] text-[#ff3b3b] leading-relaxed">{error}</p>
                     </div>
@@ -134,9 +141,9 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                     type="button"
                     disabled={isLoading}
                     onClick={() => signIn('google', { callbackUrl: redirectPath || '/dashboard' })}
-                    className="w-full border-white/10 bg-transparent hover:bg-white/5 text-[#8899aa] hover:text-[#e8edf2] font-mono text-[11px] tracking-widest uppercase h-10 transition-colors"
+                    className="w-full border-white/10 bg-white/[0.03] hover:bg-white/[0.07] text-[#8899aa] hover:text-[#e8edf2] font-mono text-[11px] tracking-widest uppercase h-11 transition-all duration-200 rounded group"
                 >
-                    <svg viewBox="0 0 24 24" className="mr-2 h-3.5 w-3.5 shrink-0">
+                    <svg viewBox="0 0 24 24" className="mr-2.5 h-3.5 w-3.5 shrink-0 group-hover:scale-110 transition-transform">
                         <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" fill="currentColor" />
                     </svg>
                     Continue with Google
@@ -145,93 +152,121 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                 {/* Divider */}
                 <div className="relative flex items-center gap-3">
                     <div className="flex-1 h-px bg-white/6" />
-                    <span className="font-mono text-[9px] tracking-[0.3em] text-[#6b7a8d] uppercase">OR</span>
+                    <span className="font-mono text-[9px] tracking-[0.35em] text-[#6b7a8d]/60 uppercase">OR</span>
                     <div className="flex-1 h-px bg-white/6" />
                 </div>
 
                 {/* Email */}
-                <div className="space-y-1.5">
-                    <Label htmlFor="email" className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#6b7a8d]">
+                <div className="space-y-2">
+                    <Label htmlFor="email" className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#6b7a8d] flex items-center gap-1.5">
+                        <Mail className="w-2.5 h-2.5" />
                         Email
                     </Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        placeholder="name@example.com"
-                        required
-                        value={emailValue}
-                        onChange={(e) => {
-                            setEmailValue(e.target.value)
-                            if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: '' })
-                        }}
-                        disabled={isLoading}
-                        className={cn(
-                            "bg-transparent border-0 border-b rounded-none font-mono text-sm text-[#e8edf2] placeholder:text-[#6b7a8d]/50",
-                            "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#ff3b3b] h-9 px-0",
-                            "transition-colors",
-                            fieldErrors.email ? "border-[#ff3b3b]/60" : "border-white/10"
+                    <div className={cn(
+                        "relative border rounded transition-all duration-200",
+                        emailFocused ? "border-[#00d4ff]/40 bg-[#00d4ff]/[0.03]" : "border-white/8 bg-transparent",
+                        fieldErrors.email ? "border-[#ff3b3b]/50" : ""
+                    )}>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            required
+                            value={emailValue}
+                            onChange={(e) => {
+                                setEmailValue(e.target.value)
+                                if (fieldErrors.email) setFieldErrors({ ...fieldErrors, email: '' })
+                            }}
+                            onFocus={() => setEmailFocused(true)}
+                            onBlur={() => setEmailFocused(false)}
+                            disabled={isLoading}
+                            className="border-0 bg-transparent font-mono text-sm text-[#e8edf2] placeholder:text-[#6b7a8d]/40 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 px-3"
+                        />
+                        {emailFocused && (
+                            <div className="absolute bottom-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/40 to-transparent" />
                         )}
-                    />
+                    </div>
                     {fieldErrors.email && (
-                        <p className="font-mono text-[10px] text-[#ff3b3b]">{fieldErrors.email}</p>
+                        <p className="font-mono text-[10px] text-[#ff3b3b] flex items-center gap-1">
+                            <AlertCircle className="w-2.5 h-2.5" />{fieldErrors.email}
+                        </p>
                     )}
                 </div>
 
                 {/* Password */}
-                <div className="space-y-1.5">
-                    <Label htmlFor="password" className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#6b7a8d]">
+                <div className="space-y-2">
+                    <Label htmlFor="password" className="font-mono text-[10px] tracking-[0.25em] uppercase text-[#6b7a8d] flex items-center gap-1.5">
+                        <Lock className="w-2.5 h-2.5" />
                         Password
                     </Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        required
-                        value={passwordValue}
-                        onChange={(e) => {
-                            setPasswordValue(e.target.value)
-                            if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' })
-                        }}
-                        disabled={isLoading}
-                        className={cn(
-                            "bg-transparent border-0 border-b rounded-none font-mono text-sm text-[#e8edf2] placeholder:text-[#6b7a8d]/50",
-                            "focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-[#ff3b3b] h-9 px-0",
-                            "transition-colors",
-                            fieldErrors.password ? "border-[#ff3b3b]/60" : "border-white/10"
+                    <div className={cn(
+                        "relative border rounded transition-all duration-200",
+                        passwordFocused ? "border-[#00d4ff]/40 bg-[#00d4ff]/[0.03]" : "border-white/8 bg-transparent",
+                        fieldErrors.password ? "border-[#ff3b3b]/50" : ""
+                    )}>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            required
+                            value={passwordValue}
+                            onChange={(e) => {
+                                setPasswordValue(e.target.value)
+                                if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' })
+                            }}
+                            onFocus={() => setPasswordFocused(true)}
+                            onBlur={() => setPasswordFocused(false)}
+                            disabled={isLoading}
+                            className="border-0 bg-transparent font-mono text-sm text-[#e8edf2] placeholder:text-[#6b7a8d]/40 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 px-3"
+                        />
+                        {passwordFocused && (
+                            <div className="absolute bottom-0 left-3 right-3 h-px bg-gradient-to-r from-transparent via-[#00d4ff]/40 to-transparent" />
                         )}
-                    />
+                    </div>
                     {fieldErrors.password && (
-                        <p className="font-mono text-[10px] text-[#ff3b3b]">{fieldErrors.password}</p>
+                        <p className="font-mono text-[10px] text-[#ff3b3b] flex items-center gap-1">
+                            <AlertCircle className="w-2.5 h-2.5" />{fieldErrors.password}
+                        </p>
                     )}
                 </div>
 
                 {/* Submit */}
-                <Button
+                <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full mt-1 bg-transparent border border-[#ff3b3b]/50 text-[#ff3b3b] hover:bg-[#ff3b3b]/10 hover:border-[#ff3b3b]/80 font-mono text-[11px] tracking-[0.2em] uppercase h-10 transition-all"
-                >
-                    {isLoading ? (
-                        <>
-                            <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                            AUTHENTICATING...
-                        </>
-                    ) : (
-                        "AUTHENTICATE →"
+                    className={cn(
+                        "relative w-full mt-1 h-11 rounded overflow-hidden font-heading text-[11px] tracking-[0.3em] uppercase transition-all duration-200",
+                        "border border-[#ff3b3b]/50 text-[#ff3b3b]",
+                        "hover:border-[#ff3b3b]/80 hover:text-white",
+                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                        "group"
                     )}
-                </Button>
+                >
+                    <span className="absolute inset-0 bg-gradient-to-r from-[#ff3b3b]/0 via-[#ff3b3b]/10 to-[#ff3b3b]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="absolute inset-0 bg-[#ff3b3b]/8" />
+                    <span className="relative flex items-center justify-center gap-2">
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                AUTHENTICATING...
+                            </>
+                        ) : (
+                            "AUTHENTICATE →"
+                        )}
+                    </span>
+                </button>
 
             </form>
 
             {/* Footer */}
             <div className="space-y-3">
                 <p className="text-center font-mono text-[11px] text-[#6b7a8d]">
-                    Don&apos;t have an account?{" "}
-                    <Link href="/signup" className="text-[#e8edf2] hover:text-[#ff3b3b] transition-colors underline underline-offset-4">
-                        Sign Up
+                    No account?{" "}
+                    <Link href="/signup" className="text-[#e8edf2] hover:text-[#ff3b3b] transition-colors font-bold">
+                        Create one →
                     </Link>
                 </p>
-                <p className="text-center font-mono text-[9px] text-[#6b7a8d]/50 tracking-wide">
+                <p className="text-center font-mono text-[9px] text-[#6b7a8d]/40 tracking-wide">
                     By continuing you agree to our{" "}
                     <Link href="/terms" className="underline underline-offset-2 hover:text-[#6b7a8d] transition-colors">Terms</Link>
                     {" "}and{" "}
