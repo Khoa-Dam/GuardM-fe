@@ -5,6 +5,7 @@ export const wantedKeys = {
     all: ['wanted'] as const,
     lists: () => [...wantedKeys.all, 'list'] as const,
     list: (page: number, limit: number, search?: string) => [...wantedKeys.lists(), { page, limit, search }] as const,
+    detail: (id: string) => [...wantedKeys.all, 'detail', id] as const,
 };
 
 interface UseWantedCriminalsOptions {

@@ -1,32 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
+import globalAlertsService, { type GlobalAlert } from '@/service/global-alerts.service';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api';
+export type { GlobalAlert };
 
-export interface GlobalAlert {
-    id: string;
-    source: string;
-    title: string;
-    url: string;
-    lat: number;
-    lng: number;
-    locationName: string;
-    category: string;
-    severity: 'low' | 'medium' | 'high';
-    summary: string | null;
-    publishedAt: string;
-    createdAt: string;
-}
+export const globalAlertsKeys = {
+    all: ['global-alerts'] as const,
+    list: (limit?: number) => [...globalAlertsKeys.all, 'list', limit] as const,
+};
 
 export function useGlobalAlerts() {
     return useQuery<GlobalAlert[]>({
-        queryKey: ['global-alerts'],
-        queryFn: async () => {
-            const res = await fetch(`${API_BASE}/global-alerts?limit=200`);
-            if (!res.ok) throw new Error('Failed to fetch global alerts');
-            const data = await res.json();
-            console.log('[useGlobalAlerts] fetched:', data.length, 'alerts, with coords:', data.filter((a: GlobalAlert) => a.lat && a.lng).length);
-            return data;
-        },
+        queryKey: globalAlertsKeys.list(200),
+        queryFn: () => globalAlertsService.findAll(200),
         staleTime: 5 * 60 * 1000,
         refetchInterval: 5 * 60 * 1000,
         placeholderData: [],

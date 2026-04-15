@@ -3,13 +3,10 @@ import wantedCriminalService, {
     CreateWantedCriminalDto,
     UpdateWantedCriminalDto,
 } from '@/service/wanted-criminal.service';
+import { wantedKeys } from './use-wanted-criminals';
 
-// Query keys (reuse from existing hooks if they exist)
-export const wantedCriminalsKeys = {
-    all: ['wanted-criminals'] as const,
-    lists: () => [...wantedCriminalsKeys.all, 'list'] as const,
-    detail: (id: string) => [...wantedCriminalsKeys.all, 'detail', id] as const,
-};
+// Re-export so admin pages can use either import
+export { wantedKeys as wantedCriminalsKeys };
 
 /**
  * Mutation hook for creating a wanted criminal (Admin only)

@@ -59,13 +59,8 @@ export function RealtimeProvider({ children }: { children: ReactNode }) {
             });
             socketRef.current = socket;
 
-            socket.on('connect', () => {
-                console.log('[Realtime] Connected:', socket.id);
-            });
-
-            socket.on('disconnect', (reason: string) => {
-                console.log('[Realtime] Disconnected:', reason);
-            });
+            socket.on('connect', () => { /* connected */ });
+            socket.on('disconnect', () => { /* disconnected */ });
 
             socket.on('report:created', (raw: CrimeReportResponse) => {
                 const report = normalizeReport(raw);
