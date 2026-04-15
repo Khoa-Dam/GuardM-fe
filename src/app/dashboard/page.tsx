@@ -110,7 +110,7 @@ export default function DashboardPage() {
   const displayedWanted = (homeData?.recentWantedCriminals ?? []).slice(0, 6);
 
   return (
-    <main className="flex-1 overflow-y-auto">
+    <div>
       {/* ── HERO: 3D Globe + HUD ─────────────────────────────────────────── */}
       <section className="relative h-[520px] md:h-[600px] overflow-hidden">
         {/* Scan-line overlay */}
@@ -330,6 +330,6 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
