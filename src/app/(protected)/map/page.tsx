@@ -10,10 +10,10 @@ import ReportCard from './components/ReportCard';
 import { FilterBtn, DangerAlert, SearchBox, ReportForm } from './components';
 import { NewsPanel } from './components/NewsPanel';
 import { MapLegend } from './components/MapLegend';
-import type { FilterType, VerificationCrimeReport } from '@/types/map';
+import type { FilterType } from '@/types/map';
 import {
-    useMapInit, useMapGeolocation, useMapCrimeMarkers, useMapHeatmap, useMapGlobalAlerts,
-    useMapFilters, useReportingMode, useMapActions,
+    useMapInit, useMapGeolocation, useMapCrimeMarkers, useMapHeatmap,
+    useMapGlobalAlerts, useMapFilters, useMapInteractions,
 } from './hooks';
 import { CRIME_TYPE_OPTIONS, TIME_OPTIONS } from './hooks/use-map-filters';
 import { useGlobalAlerts } from '@/hooks/use-global-alerts';
@@ -74,6 +74,125 @@ const HudOverlay = ({ lat, lng, address, isLoading }: { lat: number | null; lng:
     </div>
 );
 
+// ── Filter / control bar (shown when NOT in reporting mode) ───────────────────
+interface MapFilterBarProps {
+    filters: ReturnType<typeof useMapFilters>;
+    alertsCount: number;
+}
+
+const MapFilterBar = ({ filters, alertsCount }: MapFilterBarProps) => (
+    <div className="absolute top-3 left-3 right-3 z-[45] space-y-1.5 pointer-events-none">
+        <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex gap-1.5 pointer-events-auto flex-wrap">
+                {([
+                    { value: 'all' as FilterType,    label: 'All',       color: '#00d4ff' },
+                    { value: 'high' as FilterType,   label: 'Dangerous', color: '#ff3b3b' },
+                    { value: 'medium' as FilterType, label: 'Medium',    color: '#ffd700' },
+                    { value: 'low' as FilterType,    label: 'Low',       color: '#00ff88' },
+                ] as const).map(opt => (
+                    <FilterBtn key={opt.value} active={filters.severityFilter === opt.value}
+                        onClick={() => filters.setSeverityFilter(opt.value)} color={opt.color}>
+                        {opt.label}
+                    </FilterBtn>
+                ))}
+            </div>
+            <div className="ml-auto flex gap-1.5 pointer-events-auto">
+                <button onClick={() => filters.setShowGlobalAlerts(v => !v)}
+                    title={`${filters.showGlobalAlerts ? 'Hide' : 'Show'} news (${alertsCount})`}
+                    className={cn(
+                        'relative flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                        filters.showGlobalAlerts
+                            ? 'border-[rgba(255,154,60,0.6)] bg-[rgba(255,154,60,0.15)] text-[#ff9a3c]'
+                            : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
+                    )}>
+                    <Globe className="h-3 w-3" />
+                    <span className="hidden sm:inline">News</span>
+                    {alertsCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff9a3c] font-mono text-[7px] flex items-center justify-center text-white font-bold">
+                            {alertsCount > 99 ? '99' : alertsCount}
+                        </span>
+                    )}
+                </button>
+                <button onClick={() => filters.setShowHeatmap(v => !v)}
+                    className={cn(
+                        'flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                        filters.showHeatmap
+                            ? 'border-[rgba(255,107,53,0.6)] bg-[rgba(255,107,53,0.15)] text-[#ff6b35]'
+                            : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
+                    )}>
+                    <Thermometer className="h-3 w-3" />
+                    <span className="hidden sm:inline">Heat</span>
+                </button>
+                <button onClick={() => filters.setShowExtraFilters(v => !v)}
+                    className={cn(
+                        'relative flex items-center gap-1 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
+                        filters.showExtraFilters
+                            ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
+                            : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white'
+                    )}>
+                    <Filter className="h-3 w-3" />
+                    {filters.activeFilterCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff3b3b] font-mono text-[8px] flex items-center justify-center text-white">
+                            {filters.activeFilterCount}
+                        </span>
+                    )}
+                    {filters.showExtraFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                </button>
+            </div>
+        </div>
+
+        {filters.showExtraFilters && (
+            <div className="space-y-1.5 pointer-events-auto">
+                <div className="flex items-center gap-1.5 flex-wrap rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
+                    style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
+                    <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">CRIME TYPE</span>
+                    <div className="flex gap-1 flex-wrap">
+                        {CRIME_TYPE_OPTIONS.map(opt => (
+                            <button key={opt.value}
+                                onClick={() => filters.setCrimeTypeFilter(opt.value)}
+                                className={cn(
+                                    'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
+                                    filters.crimeTypeFilter === opt.value
+                                        ? 'text-white'
+                                        : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)] bg-transparent'
+                                )}
+                                style={filters.crimeTypeFilter === opt.value ? {
+                                    borderColor: `${opt.color}60`,
+                                    backgroundColor: `${opt.color}18`,
+                                    color: opt.color,
+                                } : {}}>
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex items-center gap-1.5 rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
+                    style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
+                    <Clock className="h-3 w-3 text-[#00d4ff]/40 shrink-0" />
+                    <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">TIME RANGE</span>
+                    <div className="flex gap-1">
+                        {TIME_OPTIONS.map(opt => (
+                            <button key={opt.value}
+                                onClick={() => filters.setTimeRange(opt.value)}
+                                className={cn(
+                                    'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
+                                    filters.timeRange === opt.value
+                                        ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.15)] text-[#00d4ff]'
+                                        : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white bg-transparent'
+                                )}>
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    <span className="ml-auto font-mono text-[9px] text-[#8899aa]">
+                        {filters.filteredReports.length} <span className="text-[#00d4ff]/50">result(s)</span>
+                    </span>
+                </div>
+            </div>
+        )}
+    </div>
+);
+
 // ── Main map content ──────────────────────────────────────────────────────────
 const CrimeMapContent = () => {
     const markerClickedRef = useRef(false);
@@ -92,46 +211,23 @@ const CrimeMapContent = () => {
         isLeafletLoaded, mapInstanceRef, reports,
     });
 
-    // ── Domain hooks ─────────────────────────────────────────────────────────
-    const filters = useMapFilters(reports);
-
-    // Break circular dependency: reporting ↔ actions via refs
-    const onSelectReportRef = useRef<(id: string | null) => void>(() => {});
-    const onEditReportRef   = useRef<(r: VerificationCrimeReport) => void>(() => {});
-
-    const reporting = useReportingMode({
-        mapInstanceRef,
-        isLeafletLoaded,
-        reports,
-        onSelectReport: useCallback((id) => onSelectReportRef.current(id), []),
-    });
-
-    const actions = useMapActions({
-        mapInstanceRef,
-        reports,
-        loading,
-        isLeafletLoaded,
-        onEditReport: useCallback((r) => onEditReportRef.current(r), []),
-    });
-
-    // Wire refs after both hooks are initialized
-    onSelectReportRef.current = actions.setSelectedReportId;
-    onEditReportRef.current   = reporting.handleEditReport;
+    const filters      = useMapFilters(reports);
+    const interactions = useMapInteractions({ mapInstanceRef, isLeafletLoaded, reports, loading });
 
     // ── Map layer hooks ───────────────────────────────────────────────────────
     useMapCrimeMarkers({
         isLeafletLoaded, mapInstanceRef, markersLayerRef, zonesLayerRef,
-        reports: reporting.isReportingMode ? [] : filters.filteredReports,
+        reports: interactions.isReportingMode ? [] : filters.filteredReports,
         onMarkerClick: useCallback((reportId: string) => {
             markerClickedRef.current = true;
-            actions.setSelectedReportId(reportId);
+            interactions.setSelectedReportId(reportId);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [actions.setSelectedReportId]),
-        selectedReportId: actions.selectedReportId,
+        }, [interactions.setSelectedReportId]),
+        selectedReportId: interactions.selectedReportId,
     });
 
     useMapHeatmap({ isLeafletLoaded, mapInstanceRef, reports: filters.filteredReports, enabled: filters.showHeatmap });
-    useMapGlobalAlerts({ isLeafletLoaded, mapInstanceRef, alerts: globalAlerts, visible: filters.showGlobalAlerts && !reporting.isReportingMode });
+    useMapGlobalAlerts({ isLeafletLoaded, mapInstanceRef, alerts: globalAlerts, visible: filters.showGlobalAlerts && !interactions.isReportingMode });
 
     // ── Track map center for AI panel ─────────────────────────────────────────
     useEffect(() => {
@@ -151,11 +247,11 @@ const CrimeMapContent = () => {
         if (!map || !L) return;
         const handler = () => {
             if (markerClickedRef.current) { markerClickedRef.current = false; return; }
-            actions.setSelectedReportId(null);
+            interactions.setSelectedReportId(null);
         };
         map.on('click', handler);
         return () => { map.off('click', handler); };
-    }, [mapInstanceRef, actions]);
+    }, [mapInstanceRef, interactions]);
 
     useEffect(() => {
         if (error) toast.error(error instanceof Error ? error.message : 'An error occurred while loading data');
@@ -163,7 +259,7 @@ const CrimeMapContent = () => {
 
     const handleLocationButtonClick = () => {
         handleGetLocation();
-        if (reporting.isReportingMode && !reporting.showReportForm) {
+        if (interactions.isReportingMode && !interactions.showReportForm) {
             if (currentLocation) {
                 mapInstanceRef.current?.flyTo([currentLocation.lat, currentLocation.lng], 16, { duration: 1.5 });
             } else if (navigator.geolocation) {
@@ -174,8 +270,6 @@ const CrimeMapContent = () => {
             }
         }
     };
-
-    const selectedReport = reports.find(r => r.id === actions.selectedReportId);
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
@@ -189,134 +283,25 @@ const CrimeMapContent = () => {
                 </div>
             )}
 
-            {reporting.isReportingMode && !reporting.showReportForm && <CrosshairOverlay />}
+            {interactions.isReportingMode && !interactions.showReportForm && <CrosshairOverlay />}
 
             {/* HUD / Filter bar */}
-            {reporting.isReportingMode && !reporting.showReportForm ? (
+            {interactions.isReportingMode && !interactions.showReportForm ? (
                 <HudOverlay
-                    lat={reporting.liveCoords?.lat ?? reporting.reportLocation?.lat ?? null}
-                    lng={reporting.liveCoords?.lng ?? reporting.reportLocation?.lng ?? null}
-                    address={reporting.reportLocation?.address ?? ''}
-                    isLoading={reporting.isLoadingAddress}
+                    lat={interactions.liveCoords?.lat ?? interactions.reportLocation?.lat ?? null}
+                    lng={interactions.liveCoords?.lng ?? interactions.reportLocation?.lng ?? null}
+                    address={interactions.reportLocation?.address ?? ''}
+                    isLoading={interactions.isLoadingAddress}
                 />
-            ) : !reporting.isReportingMode && (
-                <div className="absolute top-3 left-3 right-3 z-[45] space-y-1.5 pointer-events-none">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                        <div className="flex gap-1.5 pointer-events-auto flex-wrap">
-                            {([
-                                { value: 'all' as FilterType,    label: 'All',       color: '#00d4ff' },
-                                { value: 'high' as FilterType,   label: 'Dangerous', color: '#ff3b3b' },
-                                { value: 'medium' as FilterType, label: 'Medium',    color: '#ffd700' },
-                                { value: 'low' as FilterType,    label: 'Low',       color: '#00ff88' },
-                            ] as const).map(opt => (
-                                <FilterBtn key={opt.value} active={filters.severityFilter === opt.value}
-                                    onClick={() => filters.setSeverityFilter(opt.value)} color={opt.color}>
-                                    {opt.label}
-                                </FilterBtn>
-                            ))}
-                        </div>
-                        <div className="ml-auto flex gap-1.5 pointer-events-auto">
-                            <button onClick={() => filters.setShowGlobalAlerts(v => !v)}
-                                title={`${filters.showGlobalAlerts ? 'Hide' : 'Show'} news (${globalAlerts.length})`}
-                                className={cn(
-                                    'relative flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
-                                    filters.showGlobalAlerts
-                                        ? 'border-[rgba(255,154,60,0.6)] bg-[rgba(255,154,60,0.15)] text-[#ff9a3c]'
-                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
-                                )}>
-                                <Globe className="h-3 w-3" />
-                                <span className="hidden sm:inline">News</span>
-                                {globalAlerts.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff9a3c] font-mono text-[7px] flex items-center justify-center text-white font-bold">
-                                        {globalAlerts.length > 99 ? '99' : globalAlerts.length}
-                                    </span>
-                                )}
-                            </button>
-                            <button onClick={() => filters.setShowHeatmap(v => !v)}
-                                className={cn(
-                                    'flex items-center gap-1.5 font-mono text-[10px] tracking-widest uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
-                                    filters.showHeatmap
-                                        ? 'border-[rgba(255,107,53,0.6)] bg-[rgba(255,107,53,0.15)] text-[#ff6b35]'
-                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)]'
-                                )}>
-                                <Thermometer className="h-3 w-3" />
-                                <span className="hidden sm:inline">Heat</span>
-                            </button>
-                            <button onClick={() => filters.setShowExtraFilters(v => !v)}
-                                className={cn(
-                                    'relative flex items-center gap-1 font-mono text-[10px] uppercase px-2.5 py-1.5 rounded border transition-all duration-200',
-                                    filters.showExtraFilters
-                                        ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
-                                        : 'border-[rgba(255,255,255,0.1)] bg-[rgba(8,12,24,0.85)] text-[#8899aa] hover:text-white'
-                                )}>
-                                <Filter className="h-3 w-3" />
-                                {filters.activeFilterCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-[#ff3b3b] font-mono text-[8px] flex items-center justify-center text-white">
-                                        {filters.activeFilterCount}
-                                    </span>
-                                )}
-                                {filters.showExtraFilters ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                            </button>
-                        </div>
-                    </div>
-
-                    {filters.showExtraFilters && (
-                        <div className="space-y-1.5 pointer-events-auto">
-                            <div className="flex items-center gap-1.5 flex-wrap rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
-                                style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
-                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">CRIME TYPE</span>
-                                <div className="flex gap-1 flex-wrap">
-                                    {CRIME_TYPE_OPTIONS.map(opt => (
-                                        <button key={opt.value}
-                                            onClick={() => filters.setCrimeTypeFilter(opt.value)}
-                                            className={cn(
-                                                'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
-                                                filters.crimeTypeFilter === opt.value
-                                                    ? 'text-white'
-                                                    : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.2)] bg-transparent'
-                                            )}
-                                            style={filters.crimeTypeFilter === opt.value ? {
-                                                borderColor: `${opt.color}60`,
-                                                backgroundColor: `${opt.color}18`,
-                                                color: opt.color,
-                                            } : {}}>
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-1.5 rounded border border-[rgba(0,212,255,0.12)] px-2 py-1.5"
-                                style={{ background: 'rgba(6,10,20,0.9)', backdropFilter: 'blur(12px)' }}>
-                                <Clock className="h-3 w-3 text-[#00d4ff]/40 shrink-0" />
-                                <span className="font-mono text-[8px] text-[#00d4ff]/40 tracking-widest uppercase shrink-0">TIME RANGE</span>
-                                <div className="flex gap-1">
-                                    {TIME_OPTIONS.map(opt => (
-                                        <button key={opt.value}
-                                            onClick={() => filters.setTimeRange(opt.value)}
-                                            className={cn(
-                                                'font-mono text-[9px] px-2 py-0.5 rounded border transition-all duration-150',
-                                                filters.timeRange === opt.value
-                                                    ? 'border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.15)] text-[#00d4ff]'
-                                                    : 'border-[rgba(255,255,255,0.08)] text-[#8899aa] hover:text-white bg-transparent'
-                                            )}>
-                                            {opt.label}
-                                        </button>
-                                    ))}
-                                </div>
-                                <span className="ml-auto font-mono text-[9px] text-[#8899aa]">
-                                    {filters.filteredReports.length} <span className="text-[#00d4ff]/50">result(s)</span>
-                                </span>
-                            </div>
-                        </div>
-                    )}
-                </div>
+            ) : !interactions.isReportingMode && (
+                <MapFilterBar filters={filters} alertsCount={globalAlerts.length} />
             )}
 
-            {!reporting.isReportingMode && <LiveIndicator />}
+            {!interactions.isReportingMode && <LiveIndicator />}
 
             <NewsPanel
                 alerts={globalAlerts}
-                open={filters.showGlobalAlerts && !reporting.isReportingMode}
+                open={filters.showGlobalAlerts && !interactions.isReportingMode}
                 onClose={() => filters.setShowGlobalAlerts(() => false)}
                 onSelectAlert={(alert) => {
                     if (alert.lat && alert.lng) {
@@ -327,31 +312,31 @@ const CrimeMapContent = () => {
 
             <div ref={mapContainerRef} className="w-full h-full z-0 bg-[#060a14]" />
 
-            {!reporting.isReportingMode && <MapLegend />}
+            {!interactions.isReportingMode && <MapLegend />}
 
-            {reporting.isReportingMode && !reporting.showReportForm && (
+            {interactions.isReportingMode && !interactions.showReportForm && (
                 <SearchBox onSelectLocation={(lat, lng) => mapInstanceRef.current?.flyTo([lat, lng], 16, { duration: 1.5 })} />
             )}
 
-            {reporting.isReportingMode && !reporting.showReportForm && (
+            {interactions.isReportingMode && !interactions.showReportForm && (
                 <div className="absolute bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[44] flex gap-2 w-full max-w-xs px-4 pointer-events-auto">
-                    <button onClick={reporting.handleCancelReporting}
+                    <button onClick={interactions.handleCancelReporting}
                         className="flex-1 font-mono text-xs border border-[rgba(255,255,255,0.15)] rounded bg-[rgba(6,10,20,0.85)] text-[#8899aa] hover:text-white hover:border-[rgba(255,255,255,0.3)] py-2.5 transition-all"
                         style={{ backdropFilter: 'blur(12px)' }}>
                         Cancel
                     </button>
-                    <button onClick={reporting.handleConfirmLocation}
-                        disabled={!reporting.reportLocation || reporting.isLoadingAddress}
+                    <button onClick={interactions.handleConfirmLocation}
+                        disabled={!interactions.reportLocation || interactions.isLoadingAddress}
                         className="flex-1 font-mono text-xs rounded border border-[rgba(0,212,255,0.5)] bg-[rgba(0,212,255,0.12)] text-[#00d4ff] hover:bg-[rgba(0,212,255,0.2)] hover:text-white py-2.5 transition-all disabled:opacity-40"
                         style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 16px rgba(0,212,255,0.15)' }}>
-                        {reporting.isLoadingAddress
+                        {interactions.isLoadingAddress
                             ? <><Loader2 className="h-3.5 w-3.5 animate-spin inline mr-1" />Loading...</>
                             : <><Crosshair className="h-3.5 w-3.5 inline mr-1" />Confirm location</>}
                     </button>
                 </div>
             )}
 
-            {!reporting.isReportingMode && (
+            {!interactions.isReportingMode && (
                 <div className="absolute bottom-20 right-3 z-[44] w-auto sm:w-72 pointer-events-auto">
                     <AnimatePresence>
                         {showAiPanel && (
@@ -375,7 +360,7 @@ const CrimeMapContent = () => {
                 </div>
             )}
 
-            <button onClick={() => reporting.setIsReportingMode(true)} disabled={reporting.isReportingMode}
+            <button onClick={() => interactions.setIsReportingMode(true)} disabled={interactions.isReportingMode}
                 className="absolute bottom-6 left-6 z-[44] pointer-events-auto flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest rounded border border-[rgba(255,59,59,0.6)] bg-[rgba(255,59,59,0.15)] text-[#ff3b3b] hover:bg-[rgba(255,59,59,0.25)] hover:text-white px-4 py-2.5 transition-all disabled:opacity-40"
                 style={{ backdropFilter: 'blur(12px)', boxShadow: '0 0 20px rgba(255,59,59,0.2)' }}>
                 <Plus className="h-4 w-4" />
@@ -389,26 +374,26 @@ const CrimeMapContent = () => {
                 <MapPin className="h-4 w-4 text-[#00d4ff]" />
             </button>
 
-            {reporting.showReportForm && reporting.reportLocation && (
+            {interactions.showReportForm && interactions.reportLocation && (
                 <ReportForm
-                    locationData={reporting.reportLocation}
-                    onClose={() => { reporting.setShowReportForm(false); reporting.setEditingReportId(null); }}
-                    onSubmit={reporting.handleReportSubmit}
-                    isSubmitting={reporting.isSubmitting}
-                    report={reporting.editingReportId ? reports.find(r => r.id === reporting.editingReportId) : undefined}
+                    locationData={interactions.reportLocation}
+                    onClose={() => { interactions.setShowReportForm(false); interactions.setEditingReportId(null); }}
+                    onSubmit={interactions.handleReportSubmit}
+                    isSubmitting={interactions.isSubmitting}
+                    report={interactions.editingReportId ? reports.find(r => r.id === interactions.editingReportId) : undefined}
                 />
             )}
 
-            {selectedReport && (
+            {interactions.selectedReport && (
                 <ReportCard
-                    report={selectedReport}
-                    onClose={() => actions.setSelectedReportId(null)}
-                    onConfirm={actions.handleConfirm}
-                    onDispute={actions.handleDispute}
-                    onEdit={reporting.handleEditReport}
-                    onDelete={actions.handleDeleteReport}
-                    isConfirming={actions.actionState.id === selectedReport.id && actions.actionState.type === 'confirm'}
-                    isDisputing={actions.actionState.id === selectedReport.id && actions.actionState.type === 'dispute'}
+                    report={interactions.selectedReport}
+                    onClose={() => interactions.setSelectedReportId(null)}
+                    onConfirm={interactions.handleConfirm}
+                    onDispute={interactions.handleDispute}
+                    onEdit={interactions.handleEditReport}
+                    onDelete={interactions.handleDeleteReport}
+                    isConfirming={interactions.actionState.id === interactions.selectedReport.id && interactions.actionState.type === 'confirm'}
+                    isDisputing={interactions.actionState.id === interactions.selectedReport.id && interactions.actionState.type === 'dispute'}
                 />
             )}
         </div>
