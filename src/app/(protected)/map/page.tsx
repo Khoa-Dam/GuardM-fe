@@ -179,7 +179,7 @@ const CrimeMapContent = () => {
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14]">
+        <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14]">
             {alertMessage && <DangerAlert message={alertMessage} onClose={() => setAlertMessage(null)} />}
 
             {(!isLeafletLoaded || loading) && (
@@ -418,7 +418,7 @@ const CrimeMapContent = () => {
 // ── Export wrapper ────────────────────────────────────────────────────────────
 const CrimeMap = () => (
     <Suspense fallback={
-        <div className="relative w-full h-[65vh] md:h-[600px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14] flex flex-col items-center justify-center">
+        <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden border border-[rgba(0,212,255,0.15)] bg-[#060a14] flex flex-col items-center justify-center">
             <div className="w-10 h-10 border-2 border-[rgba(0,212,255,0.2)] border-t-[#00d4ff] rounded-full animate-spin mb-3" />
             <span className="font-mono text-xs text-[#00d4ff]/60 tracking-widest uppercase">Initializing map...</span>
         </div>
