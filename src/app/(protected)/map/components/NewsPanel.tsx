@@ -111,7 +111,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
     };
 
     const panelContent = (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col flex-1 min-h-0">
             {/* Header */}
             <div className="flex items-center gap-2 px-4 py-3 border-b border-white/8 flex-shrink-0">
                 <Newspaper className="h-4 w-4 text-[#ff9a3c]" />
@@ -171,7 +171,7 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
             )}
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto overscroll-contain">
+            <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}>
                 {filtered.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-32 gap-2">
                         <AlertTriangle className="h-6 w-6 text-[#6b7a8d]" />
@@ -218,8 +218,14 @@ export function NewsPanel({ alerts, open, onClose, onSelectAlert }: NewsPanelPro
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', stiffness: 300, damping: 32 }}
-                        className="absolute bottom-0 left-0 right-0 z-[46] flex md:hidden flex-col rounded-t-xl border-t border-white/10 overflow-hidden"
-                        style={{ maxHeight: '60%', background: 'rgba(6,10,20,0.97)', backdropFilter: 'blur(20px)' }}
+                        className="absolute bottom-0 left-0 right-0 z-[46] flex md:hidden flex-col rounded-t-xl border-t border-white/10"
+                        style={{
+                            height: '65dvh',
+                            background: 'rgba(6,10,20,0.97)',
+                            backdropFilter: 'blur(20px)',
+                            borderRadius: '12px 12px 0 0',
+                            overflow: 'hidden',
+                        }}
                     >
                         {/* Drag handle */}
                         <div className="flex justify-center pt-2.5 pb-1 flex-shrink-0">
