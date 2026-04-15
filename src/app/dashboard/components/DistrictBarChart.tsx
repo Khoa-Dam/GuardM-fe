@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
+import { useEffect, useRef, useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 
 interface DistrictData {
     district: string;
@@ -13,8 +13,18 @@ interface DistrictBarChartProps {
 }
 
 const DistrictBarChart = ({ data }: DistrictBarChartProps) => {
-    const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(0);
+
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const ro = new ResizeObserver(entries => {
+            const w = entries[0]?.contentRect.width ?? 0;
+            if (w > 0) setWidth(w);
+        });
+        ro.observe(containerRef.current);
+        return () => ro.disconnect();
+    }, []);
 
     if (!data.length) {
         return (
@@ -24,25 +34,25 @@ const DistrictBarChart = ({ data }: DistrictBarChartProps) => {
         );
     }
 
-    if (!mounted) return null;
-
     return (
-        <ResponsiveContainer width="100%" height={256} minWidth={0} debounce={50}>
-            <BarChart data={data}>
-                <XAxis
-                    dataKey="district"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                />
-                <YAxis tickLine={false} axisLine={false} />
-                <Tooltip
-                    formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
-                    wrapperClassName="text-sm"
-                />
-                <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} />
-            </BarChart>
-        </ResponsiveContainer>
+        <div ref={containerRef} style={{ width: '100%', height: 256 }}>
+            {width > 0 && (
+                <BarChart width={width} height={256} data={data}>
+                    <XAxis
+                        dataKey="district"
+                        tick={{ fontSize: 12 }}
+                        tickLine={false}
+                        axisLine={false}
+                    />
+                    <YAxis tickLine={false} axisLine={false} />
+                    <Tooltip
+                        formatter={(value) => `${Number(value).toLocaleString('en-US')} reports`}
+                        wrapperClassName="text-sm"
+                    />
+                    <Bar dataKey="count" fill="#00d4ff" radius={[4, 4, 0, 0]} maxBarSize={60} />
+                </BarChart>
+            )}
+        </div>
     );
 };
 

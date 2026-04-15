@@ -61,24 +61,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!cardsRef.current) return;
+    const scroller = cardsRef.current.closest('.overflow-y-auto') ?? undefined;
     const cards = cardsRef.current.querySelectorAll('.stat-card');
     gsap.fromTo(cards,
       { y: 40, opacity: 0 },
       {
         y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out',
-        scrollTrigger: { trigger: cardsRef.current, start: 'top 85%', once: true },
+        scrollTrigger: { trigger: cardsRef.current, scroller, start: 'top 85%', once: true },
       }
     );
   }, []);
 
   useEffect(() => {
+    const scroller = sectionRefs.current[0]?.closest('.overflow-y-auto') ?? undefined;
     sectionRefs.current.forEach((el) => {
       if (!el) return;
       gsap.fromTo(el,
         { y: 30, opacity: 0 },
         {
           y: 0, opacity: 1, duration: 0.7, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 80%', once: true },
+          scrollTrigger: { trigger: el, scroller, start: 'top 80%', once: true },
         }
       );
     });
@@ -88,7 +90,7 @@ export default function DashboardPage() {
         { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
         {
           clipPath: 'inset(0 0% 0 0)', opacity: 1, duration: 0.8, ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 85%', once: true },
+          scrollTrigger: { trigger: el, scroller, start: 'top 85%', once: true },
         }
       );
     });
