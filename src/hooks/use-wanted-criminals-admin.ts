@@ -17,8 +17,7 @@ export function useCreateWantedCriminal() {
     return useMutation({
         mutationFn: (payload: CreateWantedCriminalDto) => wantedCriminalService.create(payload),
         onSuccess: () => {
-            // Invalidate and refetch wanted criminals list
-            queryClient.invalidateQueries({ queryKey: wantedCriminalsKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: wantedKeys.lists() });
         },
     });
 }
@@ -33,10 +32,8 @@ export function useUpdateWantedCriminal() {
         mutationFn: ({ id, payload }: { id: string; payload: UpdateWantedCriminalDto }) =>
             wantedCriminalService.update(id, payload),
         onSuccess: (data, variables) => {
-            // Invalidate wanted criminals list
-            queryClient.invalidateQueries({ queryKey: wantedCriminalsKeys.lists() });
-            // Invalidate specific wanted criminal detail
-            queryClient.invalidateQueries({ queryKey: wantedCriminalsKeys.detail(variables.id) });
+            queryClient.invalidateQueries({ queryKey: wantedKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: wantedKeys.detail(variables.id) });
         },
     });
 }
@@ -50,8 +47,7 @@ export function useDeleteWantedCriminal() {
     return useMutation({
         mutationFn: (id: string) => wantedCriminalService.delete(id),
         onSuccess: () => {
-            // Invalidate wanted criminals list
-            queryClient.invalidateQueries({ queryKey: wantedCriminalsKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: wantedKeys.lists() });
         },
     });
 }
