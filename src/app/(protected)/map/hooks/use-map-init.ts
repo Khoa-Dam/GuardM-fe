@@ -16,7 +16,12 @@ export const useMapInit = (isLeafletLoaded: boolean) => {
             if (!L || typeof L.map !== 'function') return;
 
             const map = L.map(mapContainerRef.current, { zoomControl: false, tap: true }).setView([10.7769, 106.7009], 13);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            const cartoApiKey = process.env.NEXT_PUBLIC_CARTO_BASEMAP_API_KEY;
+            const cartoTileUrl = `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${
+                cartoApiKey ? `?key=${encodeURIComponent(cartoApiKey)}` : ''
+            }`;
+
+            L.tileLayer(cartoTileUrl, {
                 attribution: '&copy; OpenStreetMap &copy; CARTO',
                 subdomains: 'abcd',
                 maxZoom: 20,
