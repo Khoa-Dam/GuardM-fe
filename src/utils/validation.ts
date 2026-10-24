@@ -13,6 +13,12 @@ export const password = z
     .string()
     .min(1, "Password is Required")
 
+const signupPassword = z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .regex(/[a-zA-Z]/, "Password must contain at least one letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+
 export const login = z.discriminatedUnion("type", [
     z.object({
         type: z.literal("username"),
@@ -34,8 +40,8 @@ export const signUp = z
     .object({
         name: name,
         email: email,
-        password: password,
-        confirmPassword: password,
+        password: signupPassword,
+        confirmPassword: z.string().min(1, "Confirm password is Required"),
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "Passwords do not match",

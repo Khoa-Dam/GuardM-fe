@@ -9,12 +9,27 @@ export function handleApiError(error: unknown, defaultMessage: string): never {
     
     if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data as Record<string, unknown> | string | undefined;
-        errorMessage = 
-            (typeof errorData === 'object' && errorData !== null && typeof errorData.message === 'string') ? errorData.message :
-            (typeof errorData === 'object' && errorData !== null && typeof errorData.error === 'string') ? errorData.error :
-            (typeof errorData === 'string' ? errorData : null) ||
-            error.message ||
-            defaultMessage;
+        if (typeof errorData === 'object' && errorData !== null) {
+            const responseMessage = errorData.message;
+            if (typeof responseMessage === 'string') {
+                errorMessage = responseMessage;
+            } else if (Array.isArray(responseMessage)) {
+                const messages = [...new Set(responseMessage.filter(
+                    (message): message is string => typeof message === 'string',
+                ))];
+                if (messages.length > 0) errorMessage = messages.join('. ');
+            }
+
+            if (errorMessage === defaultMessage && typeof errorData.error === 'string') {
+                errorMessage = errorData.error;
+            }
+        } else if (typeof errorData === 'string') {
+            errorMessage = errorData;
+        }
+
+        if (errorMessage === defaultMessage) {
+            errorMessage = error.message || defaultMessage;
+        }
     } else if (error instanceof Error) {
         errorMessage = error.message;
     } else if (typeof error === 'string') {
