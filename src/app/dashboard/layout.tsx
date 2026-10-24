@@ -26,7 +26,7 @@ export default async function PublicLayout({
                 <div className="flex h-screen overflow-hidden">
                     <SidebarWrapper />
 
-                    <div className="flex flex-col flex-1 overflow-y-auto">
+                    <div className="flex min-h-0 flex-col flex-1 overflow-y-auto">
                         <AppHeader />
                         <main className="container flex-1 min-h-0 p-1.5 md:p-3.5">{children}</main>
                     </div>
@@ -35,4 +35,3 @@ export default async function PublicLayout({
         </SidebarStateProvider>
     )
 }
-
