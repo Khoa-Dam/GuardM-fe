@@ -11,6 +11,7 @@ import { SessionProvider } from "@/providers/session-provider";
 import { QueryProvider } from "@/providers/query-provider";
 import { RealtimeProvider } from "@/providers/realtime-provider";
 import { ThemeProvider } from "next-themes";
+import { SessionGuard } from "@/components/session-guard";
 
 export const viewport: Viewport = {
   viewportFit: "cover",
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         >
           <QueryProvider>
             <SessionProvider>
+              <SessionGuard />
               <RealtimeProvider>
 
                 <main className="container mx-auto">

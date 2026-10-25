@@ -1,5 +1,4 @@
-import { useSession, signOut } from "next-auth/react"
-import { useEffect } from "react"
+import { useSession } from "next-auth/react"
 
 /**
  * Custom hook to get current user information from session
@@ -8,13 +7,6 @@ import { useEffect } from "react"
  */
 export function useUser() {
     const { data: session, status } = useSession()
-
-    // Auto sign out if session has error (e.g. token refresh failed)
-    useEffect(() => {
-        if ((session as unknown as { error?: string })?.error) {
-            signOut({ callbackUrl: '/login' })
-        }
-    }, [session])
 
     const user = session?.user
     const isAuthenticated = status === 'authenticated'
@@ -40,5 +32,4 @@ export function useUser() {
         session,
     }
 }
-
 

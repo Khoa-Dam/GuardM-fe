@@ -4,7 +4,6 @@ import { AppHeader } from "@/components/app-header"
 import { siteConfig } from "@/config/site.config"
 import { Metadata } from "next"
 import { SidebarStateProvider } from "@/components/sidebar-context"
-import { SessionGuard } from "@/components/session-guard"
 
 export const metadata: Metadata = {
     title: {
@@ -22,7 +21,6 @@ export default function ProtectedLayout({
     return (
         <SidebarStateProvider>
             <SidebarProvider>
-                <SessionGuard />
                 <div className="flex h-screen overflow-hidden">
                     <SidebarWrapper />
 
@@ -35,5 +33,4 @@ export default function ProtectedLayout({
         </SidebarStateProvider>
     )
 }
-
 
