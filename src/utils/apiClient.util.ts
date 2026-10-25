@@ -1,5 +1,9 @@
-import axios from 'axios';
+import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { getSessionToken } from './get-session-token';
+
+type RetriableRequestConfig = InternalAxiosRequestConfig & {
+    authRefreshRetried?: boolean;
+};
 
 const apiClient = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001/api',
@@ -19,30 +23,34 @@ apiClient.interceptors.request.use(async (config) => {
     return Promise.reject(error);
 });
 
-// Response interceptor - handle 401 Unauthorized errors (token expired)
-// This is mainly a fallback - the primary token refresh happens in JWT callback (server-side)
+// The session endpoint performs the server-side refresh. If a request still gets
+// a 401, fetch the session once more and retry only when it returned a new token.
 apiClient.interceptors.response.use(
     (response) => {
         // Return successful responses as-is
         return response;
     },
     async (error) => {
-        // Check if error is 401 Unauthorized (token expired)
-        // This could happen if:
-        // 1. Both access token AND refresh token are expired
-        // 2. Server-side refresh failed
-        // 3. Race condition before server-side refresh completes
         if (error.response?.status === 401 && typeof window !== 'undefined') {
-            console.warn('[apiClient] 401 Unauthorized - Token expired, signing out...');
+            const config = error.config as RetriableRequestConfig | undefined;
+            const requestUrl = config?.url ?? '';
+            const isAuthEndpoint = /\/auth\/(login|signup|refresh|logout|google)(\?|$)/.test(requestUrl);
 
-            const { toast } = await import('sonner');
-            toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+            if (config && !config.authRefreshRetried && !isAuthEndpoint) {
+                config.authRefreshRetried = true;
+                const { getSession } = await import('next-auth/react');
+                const session = await getSession();
+                const freshToken = session?.accessToken;
+                const authorization = config.headers?.Authorization;
+                const sentToken = typeof authorization === 'string'
+                    ? authorization.replace(/^Bearer\s+/i, '')
+                    : undefined;
 
-            const { signOut } = await import('next-auth/react');
-            await signOut({
-                callbackUrl: '/login',
-                redirect: true
-            });
+                if (freshToken && freshToken !== sentToken) {
+                    config.headers.Authorization = `Bearer ${freshToken}`;
+                    return apiClient.request(config);
+                }
+            }
         }
         
         return Promise.reject(error);

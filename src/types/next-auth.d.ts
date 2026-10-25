@@ -12,7 +12,7 @@ declare module "next-auth" {
             isGoogleUser?: boolean
         }
         accessToken?: string
-        refreshToken?: string
+        error?: string
     }
 
     interface User {
@@ -38,7 +38,7 @@ declare module "next-auth/jwt" {
         avatar?: string | null
         isGoogleUser?: boolean
         accessTokenExpires?: number
+        refreshRetryAfter?: number
         error?: string
     }
 }
-

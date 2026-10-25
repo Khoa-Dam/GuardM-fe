@@ -12,6 +12,10 @@ import type { JWT } from "next-auth/jwt"
  */
 async function refreshAccessToken(token: JWT) {
     try {
+        if (!token.refreshToken) {
+            return { ...token, error: 'RefreshAccessTokenError' };
+        }
+
         const apiUrl = env.NEXT_PUBLIC_API_BASE_URL.endsWith('/api')
             ? `${env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`
             : `${env.NEXT_PUBLIC_API_BASE_URL}/api/auth/refresh`;
@@ -24,28 +28,38 @@ async function refreshAccessToken(token: JWT) {
             body: JSON.stringify({
                 refreshToken: token.refreshToken,
             }),
+            signal: AbortSignal.timeout(10_000),
         })
 
-        const refreshedTokens = await response.json()
+        const refreshedTokens = await response.json().catch(() => null)
 
         if (!response.ok) {
-            throw refreshedTokens
+            // Invalid/revoked credentials are terminal; network, rate-limit, and
+            // server failures are retried later without ending the user session.
+            if (response.status >= 400 && response.status < 500 && response.status !== 408 && response.status !== 429) {
+                return { ...token, error: 'RefreshAccessTokenError' };
+            }
+            return { ...token, refreshRetryAfter: Date.now() + 15_000 };
         }
 
-        console.log('[JWT Callback] Token refresh successful')
+        if (!refreshedTokens || typeof refreshedTokens.accessToken !== 'string') {
+            return { ...token, refreshRetryAfter: Date.now() + 15_000 };
+        }
 
         return {
             ...token,
             accessToken: refreshedTokens.accessToken,
-            refreshToken: refreshedTokens.refreshToken ?? token.refreshToken, // Fall back to old refresh token
+            refreshToken: typeof refreshedTokens.refreshToken === 'string'
+                ? refreshedTokens.refreshToken
+                : token.refreshToken,
             accessTokenExpires: Date.now() + (3600 - 300) * 1000, // 55 minutes
+            refreshRetryAfter: undefined,
+            error: undefined,
         }
-    } catch (error) {
-        console.error('[JWT Callback] Token refresh failed:', error)
-
+    } catch {
         return {
             ...token,
-            error: "RefreshAccessTokenError",
+            refreshRetryAfter: Date.now() + 15_000,
         }
     }
 }
@@ -132,8 +146,15 @@ export const authConfig = {
                 return token
             }
 
+            if (token.error === 'RefreshAccessTokenError') {
+                return token;
+            }
+
+            if ((token.refreshRetryAfter as number | undefined) && Date.now() < (token.refreshRetryAfter as number)) {
+                return token;
+            }
+
             // Access token has expired, try to refresh it
-            console.log('[JWT Callback] Access token expired, refreshing...')
             return refreshAccessToken(token)
         },
         async session({ session, token }) {
@@ -148,14 +169,32 @@ export const authConfig = {
                 }
                 // Keep accessToken even on error so public requests still work
                 session.accessToken = token.accessToken as string
-                session.refreshToken = token.refreshToken as string
             }
             // Propagate error so useUser can sign out gracefully
             if (token.error) {
-                console.error('[Session Callback] Token refresh error:', token.error)
-                return { ...session, error: token.error } as unknown as Session
+                return { ...session, error: token.error } as Session
             }
             return session
+        },
+    },
+    events: {
+        async signOut(message) {
+            if (!('token' in message) || !message.token?.refreshToken) return;
+
+            const apiUrl = env.NEXT_PUBLIC_API_BASE_URL.endsWith('/api')
+                ? `${env.NEXT_PUBLIC_API_BASE_URL}/auth/logout`
+                : `${env.NEXT_PUBLIC_API_BASE_URL}/api/auth/logout`;
+
+            try {
+                await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken: message.token.refreshToken }),
+                    signal: AbortSignal.timeout(5_000),
+                });
+            } catch {
+                console.error('[Auth] Could not revoke the backend session during sign out');
+            }
         },
     },
     providers: [
@@ -247,4 +286,3 @@ export const authConfig = {
         }),
     ],
 } satisfies NextAuthConfig
-
